@@ -1,0 +1,140 @@
+/*! @page usb_dio_16 USB-DIO-16
+USB-DIO-16A Sample Program Release Notes
+
+[TOC]
+
+# Overview {#usb_dio_16_overview}
+
+This directory contains several sample programs for the USB-DIO-16A which demonstrate use of different features and libraries.
+
+Basic AIOUSB Sample - sample.cpp, receiver.cpp
+
+AIOUSB Java Sample - Sample.java
+
+# Basic AIOUSB Sample {#usb_dio_16_basic_dio_sample}
+
+Sample.cpp and receiver.cpp are a pair of simple programs to demonstrate using the AIOUSB module to control an ACCES I/O model USB-DIO-16A digital I/O board. The program is not intended to be a comprehensive demonstration and is limited to demonstrating the following features of the AIOUSB API:
+
+- Initializing and shutting down the API – AIOUSB_Init(), AIOUSB_Exit()
+
+- Identifying devices on the USB bus – QueryDeviceInfo()
+
+- Obtaining the serial number of a device on the bus – GetDeviceSerialNumber()
+
+- Configuring the board – DIO_ConfigureEx()
+
+- Writing to, and reading from a digital I/O stream – DIO_StreamSetClocks(), DIO_StreamOpen(), DIO_StreamFrame(), DIO_StreamClose()
+
+For easy identification, the source code lines prefixed with the comment / \*API\* / denote calls to the AIOUSB API.
+
+# Building {#usb_dio_16_basic_dio_building}
+
+Before building the program, make sure the libusb module is installed. Also refer to the comments at the top of sample.cpp for additional details.
+
+Also, make sure that the ACCES I/O AIOUSB module is installed (see Installing And Using AIOUSB Library).
+
+The simplest way to build the sample program is to type make at the command line. The sample program is the default target in Makefile. Optionally, one can manually compile the program with the commands:
+
+g++ sample.cpp -laiousb -lusb-1.0 -o sample
+g++ receiver.cpp -laiousb -lusb-1.0 -o receiver
+
+# Executing {#usb_dio_16_basic_dio_executing}
+
+Before executing the sample program, make sure the Linux system is configured to automatically detect ACCES I/O devices plugged into the USB bus and upload the appropriate firmware to those devices. The files that support this automatic configuration have recently been updated and new documentation prepared. Please refer to Configuring ACCES I/O USB Devices To Work Under Linux for details.
+
+To execute the program, attach two USB-DIO-16A digital I/O boards to the USB bus and verify that their LEDs turn on, indicating that firmware has been successfully uploaded to the boards. Then simply type ./sample at the command line. There are no command line arguments to worry about. The program will search for the first two USB-DIO-16A digital I/O boards on the USB bus. If the sample program fails to find two boards, it will print an error message and quit. If it finds two such boards, the following output will appear:
+
+@verbatim
+USB-DIO-16A sample program version 1.9, 29 January 2010
+  AIOUSB library version 1.88, 18 January 2010
+  This program demonstrates high speed streaming between 2 USB-DIO-16A
+  devices on the same USB bus. For simplicity, it uses the first 2 such
+  devices found on the bus.
+ACCES devices found:
+  Device at index 0:
+    Product ID: 0x800f
+    Product name: USB-DIO-16A
+    Number of digital I/O bytes: 4
+    Number of counters: 0
+  Device at index 1:
+    Product ID: 0x800f
+    Product name: USB-DIO-16A
+    Number of digital I/O bytes: 4
+    Number of counters: 0
+Sending device at index 0, serial number 40e3a0d0c488856d
+Receiving device at index 1, serial number 40e3a0d0a53149dd
+Stream clock for device at index 0 set to 1000432.0 Hz
+1024000 point frame successfully written to device at index 0
+1024000 point frame successfully read from device at index 1
+@endverbatim
+
+
+The sample program prints out a list of all the ACCES devices found on the USB bus and then proceeds to exercise the two USB-DIO-16A boards found. Basically, sample executes receiver as a child process to receive the stream data from one of the two devices. Sample then transmits the stream data to the other device. The entire demonstration takes a couple of seconds.
+
+Important: this sample program requires that the two USB-DIO-16A devices be electrically connected together so that one device can transmit to the other. This connection is accomplished by means of a standard 68-pin SCSI cable attached to the J1 connector of each device. Contact ACCES for more information or to purchase such a cable (part number C68PS18L).
+
+# AIOUSB Java Sample {#usb_dio_16_java_sample}
+
+Sample.java is a Java implementation of the above sample program. It demonstrates use of the Java class library, which utilizes the AIOUSB C-language library. Refer to AIOUSB Java Class Library Reference for detailed documentation on the Java class library.
+
+## Building {#usb_dio_16_java_building}
+
+The prerequisites for building Sample.jar are that the Java Development Kit (JDK) must be installed. In addition, the AIOUSB Java library (aiousb.jar) must be installed somewhere on your system. To compile the program, either use the supplied Makefile or use the command:
+
+@code{.sh}
+javac -cp ../../java/aiousb.jar Sample.java
+@endcode
+
+## Executing  {#usb_dio_16_java_executing}
+
+Like the C-language sample program above, this Java sample program requires two USB-DIO-16A devices, hooked together by means of a SCSI cable. The main difference between the Java program and the C program, aside from the languages and libraries used, is that the Jave version is multithreaded, whereas the C program utilizes two processes.
+
+Assuming you have two USB-DIO-16A devices up and running (as indicated by their illuminated LEDs) and hooked together by means of a SCSI cable, type the following command to execute the sample program:
+
+
+@code{.sh}
+java -jar Sample.jar
+@endcode
+
+or
+
+@code{.sh}
+java -cp ../../java/aiousb.jar:. Sample
+@endcode
+
+There are no command line arguments to worry about. The program will search for the first two USB-DIO-16A devices on the USB bus. If it fails to find such a board, it will print an error message and quit. If it finds two such devices, the following output will appear:
+
+@code{.sh}
+USB-DIO-16A sample program version: 1.3, 29 January 2010
+  AIOUSB Java library version: 1.7, 18 January 2010
+  AIOUSB library version: 1.88, 18 January 2010
+  JRE version: 1.6.0_17
+  OS version: Linux amd64 2.6.31.5-0.1-custom
+  This program demonstrates high speed streaming between 2 USB-DIO-16A
+  devices on the same USB bus. For simplicity, it uses the first 2 such
+  devices found on the bus.
+ACCES devices found:
+  Device at index 0
+    Product ID: 0x800f
+    Product name: USB-DIO-16A
+    Serial number: 0x40e3a0d0c488856d
+    Number of digital I/O ports: 4
+    Number of digital I/O channels: 32
+    Number of tristate groups: 2
+    Number of tristate channels: 16
+    Digital I/O streaming capability installed
+  Device at index 1
+    Product ID: 0x800f
+    Product name: USB-DIO-16A
+    Serial number: 0x40e3a0d0a53149dd
+    Number of digital I/O ports: 4
+    Number of digital I/O channels: 32
+    Number of tristate groups: 2
+    Number of tristate channels: 16
+    Digital I/O streaming capability installed
+Successfully sent 1024000 samples
+Waiting for data to be received ...
+Successfully received 1024000 samples
+@endcode
+
+*/

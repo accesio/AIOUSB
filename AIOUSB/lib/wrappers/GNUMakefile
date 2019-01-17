@@ -1,0 +1,377 @@
+#
+# Builds the Wrappers for various languages
+#
+#
+SHELL		:= /bin/bash
+
+SWIG_FILE	:= AIOUSB.i	 
+SWIG		:= swig 
+SWIG_IGNORE_WARNINGS	:= -w326,522,523
+SWIG_INCLUDES	:= -I..
+
+PERL		:= perl
+PYTHON		:= python
+RUBY		:= ruby
+
+MKDIR		:= mkdir
+
+
+include $(AIOUSB_ROOT)/Mkfiles/oses.inc
+
+override CFLAGS     += -I. -I/usr/include/libusb-1.0 -D_GNU_SOURCE=1 -std=gnu99
+
+LIBDIR		:= $(shell printenv AIOUSB_ROOT)/lib
+CLASSLIBDIR	:= $(shell printenv AIOUSB_ROOT)/classlib
+
+
+PYTHON_LDFLAGS	:= -L$(LIBDIR) -L$(CLASSLIBDIR)
+RUBY_LDFLAGS	:= $(PYTHON_LDFLAGS)
+
+RUBY_INCLUDES	:= -I$(LIBDIR)
+PERL_INCLUDES	:= -I$(shell printenv AIOUSB_ROOT)/lib
+
+RUBY_BUILT	:= ruby_built.txt
+PERL_BUILT	:= perl_built.txt
+PYTHON_BUILT	:= python_built.txt
+JAVA_BUILT	:= java_built.txt
+PHP_BUILT	:= php_built.txt
+OCTAVE_BUILT	:= octave_built.txt
+R_BUILT		:= R_built.txt
+ANDROID_BUILT	:= android_built.txt
+ANDROID_LIBS_BUILD :=	$$(AIO_LIB_DIR)/ndkbuild
+
+PERL_CFLAGS	:= $(shell perl -MConfig -e "print \$$Config{ccflags}")
+PERL_XTRA_CFLAGS:= -std=gnu99 -fno-merge-constants
+
+ifdef PERL_PREFIX
+PERL_PREFIX_INSTALL	:= PREFIX=$(PERL_PREFIX)
+else 
+PERL_PREFIX_INSTALL	:= 
+endif
+PYTHON_PREFIX	:= 
+
+JAVA_DIR	:= AIOUSB
+JAVA_ROOT	:= AIOUSB
+ANDROID_DIR	:= AIOUSB
+
+
+TEST_DIR	:=	test_dir
+
+JAVA		:= java
+JAVAC		:= javac
+LITTLER		:= r
+R		:= R
+
+# ruby php java octave
+all:
+	for i in perl python ruby php octave java; do \
+		cd $${i} && $(MAKE) -f GNUMakefile $${i}_test && cd - ;\
+	done
+
+clean:
+	for i in perl python ruby php java octave R android; do \
+		cd $$i && $(MAKE) -f GNUMakefile $${i}_cleanup && cd -; \
+	done
+
+all_test:
+	for i in perl python ruby php java octave; do \
+		cd $$i && $(MAKE)	-f GNUMakefile $${i}_test && cd - ;\
+	done
+
+precheck:
+
+
+$(TEST_DIR):
+	mkdir -p $(TEST_DIR)
+
+inplace_perl:
+	cd perl && make -f GNUMakefile perl_test
+inplace_python:
+	cd python && make -f GNUMakefile python_test
+inplace_ruby:
+	cd ruby && make -f GNUMakefile ruby_test
+inplace_java:
+	cd java && make -f GNUMakefile java_test
+inplace_R:
+	cd R && make -f GNUMakefile R_test
+inplace_php:
+	cd php && make -f GNUMakefile php_test
+inplace_octave:
+	cd octave && make -f GNUMakefile octave_test
+
+
+
+
+
+perl:
+	@if [ ! -f $(PERL_BUILT) ] ; then \
+		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) $(PERL_INCLUDES)  -perl5 AIOUSB.i 2>&1; \
+		$(PERL) Makefile.PL CCFLAGS="$(PERL_CFLAGS) $(PERL_XTRA_CFLAGS)" $(PERL_PREFIX_INSTALL) ;\
+		$(MAKE) -f Makefile ; \
+		if [ "$$?" == 0 ] ; then \
+			$(PERL) -i -ne 's/^(\*)swig_+([\S_]*)?_(get|set)/$$1$$3_$$2/g;print;' AIOUSB.pm;\
+			touch $(PERL_BUILT); \
+		fi \
+	fi 
+
+$(PERL_BUILT): perl
+
+
+perl_test:	$(PERL_BUILT) $(TEST_DIR)
+	@perl -I./blib/arch/ -MAIOUSB -e 'AIOUSB::AIOUSB_Init(); AIOUSB::AIOUSB_ListDevices()'
+
+perl_cleanup:
+	@echo "Cleaning Perl"
+	@$(RM) -f pm_to_blib $(PERL_BUILT) AIOUSB_wrap.o AIOUSB.bs \
+	MYMETA.yml MYMETA.json Makefile AIOUSB_wrap.c AIOUSB.pm *_wrap*
+	@$(RM) -rf blib
+
+perl_atest:
+	@$(MAKE) -f GNUMakefile perl 2>&1 > /dev/null
+	@$(MAKE) --no-print-directory -f GNUMakefile perl_test
+	@$(MAKE) -f GNUMakefile perl_cleanup > /dev/null
+
+perl_install:  perl_test
+	$(MAKE) -f Makefile install 
+
+
+PYTHON_PLATFORM=$(shell $(PYTHON)  -c 'import distutils.util; print(distutils.util.get_platform())')
+PYTHON_VERSION=$(shell $(PYTHON) -c 'import distutils.sysconfig; print(distutils.sysconfig.get_python_version())' )
+
+python: 
+	@if [ ! -f $(PYTHON_BUILT) ] ; then \
+		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I${LIBDIR}  -python AIOUSB.i 2>&1; \
+		LDFLAGS="$(PYTHON_LDFLAGS)"  $(PYTHON) setup.py build 2>&1; \
+		if [ "$$?" == 0 ] ; then \
+			touch $(PYTHON_BUILT); \
+		fi \
+	fi
+
+$(PYTHON_BUILT): python
+
+
+pytest:	
+	@echo $(PYTHON_PLATFORM)
+	@echo $(PYTHON_VERSION)
+
+python_test: $(PYTHON_BUILT) $(TEST_DIR)
+	PYTHONPATH=$${PWD}/build/lib.$(PYTHON_PLATFORM)-$(PYTHON_VERSION) $(PYTHON) -c 'import AIOUSB; AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
+
+#	echo "$${PWD}/build/lib.$(PYTHON_PLATFORM)-$(PYTHON_VERSION) "
+
+python_cleanup:
+	$(RM) -f AIOUSB_wrap.c AIOUSB.py $(PYTHON_BUILT)
+	$(RM) -rf build 
+	$(RM) -rf *.pyc
+
+python_install: python
+	$(PYTHON) setup.py install --prefix=$(PYTHON_PREFIX)
+
+python_atest:
+	@$(MAKE) -f GNUMakefile python 2>&1 > /dev/null
+	@$(MAKE) --no-print-directory -f GNUMakefile python_test
+	@$(MAKE) -f GNUMakefile python_cleanup > /dev/null
+
+#
+# RUBY
+#
+ruby:
+	@if [ ! -f $(RUBY_BUILT) ] ; then \
+		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I../../ -ruby AIOUSB.i 2>&1; \
+		$(RUBY) extconf.rb --with-ldflags="$(RUBY_LDFLAGS)" --with-name-include="$(RUBY_INCLUDES)" 2>&1 ; \
+		$(MAKE) -f Makefile 2>&1;\
+		if [ "$$?" == 0 ] ; then \
+			touch $(RUBY_BUILT); \
+		fi \
+	fi
+
+$(RUBY_BUILT): ruby
+
+ruby_test:	$(RUBY_BUILT) $(TEST_DIR)
+	@cd $(TEST_DIR) && ruby -I.. -rAIOUSB  -e 'AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
+
+
+ruby_install: ruby_test
+	$(MAKE) -f Makefile install
+
+ruby_cleanup:
+	$(RM) -f AIOUSB.so $(RUBY_BUILT) AIOUSB_wrap.o AIOUSB_wrap.c mkmf.log Makefile
+
+
+ruby_atest:
+	@$(MAKE) -f GNUMakefile ruby 2>&1 > /dev/null
+	@$(MAKE) --no-print-directory -f GNUMakefile ruby_test
+	@$(MAKE) -f GNUMakefile ruby_cleanup > /dev/null
+
+#
+# PHP
+#
+
+php:
+	@if [ ! -f $(PHP_BUILT) ] ; then \
+		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I../..// -php AIOUSB.i 2>&1 ; \
+		$(CC) -I. -I$$AIO_LIB_DIR -I../../  $$(php-config --includes) -fpic -c AIOUSB_wrap.c 2>&1 ; \
+		$(CC) -fPIC -shared -Wl,-soname,AIOUSB.so AIOUSB_wrap.o -o AIOUSB.so -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -lusb-1.0 -laiousb 2>&1;\
+		if [ "$$?" == 0 ] ; then \
+			touch $(PHP_BUILT); \
+		fi \
+	fi
+
+
+$(PHP_BUILT): php
+
+
+php_test: $(PHP_BUILT) $(TEST_DIR)
+	@php -c $$PWD/.. -r 'AIOUSB_Init(); AIOUSB_ListDevices();' 2>&1
+
+php_cleanup:
+	$(RM) -f AIOUSB.php AIOUSB_wrap.* AIOUSB.so php_AIOUSB.h $(PHP_BUILT)
+
+php_atest:
+	@$(MAKE) -f GNUMakefile php 2>&1 > /dev/null
+	@$(MAKE) --no-print-directory -f GNUMakefile php_test
+	@$(MAKE) -f GNUMakefile php_cleanup > /dev/null
+
+#
+# OCTAVE
+#
+octave:
+	@echo "Building Octave module WITHOUT MPI support ! Please remove -DMPICH_SKIP_MPICXX"
+	@echo "   and  -DOMPI_SKIP_MPICXX  from this build if you need this functionality"
+	@if [ ! -f $(OCTAVE_BUILT) ] ; then \
+		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I../../ -octave -o AIOUSB_wrap.cpp AIOUSB.i 2>&1 ; \
+		mkoctfile -o AIOUSB.oct   -DMPICH_SKIP_MPICXX  -DOMPI_SKIP_MPICXX  -I../../ AIOUSB_wrap.cpp -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -laiousb 2>&1 | tee octave.log; \
+		grep -i error octave.log; \
+		if [ "$$?" != 0 ] ; then \
+			touch $(OCTAVE_BUILT); \
+		fi;\
+	fi
+
+$(OCTAVE_BUILT): octave
+
+octave_test: $(OCTAVE_BUILT)
+	@octave -q  --eval "AIOUSB; AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices();"
+
+
+octave_cleanup:
+	$(RM) -f $(OCTAVE_BUILT) AIOUSB.oct AIOUSB_*wrap*
+
+octave_atest:
+	@$(MAKE) -f GNUMakefile octave 2>&1 > /dev/null
+	@$(MAKE) --no-print-directory -f GNUMakefile octave_test
+	@$(MAKE) -f GNUMakefile octave_cleanup > /dev/null
+
+
+#
+# Android
+#
+
+$${AIO_LIB_DIR}/ndkbuild/builtndk.txt:
+	cd $${AIO_LIB_DIR}/ndkbuild && make 
+
+full_android_cleanup: android_cleanup
+	cd $${AIO_LIB_DIR}/ndkbuild && make clean
+
+android_cleanup:
+	rm -rf AIOUSB TMPDIR obj
+	rm -f *.so *.jar
+	rm -f $(ANDROID_BUILT)
+	rm -f AIOUSB_wrap*
+	rm -rf libs
+	rm -rf $${AIO_LIB_DIR}/ndkbuild/builtndk.txt
+
+android: $(ANDROID_DIR) $${AIO_LIB_DIR}/ndkbuild/builtndk.txt
+	@echo $$(pwd)
+	@if [ ! -f $(ANDROID_BUILT) ] ; then \
+		$(SWIG) -DSWIGANDROID $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I../../ -java -package AIOUSB -outdir $(ANDROID_DIR) AIOUSB.i 2>&1; \
+		ndk-build;\
+		if [[ $$? !=  0 ]] ; then exit 1;fi; \
+		mkdir -p TMPDIR; \
+		$(JAVAC) -d TMPDIR  AIOUSB/*.java $$(find cz -name "*.java" -follow);\
+	fi
+	cp libs/armeabi/libAIOUSB.so .
+	cp libAIOUSB.so libAIOUSB32.so
+	cp libAIOUSB.so libAIOUSB64.so
+	jar cf AIOUSB.jar  -C TMPDIR . *.so -C $${AIO_LIB_DIR}/ndkbuild/libs/armeabi libaiousbdbg.so -C $${AIO_LIB_DIR}/ndkbuild/libs/armeabi libaiousb.so
+	touch $(ANDROID_BUILT);
+
+#
+# JAVA
+#
+
+$(JAVA_DIR):
+	@$(MKDIR) -p $@
+
+
+java: 	$(JAVA_DIR)
+	@if [ ! -f $(JAVA_BUILT) ] ; then \
+		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I../../ -java -package AIOUSB -outdir $(JAVA_DIR) AIOUSB.i 2>&1; \
+		$(CC)  -fPIC -shared  -o libAIOUSB.so ./AIOUSB_wrap.c ${CFLAGS} -I../.. -I$${JAVA_HOME}/include -L$${AIO_LIB_DIR} -L$${AIO_CLASSLIB_DIR} -laiousbdbg -lusb-1.0 -lpthread -lrt -ldl -lm -lc  2>&1 ; \
+		cp libAIOUSB.so libAIOUSB32.so;\
+		cp libAIOUSB.so libAIOUSB64.so;\
+		mkdir -p TMPDIR;\
+		$(JAVAC) -d TMPDIR  AIOUSB/*.java $$(find cz -name "*.java");\
+		mkdir -p tests/TESTDIR;\
+		cd tests && javac -classpath "../TMPDIR:$$(pwd)/:$$(pwd)/../" -d TESTDIR test.java com/jdotsoft/jarloader/JarClassLoader.java 2>&1; \
+		if [ ! -d /tmp/scala-devel ] ; then mkdir /tmp/scala-devel; chmod 777 /tmp/scala-devel; fi \
+	fi
+	@jar cf AIOUSB.jar libAIOUSB{32,64}.so libAIOUSB.so -C $${AIO_LIB_DIR} libaiousbdbg.so -C TMPDIR .
+	@if [ "$$?" == 0 ]; then \
+		touch $(JAVA_BUILT); \
+	fi;
+
+java_test:	$(JAVA_BUILT) $(TEST_DIR)
+	$(JAVA) -classpath "$${AIO_LIB_DIR}/wrappers/java/AIOUSB.jar:$$(pwd)/tests/TESTDIR" test
+
+
+scala_test:	$(JAVA_BUILD) $(TEST_DIR)
+	@LD_LIBRARY_PATH="$${AIO_LIB_DIR}:$${AIO_CLASSLIB_DIR}:$$(pwd)" CLASSPATH=$$(pwd) scala -cp "$${AIO_LIB_DIR}/wrappers/java/*:" -e 'import AIOUSB._;  AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
+
+$(JAVA_BUILT): java
+
+java_cleanup:
+	$(RM) -rf com
+	$(RM) -rf libAIOUSB*.so $(JAVA_BUILT) AIOUSB_wrap.c AIOUSB_wrap.o AIOUSB.jar *.class $(JAVA_DIR)
+	@$(RM) -rf /tmp/scala-devel || true
+	$(RM) -f tests/*.class
+	$(RM) -rf tests/TESTDIR
+	$(RM) -rf TMPDIR
+
+java_atest:
+	@$(MAKE) -f GNUMakefile java 2>&1 > /dev/null
+	@$(MAKE) --no-print-directory -f GNUMakefile java_test 2>&1
+	@$(MAKE) -f GNUMakefile java_cleanup > /dev/null
+
+
+
+
+
+#
+# R
+#
+
+
+R:
+	@if [ ! -f $(R_BUILT) ] ; then \
+		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I/usr/include/libusb-1.0 -I$${AIO_LIB_DIR} -r AIOUSB.i 2>&1 ; \
+		export PKG_CFLAGS="-I../../" ; \
+		R CMD SHLIB -o AIOUSB.so AIOUSB_wrap.c -I/usr/include/libusb-1.0 -I$${AIO_LIB_DIR} -L$${AIO_LIB_DIR} -laiousb -lusb-1.0 2>&1; \
+		if [ "$$?" == 0 ]; then \
+			touch $(R_BUILT); \
+		fi;\
+	fi
+
+$(R_BUILT): R
+
+
+R_test: $(R_BUILT) $(TEST_DIR)
+	@LD_LIBRARY_PATH="$${AIO_LIB_DIR}:$${AIO_CLASSLIB_DIR}:$$(pwd)" $(LITTLER) -e 'dyn.load("AIOUSB.so"); source("AIOUSB.R"); AIOUSB_Init(); AIOUSB_ListDevices()'
+
+R_cleanup:
+	$(RM) -f AIOUSB.R AIOUSB_wrap.o AIOUSB AIOUSB.so R_AIOUSB.h $(R_BUILT) AIOUSB_wrap.c
+
+R_atest:
+	@$(MAKE) -f GNUMakefile R 2>&1 > /dev/null
+	@$(MAKE) --no-print-directory -f GNUMakefile R_test
+	@$(MAKE) -f GNUMakefile R_cleanup > /dev/null
+

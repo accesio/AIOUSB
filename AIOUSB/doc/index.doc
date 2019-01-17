@@ -1,0 +1,86 @@
+/*! 
+<!--AIOUSB Manual-->
+\if logo_on
+<center>
+\htmlonly
+<img src="http://accesio.com/images/emaillogo.png" alt="aiousb"/><br/>
+Version: $Format: %h$
+\endhtmlonly
+</center>
+\endif
+
+<h2>Introduction</h2>
+AIOUSB is a general purpose C based library developed for communicating with 
+ACCES I/O products' line of USB data acquistion modules. In addition to providing 
+C and C++ support, this packages also provides wrapper language support for such languages
+as Ruby, Perl, Python, PHP, Java, R.
+
+AIOUSB is developed under Mac OS X and Linux, but is set-up to be highly 
+portable. As a result, it runs on most other Unix flavors as well. 
+Furthermore, executables for Windows are available.
+
+\n
+This manual is divided into three parts, each of which is divided into several sections.
+
+The first part forms a user manual:
+<ul>
+
+<li>Section \ref install discusses how to 
+      <a href="http://github.com/accesio/AIOUSB">download</a>, install AIOUSB libraries
+<li>Section \ref aiousb tells you about the AIOUSB C and C++ libraries.
+<li>Section \ref classlib tells you about the AIOUSB CLASSLIB C++ libraries.
+
+</ul>
+
+The second part forms a reference manual:
+
+The third part provides information for developers:
+
+\n<h2>AIOUSB License</h2>
+\addindex license
+\addindex GPL
+
+Copyright &copy; 1993-2015 by <a href="http://www.accesio.com">ACCES I/O Products Inc</a> and 
+<a href="mailto:jdamon@accesio.com">Jimi Damon</a>.<p>
+
+Permission to use, copy, modify, and distribute this software and its
+documentation under the terms of the GNU Lesser Public License is hereby 
+granted. No representations are made about the suitability of this software 
+for any purpose. It is provided "as is" without express or implied warranty.
+See the 
+<a href="http://www.gnu.org/licenses/lgpl-3.0.en.html">GNU Lesser General Public License</a>
+for more details.
+<p>
+
+<h2>User examples</h2>
+
+AIOUSB a number of \ref output "output formats" where HTML is the
+most popular one. I've gathered 
+
+<h2>Future work</h2>
+Things to improve
+
+<p>
+You can submit enhancement requests in
+
+Make sure the severity of the bug report is set to "enhancement".
+
+<h2>Acknowledgments</h2>
+\addindex acknowledgments
+Thanks go to:
+<ul>
+<li><a href="mailto:jhentges@accesio.com?subject=Questions">John Hentges</a>
+<li>\addindex Doxygen 
+ Dimitri van Heesch ( and other Doxygen contributors ) for creating the amazing program
+ known as Doxygen. This help ACCES I/O Products improve its technical documentation.
+<li><a href="http://www.comedi.org/">COMEDI Project</a>
+<li>Dave Arocot
+<li>Jay Dolan
+</ul>
+
+\htmlonly
+Go to the <a href="install.html">next</a> section.
+\endhtmlonly
+
+*/
+

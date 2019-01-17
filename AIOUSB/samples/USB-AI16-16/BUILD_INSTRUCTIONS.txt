@@ -1,0 +1,199 @@
+
+There are simple instructions for building the USB-AI16-16 samples.
+
+
+Here's a general way to do it. 
+
+First we assume the following file structure starting at the root of your install.
+(output from tree -L 4 )
+.
+|-- USB
+|   |-- AIOUSB
+|   |   |-- classlib
+|   |   |   |-- AI16_DataPoint.cpp
+|   |   |   |-- AI16_DataPoint.hpp
+|   |   |   |-- AI16_DataSet.cpp
+|   |   |   |-- AI16_DataSet.hpp
+|   |   |   |-- AI16_InputRange.cpp
+|   |   |   |-- AI16_InputRange.hpp
+|   |   |   |-- AO16_AnalogOutputSubsystem.cpp
+|   |   |   |-- AO16_AnalogOutputSubsystem.hpp
+|   |   |   |-- AO16_OutputRange.cpp
+|   |   |   |-- AO16_OutputRange.hpp
+|   |   |   |-- AnalogIORange.cpp
+|   |   |   |-- AnalogIORange.hpp
+|   |   |   |-- AnalogInputSubsystem.cpp
+|   |   |   |-- AnalogInputSubsystem.hpp
+|   |   |   |-- AnalogOutputSubsystem.cpp
+|   |   |   |-- AnalogOutputSubsystem.hpp
+|   |   |   |-- Counter.cpp
+|   |   |   |-- Counter.hpp
+|   |   |   |-- CounterSubsystem.cpp
+|   |   |   |-- CounterSubsystem.hpp
+|   |   |   |-- DA12_AnalogOutputSubsystem.cpp
+|   |   |   |-- DA12_AnalogOutputSubsystem.hpp
+|   |   |   |-- DA12_OutputRange.cpp
+|   |   |   |-- DA12_OutputRange.hpp
+|   |   |   |-- DIOStreamSubsystem.cpp
+|   |   |   |-- DIOStreamSubsystem.hpp
+|   |   |   |-- DeviceSubsystem.cpp
+|   |   |   |-- DeviceSubsystem.hpp
+|   |   |   |-- DigitalIOSubsystem.cpp
+|   |   |   |-- DigitalIOSubsystem.hpp
+|   |   |   |-- Doxyfile
+|   |   |   |-- Makefile
+|   |   |   |-- OutputVoltagePoint.hpp
+|   |   |   |-- Overview
+|   |   |   |-- USBDevice.cpp
+|   |   |   |-- USBDevice.hpp
+|   |   |   |-- USBDeviceManager.cpp
+|   |   |   |-- USBDeviceManager.hpp
+|   |   |   |-- USB_AI16_Family.cpp
+|   |   |   |-- USB_AI16_Family.hpp
+|   |   |   |-- USB_AO16_Family.cpp
+|   |   |   |-- USB_AO16_Family.hpp
+|   |   |   |-- USB_CTR_15_Family.cpp
+|   |   |   |-- USB_CTR_15_Family.hpp
+|   |   |   |-- USB_DA12_8A_Family.cpp
+|   |   |   |-- USB_DA12_8A_Family.hpp
+|   |   |   |-- USB_DA12_8E_Family.cpp
+|   |   |   |-- USB_DA12_8E_Family.hpp
+|   |   |   |-- USB_DIO_16_Family.cpp
+|   |   |   |-- USB_DIO_16_Family.hpp
+|   |   |   |-- USB_DIO_32_Family.cpp
+|   |   |   |-- USB_DIO_32_Family.hpp
+|   |   |   |-- USB_DIO_Family.cpp
+|   |   |   |-- USB_DIO_Family.hpp
+|   |   |   `-- doc
+|   |   |-- doc
+|   |   |   `-- README.html
+|   |   |-- java
+|   |   |   |-- Makefile
+|   |   |   |-- Overview.html
+|   |   |   |-- aiousb.jar
+|   |   |   |-- com
+|   |   |   |-- doc
+|   |   |   `-- lib
+|   |   |-- lib
+|   |   |   |-- AIOUSB_ADC.c
+|   |   |   |-- AIOUSB_ADC_ExternalCal.c
+|   |   |   |-- AIOUSB_CTR.c
+|   |   |   |-- AIOUSB_Core.c
+|   |   |   |-- AIOUSB_Core.h
+|   |   |   |-- AIOUSB_CustomEEPROMRead.c
+|   |   |   |-- AIOUSB_CustomEEPROMWrite.c
+|   |   |   |-- AIOUSB_DAC.c
+|   |   |   |-- AIOUSB_DIO.c
+|   |   |   |-- AIOUSB_GetDeviceByProductID.c
+|   |   |   |-- AIOUSB_GetDeviceBySerialNumber.c
+|   |   |   |-- AIOUSB_GetDeviceProperties.c
+|   |   |   |-- AIOUSB_GetResultCodeAsString.c
+|   |   |   |-- AIOUSB_ListDevices.c
+|   |   |   |-- Makefile
+|   |   |   |-- aiousb.h
+|   |   |   `-- doc
+|   |   `-- samples
+|   |       |-- USB-AI16-16
+|   |       |-- USB-AO16-16
+|   |       |-- USB-DA12-8A
+|   |       |-- USB-DIO-16
+|   |       |-- USB-DIO-32
+|   |       `-- USB-IIRO-16
+|   `-- Firmware
+|       |-- 10-acces_usb.alt.rules
+|       |-- 10-acces_usb.rules
+|       |-- PICO-DIO16RO8.hex
+|       |-- USB-AI16-16.hex
+|       |-- USB-AIO16-16A.hex
+|       |-- USB-AO16-16.hex
+|       |-- USB-CTR-15.hex
+|       |-- USB-DA12-8A.hex
+|       |-- USB-DA12-8E.hex
+|       |-- USB-DIO-16A.hex
+|       |-- USB-DIO-32.hex
+|       |-- USB-DIO-48.hex
+|       |-- USB-DIO-96.hex
+|       |-- USB-IDIO-16.hex
+|       |-- USB-IIRO-16.hex
+|       |-- USB-IIRO4-2SM.hex
+|       |-- USB-IIRO4-COM.hex
+|       |-- USBP-DIO16RO8.hex
+|       |-- accesloader.pl
+|       `-- doc
+|           `-- README.html
+`-- doc
+    |-- README.html
+    `-- stylesheet.css
+
+21 directories, 96 files
+
+
+
+Next, you will run "make" plus one of the targets from this
+directory. The targets are any files that end in ".cpp" or in ".c". 
+You will also need to specify the location of the AIOUSBLIBDIR and the
+AIOUSBCLASSLIBDIR for your program to compile correctly.
+
+
+Hard Coded Libraries
+=====================
+
+1. First you need to specify the path to your USB header files. On a typical Ubuntu / Debian system 
+you would first run 
+sudo apt-get install libusb-1.0-0-dev 
+). 
+
+
+2. Next you should source the file sourceme.sh in the directory
+$ROOT_INSTALL/USB/AIOUSB/sourceme.sh . This assumes  that you are
+using a Bash or Korn shell.
+
+cd $ROOT_INSTALL
+. sourceme.sh
+
+
+
+3. You should export CPATH variable as follows  
+
+export CPATH=/usr/include/libusb-1.0:$AIOUSB_ROOT/lib:$AIOUSB_ROOT/classlib
+
+( If you have installed your libusb.h header file elsewhere, please
+alter the CPATH variable accordingly. ) 
+
+
+
+4. Now compile the sample as follows
+
+make sample  AIOUSBLIBDIR=$AIOUSB_ROOT/lib   AIOUSBCLASSLIBDIR=$AIOUSB_ROOT/classlib
+
+
+
+Shared Libraries.
+==================
+
+If you want to build your binary with shared libraries , please 
+run "make" in the directories ../../lib and ../../classlib before you
+perform this step. You will also have to set the CPATH variable to point
+to the correct location for this to work.
+
+
+1. make sample  LDFLAGS="-L$AIOUSB_ROOT/lib -L$AIOUSB_ROOT/classlib" 
+
+
+2. Set your LD_LIBRARY_PATH to include these directories
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/../../lib:$PWD/../../classlib
+
+
+New Features as of   04/23/2013
+==================================
+
+
+- Perl and Python wrapping for USB libraries: This is a first cut at
+  providing wrappers for the AIOUSB libraries.  At the time there is
+  limited type checking and not enough OO approach to the fundamental
+  structure types.  This will be improved upon in the coming
+  releases. In addition, extra languages will be provided as well.
+
+
+
+

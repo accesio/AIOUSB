@@ -1,0 +1,22 @@
+
+
+The Java class library implements the entire functionality of the AIOUSB C library and adds substantial ease-of-use features, in a robust object-oriented class hierarchy.
+Installing
+
+There really isn't anything to install with the Java class library. The entire library resides within aiousb.jar. You can use this JAR file as a class path when compiling or executing Java application programs, or you can use the directory that contains the actual "*.class" files as the class path, the choice is yours.
+
+As with the C and C++ libraries, the location of the Java library can be specified in an environment variable which is used by the sample program make files:
+
+export AIOUSBJAVALIBDIR="path to the AIOUSB java libraries"
+Documentation
+
+Complete documentation for the Java class library may be found in AIOUSB Java Class Library Reference.
+Compiling Programs
+
+To compile Java programs to use the AIOUSB Java class library, use the command:
+
+javac -cp /path/aiousb.jar Sample.java (where "path" is where you installed the Java class library)
+
+To execute the compiled Java program, use the command:
+
+java -cp /path/aiousb.jar:. Sample

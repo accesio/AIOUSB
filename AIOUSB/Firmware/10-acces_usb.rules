@@ -1,0 +1,473 @@
+# 10-acces_usb.rules
+# $Format: %an <%ae>$
+# $Format: %ad$
+# $Format: %t$
+# loads the correct firmware into an ACCES I/O USB device when it is plugged in
+#
+# this implementation may seem a bit peculiar, what with two initialization steps per board; the reason
+# for this scheme is that after the first step in which the firmware is downloaded into the board, the
+# board disconnects and reconnects with a new product ID with the 0x8000 bit set; it also assumes a new
+# device number on the USB bus, which is why the chmod is performed in the second step; one additional
+# complication is that only boards with a product ID whose upper nibble is zero exhibit this two stage
+# behavior; for example, the boards with product IDs in the 0x4000 range do not change their ID after
+# having their firmware downloaded
+#
+# it seems that some versions of Linux (older ones?) prefer referring to device nodes with $ENV{DEVNAME},
+# while other versions of Linux (newer ones?) prefer $tempnode; so if one form doesn't work, try the other;
+# also, the MODE= action doesn't seem to work on some versions of Linux, which is why chmod is used instead
+#
+
+# Model: USB-DIO-32
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0001", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DIO-32.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8001", RUN+="/bin/chmod 0666 $tempnode"
+
+# Model: USB-DIO-32I
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0004", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DIO-32I.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8004", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-DIO-48
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0002", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DIO-48.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8002", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-DIO-96
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0003", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DIO-96.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8003", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-DI16A Rev A1
+# SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0008", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DI16A Rev A1.hex"
+# SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8008", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-DO16A Rev A1
+# SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0009", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DO16A Rev A1.hex"
+# SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8009", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-DI16A Rev A2
+# SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="000a", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DI16A Rev A2.hex"
+# SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="800a", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-DIO-16H Rev B and newer
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="000c", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DIO-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="800c", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-DI16A Rev B and newer
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="000d", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DIO-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="800d", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-DO16A Rev B and newer
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="000e", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DIO-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="800e", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-DIO-16A Rev B and newer
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="000f", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DIO-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="800f", RUN+="/bin/chmod 0666 $tempnode"
+
+
+# USB-DIO-24 Rev B and newer
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0005", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DIO-32.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8005", RUN+="/bin/chmod 0666 $tempnode"
+
+
+# USB-DIO-24-Ctr Rev B and newer
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0006", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DIO24-CTR6.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8006", RUN+="/bin/chmod 0666 $tempnode"
+
+
+# USB-IIRO-16
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0010", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IDIO-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8010", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-II-16
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0011", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IDIO-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8011", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-RO-16
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0012", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IDIO-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8012", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-IIRO-8
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0014", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IDIO-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8014", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-II-8
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0015", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IDIO-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8015", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-IIRO-4
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0016", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IDIO-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8016", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-IDIO-16
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0018", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IDIO-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8018", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-II-16
+# SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0019", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IDIO-16.hex"
+# SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8019", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-IDO-16
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="001a", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IDIO-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="801a", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-IDIO-8
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="001c", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IDIO-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="801c", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-II-8
+# SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="001d", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IDIO-16.hex"
+# SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="801d", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-IDIO-4
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="001e", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IDIO-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="801e", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-CTR-15
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0020", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-CTR-15.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8020", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-IIRO4-2SM
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0030", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IIRO4-2SM.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8030", RUN+="/bin/chmod 0666 $tempnode"
+
+# USBP-DIO16RO8
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0032", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USBP-DIO16RO8.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8032", RUN+="/bin/chmod 0666 $tempnode"
+
+# PICO-DIO16RO8
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0033", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/PICO-DIO16RO8.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8033", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI16-16A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0040", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8040", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI16-16E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0041", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8041", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-16A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0042", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8042", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-16
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0043", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8043", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-16E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0044", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8044", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI16-64MA
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0045", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8045", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI16-64ME
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0046", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8046", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-64MA
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0047", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8047", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-64M
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0048", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8048", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-64ME
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0049", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8049", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI16-32A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="004a", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="804a", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI16-32E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="004b", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="804b", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-32A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="004c", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="804c", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-32
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="004d", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="804d", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-32E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="004e", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="804e", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI16-64A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="004f", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="804f", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI16-64E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0050", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8050", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-64A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0051", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8051", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-64
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0052", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8052", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-64E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0053", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8053", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI16-96A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0054", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8054", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI16-96E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0055", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8055", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-96A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0056", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8056", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-96
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0057", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8057", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-96E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0058", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8058", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI16-128A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0059", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8059", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI16-128E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="005a", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="805a", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-128A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="005b", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="805b", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-128
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="005c", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="805c", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI12-128E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="005d", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="805d", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO16-16A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0140", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8140", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO16-16E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0141", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8141", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-16A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0142", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8142", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-16
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0143", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8143", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-16E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0144", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8144", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO16-64MA
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0145", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8145", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO16-64ME
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0146", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8146", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-64MA
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0147", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8147", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-64M
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0148", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8148", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-64ME
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0149", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8149", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO16-32A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="014a", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="814a", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO16-32E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="014b", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="814b", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-32A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="014c", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="814c", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-32
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="014d", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="814d", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-32E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="014e", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="814e", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO16-64A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="014f", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="814f", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO16-64E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0150", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8150", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-64A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0151", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8151", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-64
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0152", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8152", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-64E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0153", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8153", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO16-96A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0154", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8154", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO16-96E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0155", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8155", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-96A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0156", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8156", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-96
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0157", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8157", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-96E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0158", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8158", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO16-128A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0159", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8159", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO16-128E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="015a", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="815a", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-128A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="015b", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="815b", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-128
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="015c", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="815c", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AIO12-128E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="015d", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="815d", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AO16-16A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0070", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO16-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8070", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AO16-16
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0071", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO16-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8071", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AO16-12A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0072", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO16-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8072", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AO16-12
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0073", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO16-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8073", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AO16-8A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0074", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO16-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8074", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AO16-8
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0075", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO16-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8075", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AO16-4A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0076", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO16-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8076", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AO16-4
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0077", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO16-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8077", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AO12-16A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0078", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO16-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8078", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AO12-16
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0079", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO16-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8079", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AO12-12A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="007a", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO16-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="807a", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AO12-12
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="007b", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO16-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="807b", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AO12-8A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="007c", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO16-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="807c", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AO12-8
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="007d", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO16-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="807d", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AO12-4A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="007e", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO16-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="807e", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AO12-4
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="007f", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO16-16.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="807f", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-DA12-8A (Rev A)
+# SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="c001", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DA128-ArevA.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
+
+# USB-DA12-8A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="c002", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DA12-8A.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
+
+# USB-DA12-8E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="c003", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DA12-8E.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
+
+# USB-IIRO4-COM (Xerox)
+# SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8031", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IIRO4-COM.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
+
+# USB-AO-ARB1
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0068", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO-ARB1.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8068", RUN+="/bin/chmod 0666 $tempnode"
+
+
+# JTAG
+SUBSYSTEM=="usb", ACTION=="add", ATTR{idVendor}=="fffe", ATTR{idProduct}=="0480" , MODE="0666"
+
+# end of file
+
+#
+# New PCIeWDG
+#
+
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="04b4", ATTR{idProduct}=="8613", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/PCIe-WDG-CSM.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
+
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0080", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/PCIe-WDG-CSM.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
+
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8080", RUN+="/bin/chmod 0666 $tempnode"

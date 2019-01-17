@@ -1,0 +1,2237 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<link rel="stylesheet" href="../../../../doc/stylesheet.css" type="text/css">
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>AIOUSB API Reference</title>
+	<style type="text/css">
+		/* function and variable declarations in the body page - placeholder */
+		.bodydecl {
+		}
+
+		/* program statements */
+		.statement {
+			font-style: italic;
+			font-weight: bold;
+		}
+
+		/* heading that begins major section */
+		h2.body {
+			text-indent: 5px;
+			color: #ffffff;
+			background: #3677ac;
+		}
+
+		/* wide, colorful horizontal rule separates minor elements of a section */
+		hr.body {
+			border-color: #3677ac;
+			border-width: 5px;
+		}
+	</style>
+</head>
+<body lang="en-us" dir="ltr">
+<h2 class="body">Overview</h2>
+<a name="Synopsis"></a>
+<h3>Synopsis</h3>
+<p class="indent1">This document is a reference manual for the AIOUSB library. It describes all the API functions,
+as well as global variables and constants. It also provides some guidance as to how to use AIOUSB. This document
+is intended to serve both the Linux and Windows implementations of AIOUSB.</p>
+<hr class="body">
+<a name="DocumentOrganization"></a>
+<h3>Document Organization and Conventions</h3>
+<p class="indent1">The API functions are grouped by category, and within each group they are sorted in alphabetical order.</p>
+<p class="indent1">Everything is described in this frame, so the best way to navigate around the document is by using the menu at left.</p>
+<p class="indent1">Where appropriate, Linux- or Windows-specific notes are included.</p>
+<p class="indent1">Names of <span class="funcname">files</span>, <span class="funcname">program statements</span>,
+<span class="funcname">functions</span>, <span class="funcname">variables</span> and <span class="funcname">constants</span>
+are highlighted using a different text style than the regular body text.</p>
+<p class="indent1">Instead of replicating the same information dozens of times, commonly used variables and constants are
+described in a single place.</p>
+<hr class="body">
+<a name="SampleProgram"></a>
+<h3>Sample Program</h3>
+<p class="indent1">Below is an example of a minimalist C++ program for <span class="bold">Linux</span> that
+demonstrates how to properly initialize AIOUSB, query the bus for devices, query an individual device for its
+product ID and name and then terminate use of AIOUSB. If AIOUSB and <span class="filename">libusb</span> are
+properly installed, you should be able to copy this sample program from this document, paste it into a file named
+<span class="filename">test.cpp</span> and compile it using the command shown below. This program uses the first
+ACCES device it finds on the bus. A "real" application would probably be looking for devices of a particular type,
+which can be determined from the product ID.</p>
+<pre class="indent1 computer output">/*
+ * compile with: g++ test.cpp -laiousbcpp -lusb-1.0 -o test
+ */
+<span class="highlight">#include &lt;aiousb.h&gt;</span>
+#include &lt;stdio.h&gt;
+<span class="highlight">using namespace AIOUSB;</span>
+int main( int argc, char **argv ) {
+  unsigned long result = <span class="highlight">AIOUSB_Init</span>();
+  if( result == <span class="highlight">AIOUSB_SUCCESS</span> ) {
+    const int MAX_NAME_SIZE = 20;
+    char name[ MAX_NAME_SIZE + 2 ];
+    unsigned long productID
+      , nameSize = MAX_NAME_SIZE;
+    result = <span class="highlight">QueryDeviceInfo</span>( <span class="highlight">diFirst</span>
+      , &amp;productID, &amp;nameSize, name, NULL, NULL );
+    if( result == <span class="highlight">AIOUSB_SUCCESS</span> ) {
+      name[ nameSize ] = 0;
+      printf( "Found a device with product ID %#06x and name '%s'\n"
+        , ( unsigned ) productID, name );
+    } else
+      printf( "Error '%s' querying device\n"
+        , <span class="highlight">AIOUSB_GetResultCodeAsString</span>( result ) );
+    <span class="highlight">AIOUSB_Exit</span>();
+  }  // if( result ...
+  return ( int ) result;
+}  // main()</pre>
+<p class="indent1">The above sample program can be ported to Windows by doing the following:</p>
+<ul>
+	<li class="indent1"><p>Omitting the statement <span class="statement">using namespace AIOUSB;</span></p>
+	<li class="indent1"><p>Changing the result code names from <span class="constname">AIOUSB_*</span> to
+		<span class="constname">ERROR_*</span></p>
+	<li class="indent1"><p>Removing the calls to <span class="funcname">AIOUSB_Init()</span> and
+		<span class="funcname">AIOUSB_Exit()</span>
+	<li class="indent1"><p>Removing the call to <span class="funcname">AIOUSB_GetResultCodeAsString()</span>
+		and printing the result code as a number instead of a string</p>
+	<li class="indent1"><p>Using a different command line - one appropriate for Windows - to compile the program</p>
+</ul>
+<h2 class="body">General Functions</h2>
+<a name="AIOUSB_ClearFIFO"></a>
+<h3 class="bodydecl">unsigned long AIOUSB_ClearFIFO( unsigned long DeviceIndex, unsigned long Method )</h3>
+<p class="indent1">Clears the streaming FIFO, using one of the method codes below.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog input, buffered digital I/O; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">Method</span> - the method to use when clearing the FIFO. May be one of:</p>
+<p class="indent3"><span class="constname">CLEAR_FIFO_METHOD_IMMEDIATE (0)</span> - Clear FIFO as soon as command received
+(and disable auto-clear)</p>
+<p class="indent3"><span class="constname">CLEAR_FIFO_METHOD_AUTO (1)</span> - Enable auto-clear FIFO every falling edge of
+DIO port D bit 1 (on digital boards, analog boards treat as 0)</p>
+<p class="indent3"><span class="constname">CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT (5)</span> - Clear FIFO as soon as command
+received (and disable auto-clear), and abort stream</p>
+<p class="indent3"><span class="constname">CLEAR_FIFO_METHOD_WAIT (86)</span> - Clear FIFO and wait for it to be emptied</p>
+<p class="indent3">Linux: Use the named constants listed above.</p>
+<p class="indent3">Windows: Use the numeric values shown in parenthesis.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="AIOUSB_GetStreamingBlockSize"></a>
+<h3 class="bodydecl">unsigned long AIOUSB_GetStreamingBlockSize( unsigned long DeviceIndex, unsigned long *BlockSize )</h3>
+<p class="indent1">Gets the current streaming block size.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog input, buffered digital I/O; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">BlockSize</span> - a pointer to the variable that will be set to the current streaming
+block size if supported for the specified device. The value returned may not be the same as the value passed to
+<a href="#AIOUSB_SetStreamingBlockSize"><span class="funcname">AIOUSB_SetStreamingBlockSize()</span></a> because that
+value is rounded up to a whole multiple of 256 or 512.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="AIOUSB_SetStreamingBlockSize"></a>
+<h3 class="bodydecl">unsigned long AIOUSB_SetStreamingBlockSize( unsigned long DeviceIndex, unsigned long BlockSize )</h3>
+<p class="indent1">Sets the streaming block size.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog input, buffered digital I/O; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">BlockSize</span> - the streaming block size you wish to set. For DIO
+streaming, this will get rounded up to the next multiple of 256. For A/D streaming, this will get rounded up to the next
+multiple of 512.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="ClearDevices"></a>
+<h3 class="bodydecl">unsigned long ClearDevices( void )</h3>
+<p class="indent1">Closes handles and clears records of unplugged devices.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux, Windows</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="CustomEEPROMRead"></a>
+<h3 class="bodydecl">unsigned long CustomEEPROMRead( unsigned long DeviceIndex, unsigned long StartAddress,
+unsigned long *DataSize, void *Data )</h3>
+<p class="indent1">Reads data from the custom programming area of the device EEPROM.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">StartAddress</span> - number from 0x000 to 0x1FF of the first custom EEPROM
+byte you wish to read from.</p>
+<p class="indent2"><span class="varname">DataSize</span> - pointer to a variable holding the number of custom EEPROM
+bytes to read. The last custom EEPROM byte is 0x1FF, so StartAddress plus DataSize can't be greater than 0x200.</p>
+<p class="indent2"><span class="varname">Data</span> - pointer to the start of a block of bytes to fill with data
+read from the custom EEPROM area.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="CustomEEPROMWrite"></a>
+<h3 class="bodydecl">unsigned long CustomEEPROMWrite( unsigned long DeviceIndex, unsigned long StartAddress,
+unsigned long DataSize, void *Data )</h3>
+<p class="indent1">Writes data to the custom programming area of the device EEPROM.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">StartAddress</span> - number from 0x000 to 0x1FF of the first custom EEPROM
+byte you wish to write to.</p>
+<p class="indent2"><span class="varname">DataSize</span> - number of custom EEPROM bytes to write. The last custom
+EEPROM byte is 0x1FF, so StartAddress plus DataSize can't be greater than 0x200.</p>
+<p class="indent2"><span class="varname">Data</span> - pointer to the start of a block of bytes to write to the custom
+EEPROM area.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="GetDeviceBySerialNumber"></a>
+<h3 class="bodydecl">unsigned long GetDeviceBySerialNumber( const __uint64_t *pSerialNumber ) (Linux)<br>
+unsigned long GetDeviceBySerialNumber( const unsigned __int64 *pSerialNumber ) (Windows)</h3>
+<p class="indent1">Searches the bus for an ACCES device with the specified serial number. In the unlikely event
+that multiple devices have the same serial number, <span class="funcname">GetDeviceBySerialNumber()</span>
+returns a <a href="#DeviceIndex">device index</a> to the first such device found.</p>
+<p class="indent1">Unlike <a href="#GetDevices"><span class="funcname">GetDevices()</span></a>, which clears and rebuilds
+the internal list of devices, <span class="funcname">GetDeviceBySerialNumber()</span> is "non-destructive" and simply
+searches the existing internal list.</p>
+<p class="indent1">Linux: see also <a href="#AIOUSB_GetDeviceByProductID"><span class="funcname">AIOUSB_GetDeviceByProductID()</span>.</a></p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">pSerialNumber</span> - pointer to an 8-byte (64-bit) value containing the
+serial number to search for</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#DeviceIndex">device index</a> if the device was found, or
+<a href="#ResolveDeviceIndex"><span class="constname">diNone</span></a> if no device was found with the specified
+serial number</p>
+<hr class="body">
+<a name="GetDevices"></a>
+<h3 class="bodydecl">unsigned long GetDevices( void )</h3>
+<p class="indent1">Gets a "list" of all the ACCES devices found on the USB bus. This "list" is returned in the form
+of a 32-bit device mask. Each bit set to a "1" indicates an ACCES device was detected at the
+<a href="#DeviceIndex">device index</a> corresponding to the set bit number. For example, if the return value is
+0x00000104 then <a href="#DeviceIndex"><span class="varname">DeviceIndex</span></a> #2 and #8 correspond to devices
+that can be controlled by this driver. Returns 0 if no devices were found, which may mean the driver is not installed
+properly. This function does not return a single device index, but a pattern of bits indicating all the detected devices.</p>
+<p class="indent1">See also <a href="#GetDeviceBySerialNumber"><span class="funcname">GetDeviceBySerialNumber()</span>.</a></p>
+<p class="indent1">Linux: see also <a href="#AIOUSB_GetDeviceByProductID"><span class="funcname">AIOUSB_GetDeviceByProductID()</span>.</a></p>
+<p class="indent1">Windows: A limitation in the current .SYS file prevents detection of more than 32 ACCES devices
+connected to one computer simultaneously. Let us know if this is of any concern for your application.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux, Windows</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A 32-bit device mask (0 if no devices found).</p>
+<hr class="body">
+<a name="GetDeviceSerialNumber"></a>
+<h3 class="bodydecl">unsigned long GetDeviceSerialNumber( unsigned long DeviceIndex, __uint64_t *pSerialNumber ) (Linux)<br>
+unsigned long GetDeviceSerialNumber( unsigned long DeviceIndex, unsigned __int64 *pSerialNumber ) (Windows)</h3>
+<p class="indent1">Gets the device's unique serial number.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">pSerialNumber</span> - pointer to an 8-byte (64-bit) value to fill with the
+serial number.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="QueryDeviceInfo"></a>
+<h3 class="bodydecl">unsigned long QueryDeviceInfo( unsigned long DeviceIndex, unsigned long *pPID, unsigned long *pNameSize,
+char *pName, unsigned long *pDIOBytes, unsigned long *pCounters )</h3>
+<p class="indent1">Gets the device's specific properties.</p>
+<p class="indent1">Linux: see also <a href="#AIOUSB_GetDeviceProperties"><span class="funcname">AIOUSB_GetDeviceProperties()</span></a>.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">pPID</span> - pointer to 32-bit variable in which to store the product ID of
+the device.</p>
+<p class="indent2"><span class="varname">pNameSize</span> - pointer to 32-bit value which specifies the size of the
+<span class="varname">pName</span> buffer. It gets set to the number of bytes actually required by the name. If
+<span class="varname">pNameSize</span> is too small to accommodate the entire name, the name will be truncated to fit
+within your buffer.</p>
+<p class="indent2"><span class="varname">pName</span> - pointer to <span class="typename">char[]</span> buffer in which
+to receive the device name. This is an array of characters, not a null-terminated string. Length of string is passed back
+via <span class="varname">pNameSize</span>.</p>
+<p class="indent2"><span class="varname">pDIOBytes</span> - pointer to 32-bit value which gets set to how many bytes of
+DIO the card supports.</p>
+<p class="indent2"><span class="varname">pCounters</span> - pointer to 32-bit value which gets set to how many 8254-compatible
+counters are available.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="ResolveDeviceIndex"></a>
+<h3 class="bodydecl">unsigned long ResolveDeviceIndex( unsigned long DeviceIndex )</h3>
+<p class="indent1">Converts a possibly abstract device index into an absolute device index.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - the device index you want to resolve. This index may be
+a standard device index, in which case the same index will be returned, or one of these special constants:</p>
+<p class="indent3"><span class="constname">diFirst (0xFFFFFFFEul)</span> - obtains the index of the first ACCES device found on the bus</p>
+<p class="indent3"><span class="constname">diOnly (0xFFFFFFFDul)</span> - obtains the index of the only ACCES device found on the bus,
+meaning that there must be only one ACCES device on the bus</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#DeviceIndex">device index</a> or <span class="constname">diNone (0xFFFFFFFFul)</span>
+if a valid device index cannot be returned.</p>
+<h2 class="body">Extended General Functions</h2>
+<a name="AIOUSB_Exit"></a>
+<h3 class="bodydecl">void AIOUSB_Exit()</h3>
+<p class="indent1">Shuts down the AIOUSB API prior to exiting the program. <span class="bold">Must</span> be called
+if the call to <a href="#AIOUSB_Init"><span class="funcname">AIOUSB_Init()</span></a> was successful. No AIOUSB function
+calls may be made after <span class="funcname">AIOUSB_Exit()</span> has been called.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux</p>
+<hr class="body">
+<a name="AIOUSB_GetCommTimeout"></a>
+<h3 class="bodydecl">unsigned AIOUSB_GetCommTimeout( unsigned long DeviceIndex )</h3>
+<p class="indent1">Returns the current timeout setting (in milliseconds) for USB communications.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">Current timeout setting (in milliseconds)</p>
+<hr class="body">
+<a name="AIOUSB_GetDeviceByProductID"></a>
+<h3 class="bodydecl">unsigned long AIOUSB_GetDeviceByProductID( int minProductID, int maxProductID, int maxDevices, int *deviceList )</h3>
+<p class="indent1">Like <a href="#GetDevices"><span class="funcname">GetDevices()</span></a> and
+<a href="#GetDeviceBySerialNumber"><span class="funcname">GetDeviceBySerialNumber()</span></a>,
+<span class="funcname">AIOUSB_GetDeviceByProductID()</span> searches for devices on the bus. It returns an array
+of integers containing the list of devices found that match the search criteria. This array consists of
+&lt;device index&gt;-&lt;product ID&gt; pairs, making it easy to identify all the devices of interest.</p>
+<p class="indent1">Unlike <a href="#GetDevices"><span class="funcname">GetDevices()</span></a>, which clears and rebuilds
+the internal list of devices, <span class="funcname">AIOUSB_GetDeviceByProductID()</span> is "non-destructive" and simply
+searches the existing internal list.</p>
+<p class="indent1">If you are only interested in a single product ID, set <span class="varname">minProductID</span> and
+<span class="varname">maxProductID</span> to the same value.</p>
+<p class="indent1">If you want a list of all product IDs, set <span class="varname">minProductID</span> to 0 and
+<span class="varname">maxProductID</span> to 0xffff.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">minProductID</span> - the minimum product ID to search for (0 - 0xffff)</p>
+<p class="indent2"><span class="varname">maxProductID</span> - the maximum product ID to search for (0 - 0xffff; must
+be greater than or equal to <span class="varname">minProductID</span>)</p>
+<p class="indent2"><span class="varname">maxDevices</span> - the maximum number of devices to return in
+<span class="varname">deviceList</span> (1 - 127)</p>
+<p class="indent2"><span class="varname">deviceList</span> - pointer to an array of integers in which the found device indexes
+and product IDs will be returned. The size of this array must be equal to <span class="italic">1 + maxDevices * 2</span>.
+The array will contain &lt;device index&gt;-&lt;product ID&gt; <span class="italic">pairs</span>, which is why it must
+be twice the size of the number of devices requested. The actual number of devices found is returned in the first integer
+of the array, index [0]. The &lt;device index&gt;-&lt;product ID&gt; pairs follow, beginning with indexes [1] and [2],
+respectively.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="AIOUSB_GetDeviceProperties"></a>
+<h3 class="bodydecl">unsigned long AIOUSB_GetDeviceProperties( unsigned long DeviceIndex, DeviceProperties *properties )</h3>
+<p class="indent1">Gets a richer set of device-specific properties. This function obtains a superset of the information
+obtained by <a href="#QueryDeviceInfo"><span class="funcname">QueryDeviceInfo()</span></a>.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">properties</span> - pointer to a
+<a href="#DeviceProperties"><span class="typename">DeviceProperties</span></a> structure in which the device properties
+will be returned.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="AIOUSB_GetMiscClock"></a>
+<h3 class="bodydecl">double AIOUSB_GetMiscClock( unsigned long DeviceIndex )</h3>
+<p class="indent1">Gets the current clock frequency for the timer-driven functions (see also
+<a href="#AIOUSB_SetMiscClock"><span class="funcname">AIOUSB_SetMiscClock()</span></a>).</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">The current clock frequency in Hertz.</p>
+<hr class="body">
+<a name="AIOUSB_GetResultCodeAsString"></a>
+<h3 class="bodydecl">const char *AIOUSB_GetResultCodeAsString( unsigned long result )</h3>
+<p class="indent1">Returns the string representation of an <span class="constname">AIOUSB_*</span> result code,
+useful mainly for debugging purposes.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux; <span class="bold">debugging</span></p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">result</span> - a standard <a href="#ResultCodes">result code</a></p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">Pointer to a null-terminated string representation of <span class="varname">result</span></p>
+<hr class="body">
+<a name="AIOUSB_GetVersion"></a>
+<h3 class="bodydecl">const char *AIOUSB_GetVersion()</h3>
+<p class="indent1">Returns the AIOUSB module version number as a string with the form, "1.78".</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">Pointer to a null-terminated version number string</p>
+<hr class="body">
+<a name="AIOUSB_GetVersionDate"></a>
+<h3 class="bodydecl">const char *AIOUSB_GetVersionDate()</h3>
+<p class="indent1">Returns the AIOUSB module version date as a string with the form, "15 November 2009".</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">Pointer to a null-terminated version date string</p>
+<hr class="body">
+<a name="AIOUSB_Init"></a>
+<h3 class="bodydecl">unsigned long AIOUSB_Init()</h3>
+<p class="indent1">Initializes AIOUSB API. <span class="bold">Must</span> be called before using any other functions
+in the AIOUSB module. Automatically scans the USB bus and populates the list of ACCES devices found. If this call is
+successful, then <a href="#AIOUSB_Exit"><span class="funcname">AIOUSB_Exit()</span></a> must be called before the
+program exits.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="AIOUSB_ListDevices"></a>
+<h3 class="bodydecl">void AIOUSB_ListDevices()</h3>
+<p class="indent1">A crude means to dump a list of all ACCES devices found on the USB bus.
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux; <span class="bold">debugging</span></p>
+<hr class="body">
+<a name="AIOUSB_SetCommTimeout"></a>
+<h3 class="bodydecl">unsigned long AIOUSB_SetCommTimeout( unsigned long DeviceIndex, unsigned timeout )</h3>
+<p class="indent1">Sets the timeout (in milliseconds) for USB communications. The default setting is 5,000 ms.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">timeout</span> - the new timeout setting (in milliseconds)</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="AIOUSB_SetMiscClock"></a>
+<h3 class="bodydecl">unsigned long AIOUSB_SetMiscClock( unsigned long DeviceIndex, double clockHz )</h3>
+<p class="indent1">Specifies a clock frequency (in Hertz) for some of the timer-driven functions. The default setting is 1 Hz.
+ (See also <a href="#AIOUSB_GetMiscClock"><span class="funcname">AIOUSB_GetMiscClock()</span></a>.)</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">All products; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">clockHz</span> - the new clock frequency in Hertz</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<h2 class="body">DIO Functions</h2>
+<a name="DIO_ConfigurationQuery"></a>
+<h3 class="bodydecl">unsigned long DIO_ConfigurationQuery( unsigned long DeviceIndex, void *pOutMask, void *pTristateMask )</h3>
+<p class="indent1">Gets the configuration of the digital I/O ports.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Digital inputs and outputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">pOutMask</span> - a pointer to the first element of an array of bytes, one
+byte per 8 ports or fraction. Each bit in the array will be set to "1" if the corresponding port is an output, or
+"0" if it's an input.</p>
+<p class="indent2"><span class="varname">pTristateMask</span> - a pointer to the first element of an array of bytes,
+one byte per 8 tristate groups or fraction. Each bit in the array will be set to "1" if the corresponding tristate
+group is in tristate (high-impedance) mode, or a "0" if not.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DIO_Configure"></a>
+<h3 class="bodydecl">unsigned long DIO_Configure( unsigned long DeviceIndex, unsigned char bTristate,
+void *pOutMask, void *pData )</h3>
+<p class="indent1">Configures the digital I/O ports. <span class="funcname">DIO_Configure()</span> or
+<a href="#DIO_ConfigureEx"><span class="funcname">DIO_ConfigureEx()</span></a> <span class="italic">must</span>
+be called before using any of the read/write functions.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Digital inputs and outputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">bTristate</span> - <span class="constname">AIOUSB_TRUE, TRUE</span> causes all bits on
+the device to enter tristate (high-impedance) mode; <span class="constname">AIOUSB_FALSE, FALSE</span> removes the tristate. The
+tristate is changed after the remainder of the configuration has occurred. All devices with this feature power-on
+in the "tristate" mode at this time.</p>
+<p class="indent2"><span class="varname">pOutMask</span> - a pointer to the first element of an array of bytes,
+one byte per 8 ports or fraction. Each "1" bit in the array indicates that the corresponding byte of the device
+is an output. The number of bytes required by the output mask is equal to the number of ports, divided by 8 (one
+bit controls the direction of an entire port) and rounded up to the next whole value. For example, if the device
+has 4 ports, then 4 divided by 8 and rounded up is 1; that is, one mask byte is required (actually only the least
+significant 4 bits of the mask are required).</p>
+<p class="indent2"><span class="varname">pData</span> - a pointer to the first element of an array of bytes. Each
+byte is copied to the digital output ports on the device before the ports are taken out of tristate. Any bytes in
+the array associated with ports configured as input are ignored. The number of bytes required to store all the
+data for the device is equal to the number or ports, or the number of channels divided by 8 channels/bits per
+port/byte. For example, if the device has 96 channels, the number of ports/bytes is 96 divided by 8, or 12.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DIO_ConfigureEx"></a>
+<h3 class="bodydecl">unsigned long DIO_ConfigureEx( unsigned long DeviceIndex, void *pOutMask,
+void *pData, void *pTristateMask )</h3>
+<p class="indent1">Configures the digital I/O ports. <span class="funcname">DIO_ConfigureEx()</span> or
+<a href="#DIO_Configure"><span class="funcname">DIO_Configure()</span></a> <span class="italic">must</span>
+be called before using any of the read/write functions.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Digital inputs and outputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">pOutMask</span> - a pointer to the first element of an array of bytes,
+one byte per 8 ports or fraction. Each "1" bit in the array indicates that the corresponding byte of the device
+is an output. The number of bytes required by the output mask is equal to the number of ports, divided by 8 (one
+bit controls the direction of an entire port) and rounded up to the next whole value. For example, if the device
+has 4 ports, then 4 divided by 8 and rounded up is 1; that is, one mask byte is required (actually only the least
+significant 4 bits of the mask are required).</p>
+<p class="indent2"><span class="varname">pData</span> - a pointer to the first element of an array of bytes. Each
+byte is copied to the digital output ports on the device before the ports are taken out of tristate. Any bytes in
+the array associated with ports configured as input are ignored. The number of bytes required to store all the
+data for the device is equal to the number or ports, or the number of channels divided by 8 channels/bits per
+port/byte. For example, if the device has 96 channels, the number of ports/bytes is 96 divided by 8, or 12.</p>
+<p class="indent2"><span class="varname">pTristateMask</span> - a pointer to the first element of an array of bytes,
+one byte per 8 tristate groups or fraction. Each "1" bit in the array causes the corresponding tristate group to
+enter tristate (high-impedance) mode. A “0" bit removes the tristate. The tristate is changed after the remainder
+of the configuration has occurred. All devices with this feature power-on in the "tristate" mode at this time.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DIO_Read1"></a>
+<h3 class="bodydecl">unsigned long DIO_Read1( unsigned long DeviceIndex, unsigned long BitIndex, unsigned char *pBuffer )</h3>
+<p class="indent1">Reads a single bit from a digital I/O port.
+<a href="#DIO_Configure"><span class="funcname">DIO_Configure()</span></a> or
+<a href="#DIO_ConfigureEx"><span class="funcname">DIO_ConfigureEx()</span></a> <span class="italic">must</span>
+be called before using any of the read/write functions.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Digital inputs and outputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">BitIndex</span> - Number of the bit you wish to read (0-based)</p>
+<p class="indent2"><span class="varname">pBuffer</span> - pointer to a byte which will be set to zero or one based
+on the input bit. Data read from ports configured as output results in a "read-back" of the output.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DIO_Read8"></a>
+<h3 class="bodydecl">unsigned long DIO_Read8( unsigned long DeviceIndex, unsigned long ByteIndex, unsigned char *pBuffer )</h3>
+<p class="indent1">Reads a single digital I/O port (8-bits).
+<a href="#DIO_Configure"><span class="funcname">DIO_Configure()</span></a> or
+<a href="#DIO_ConfigureEx"><span class="funcname">DIO_ConfigureEx()</span></a> <span class="italic">must</span>
+be called before using any of the read/write functions.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Digital inputs and outputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">ByteIndex</span> - Number of the byte you wish to read (0-based)</p>
+<p class="indent2"><span class="varname">pBuffer</span> - pointer to a byte in which the input byte will be stored.
+Data read from ports configured as output results in a "read-back" of the output.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DIO_ReadAll"></a>
+<h3 class="bodydecl">unsigned long DIO_ReadAll( unsigned long DeviceIndex, void *Buffer )</h3>
+<p class="indent1">Reads all the digital I/O ports in the device.
+<a href="#DIO_Configure"><span class="funcname">DIO_Configure()</span></a> or
+<a href="#DIO_ConfigureEx"><span class="funcname">DIO_ConfigureEx()</span></a> <span class="italic">must</span>
+be called before using any of the read/write functions.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Digital inputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">Buffer</span> - pointer to the first element of an array of bytes. Each port
+will be read, and the reading stored in the corresponding byte in the array. The number of bytes required to store all
+the data for the device is equal to the number or ports, or the number of channels divided by 8 channels/bits per
+port/byte. For example, if the device has 96 channels, the number of ports/bytes is 96 divided by 8, or 12.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DIO_Write1"></a>
+<h3 class="bodydecl">unsigned long DIO_Write1( unsigned long DeviceIndex, unsigned long BitIndex, unsigned char bData )</h3>
+<p class="indent1">Writes a single bit to a digital output port.
+<a href="#DIO_Configure"><span class="funcname">DIO_Configure()</span></a> or
+<a href="#DIO_ConfigureEx"><span class="funcname">DIO_ConfigureEx()</span></a> <span class="italic">must</span>
+be called before using any of the read/write functions.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Digital outputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">BitIndex</span> - Number of the bit you wish to change (0-based). Writes to
+bits configured as inputs are ignored.</p>
+<p class="indent2"><span class="varname">bData</span> - <span class="constname">AIOUSB_TRUE, TRUE</span> will set the bit to "1";
+<span class="constname">AIOUSB_FALSE, FALSE</span> will clear the bit to "0".</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DIO_Write8"></a>
+<h3 class="bodydecl">unsigned long DIO_Write8( unsigned long DeviceIndex, unsigned long ByteIndex, unsigned char Data )</h3>
+<p class="indent1">Writes a single digital output port (8-bits).
+<a href="#DIO_Configure"><span class="funcname">DIO_Configure()</span></a> or
+<a href="#DIO_ConfigureEx"><span class="funcname">DIO_ConfigureEx()</span></a> <span class="italic">must</span>
+be called before using any of the read/write functions.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Digital outputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">ByteIndex</span> - Number of the byte you wish to change (0-based). Writes
+to bytes configured as inputs are ignored.</p>
+<p class="indent2"><span class="varname">Data</span> - The byte will be copied to the port outputs. Each set bit
+will cause the same port bit to be set to "1".</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DIO_WriteAll"></a>
+<h3 class="bodydecl">unsigned long DIO_WriteAll( unsigned long DeviceIndex, void *pData )</h3>
+<p class="indent1">Writes all the digital output ports in the device.
+<a href="#DIO_Configure"><span class="funcname">DIO_Configure()</span></a> or
+<a href="#DIO_ConfigureEx"><span class="funcname">DIO_ConfigureEx()</span></a> <span class="italic">must</span>
+be called before using any of the read/write functions.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Digital outputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">pData</span> - pointer to the first element of an array of bytes. Each byte
+is copied to the corresponding output byte. Bytes written to ports configured as inputs are ignored. The number of
+bytes required to store all the data for the device is equal to the number or ports, or the number of channels divided
+by 8 channels/bits per port/byte. For example, if the device has 96 channels, the number of ports/bytes is 96 divided
+by 8, or 12.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<h2 class="body">DIO Streaming Functions (Advanced)</h2>
+<a name="DIO_StreamClose"></a>
+<h3 class="bodydecl">unsigned long DIO_StreamClose( unsigned long DeviceIndex )</h3>
+<p class="indent1">Closes a digital I/O stream opened by a call to
+<a href="#DIO_StreamOpen"><span class="funcname">DIO_StreamOpen()</span></a>.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Buffered digital inputs and outputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DIO_StreamFrame"></a>
+<h3 class="bodydecl">unsigned long DIO_StreamFrame( unsigned long DeviceIndex, unsigned long FramePoints,
+unsigned short *pFrameData, unsigned long *BytesTransferred )</h3>
+<p class="indent1">Read from, or write to a digital I/O stream opened by a call to
+<a href="#DIO_StreamOpen"><span class="funcname">DIO_StreamOpen()</span></a>.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Buffered digital inputs and outputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">FramePoints</span> - number of 16-bit points you wish to stream</p>
+<p class="indent2"><span class="varname">pFrameData</span> - pointer to the beginning of the block of data you wish to stream</p>
+<p class="indent2"><span class="varname">BytesTransferred</span> - pointer to a variable that will receive the amount of
+data actually transferred, in <span class="bold">bytes</span></p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DIO_StreamOpen"></a>
+<h3 class="bodydecl">unsigned long DIO_StreamOpen( unsigned long DeviceIndex, unsigned long bIsRead )</h3>
+<p class="indent1">Opens a digital I/O stream. When you are done using the stream, you must close it by calling
+<a href="#DIO_StreamClose"><span class="funcname">DIO_StreamClose()</span></a>.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Buffered digital inputs and outputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">bIsRead</span> - <span class="constname">AIOUSB_TRUE, TRUE</span> will open a stream for
+reading; <span class="constname">AIOUSB_FALSE, FALSE</span> will open a stream for writing</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DIO_StreamSetClocks"></a>
+<h3 class="bodydecl">unsigned long DIO_StreamSetClocks( unsigned long DeviceIndex, double *ReadClockHz,
+double *WriteClockHz )</h3>
+<p class="indent1">Sets the internal read/write clock speed of a digital I/O stream.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Buffered digital inputs and outputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">ReadClockHz</span> - a pointer to an IEEE double-precision value indicating
+the desired frequency of an internal read clock. It will be changed to the actual frequency achieved. Use "0" for an
+external read clock.</p>
+<p class="indent2"><span class="varname">WriteClockHz</span> - a pointer to an IEEE double-precision value indicating
+the desired frequency of an internal write clock. It will be changed to the actual frequency achieved. Use "0" for an
+external write clock.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<h2 class="body">CTR Functions</h2>
+<p>The 8254 programming details are not described in this manual. Programming details for the 8254 can be found
+in the document named <span class="filename">CD/ChipDocs/8254.pdf</span>.</p>
+<a name="CounterAddressing"></a>
+<h3>Counter Addressing</h3>
+<p>Each of these functions is designed to operate in one of two addressing modes. The parameter
+<span class="varname">BlockIndex</span> refers to 8254 chips, each of which contains 3 “Counters”.
+<span class="varname">CounterIndex</span> refers to the counters inside the 8254s. In the primary addressing mode
+you specify the block and the counter. In the secondary addressing mode, you specify zero (0) for the block, and
+consider the counters to be addressed sequentially. That is, <span class="varname">BlockIndex</span> 3,
+<span class="varname">CounterIndex</span> 1 can also be addressed as <span class="varname">BlockIndex</span> 0,
+<span class="varname">CounterIndex</span> 10. The equation to determine the secondary or sequential
+<span class="varname">CounterIndex</span> given the primary or block values is as follows (they simply count
+consecutively):</p>
+<p style="text-align: center;"><span class="varname">CounterIndex<sub>sequential</sub></span> = <span class="varname">BlockIndex</span>
+* 3 + <span class="varname">CounterIndex<sub>primary</sub></span></p>
+<p>Please note, <span class="varname">CounterIndex</span> values associated with
+<span class="varname">BlockIndex</span> 0 are compatible with either addressing mode, there is no need to tell
+the driver which addressing mode you wish to use.</p>
+<hr class="body">
+<a name="CTR_8254Load"></a>
+<h3 class="bodydecl">unsigned long CTR_8254Load( unsigned long DeviceIndex, unsigned long BlockIndex,
+unsigned long CounterIndex, unsigned short LoadValue )</h3>
+<p class="indent1">Loads a count value into a counter
+(see also <a href="#CTR_8254ModeLoad"><span class="funcname">CTR_8254ModeLoad()</span></a>).</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">USB-CTR-15 only; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">BlockIndex</span> - number indicating which 8254 you wish to load</p>
+<p class="indent2"><span class="varname">CounterIndex</span> - number from 0-2 indicating which counter on the
+specified 8254 you wish to load (see note about <a href="#CounterAddressing">counter addressing</a>)</p>
+<p class="indent2"><span class="varname">LoadValue</span> - a number from 0 to 65535 which you wish loaded into the
+specified counter</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="CTR_8254Mode"></a>
+<h3 class="bodydecl">unsigned long CTR_8254Mode( unsigned long DeviceIndex, unsigned long BlockIndex,
+unsigned long CounterIndex, unsigned long Mode )</h3>
+<p class="indent1">Sets a counter mode.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Counter timers; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">BlockIndex</span> - number indicating which 8254 you wish to configure</p>
+<p class="indent2"><span class="varname">CounterIndex</span> - number from 0-2 indicating which counter on the
+specified 8254 you wish to configure (see note about <a href="#CounterAddressing">counter addressing</a>)</p>
+<p class="indent2"><span class="varname">Mode</span> - a number from 0-5 specifying the 8254 counter mode</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="CTR_8254ModeLoad"></a>
+<h3 class="bodydecl">unsigned long CTR_8254ModeLoad( unsigned long DeviceIndex, unsigned long BlockIndex,
+unsigned long CounterIndex, unsigned long Mode, unsigned short LoadValue )</h3>
+<p class="indent1">Sets a counter mode and loads a count value into the counter.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Counter timers; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">BlockIndex</span> - number indicating which 8254 you wish to configure</p>
+<p class="indent2"><span class="varname">CounterIndex</span> - number from 0-2 indicating which counter on the
+specified 8254 you wish to configure (see note about <a href="#CounterAddressing">counter addressing</a>)</p>
+<p class="indent2"><span class="varname">Mode</span> - a number from 0-5 specifying the 8254 counter mode</p>
+<p class="indent2"><span class="varname">LoadValue</span> - a number from 0 to 65535 which you wish loaded into the
+specified counter</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="CTR_8254Read"></a>
+<h3 class="bodydecl">unsigned long CTR_8254Read( unsigned long DeviceIndex, unsigned long BlockIndex,
+unsigned long CounterIndex, unsigned short *pReadValue )</h3>
+<p class="indent1">Reads a counter's current count value.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Counter timers; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">BlockIndex</span> - number indicating which 8254 you wish to read</p>
+<p class="indent2"><span class="varname">CounterIndex</span> - number from 0-2 indicating which counter on the
+specified 8254 you wish to read (see note about <a href="#CounterAddressing">counter addressing</a>)</p>
+<p class="indent2"><span class="varname">pReadValue</span> - a pointer to a 16-bit integer in which will be stored
+the value latched and read from the specified counter</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="CTR_8254ReadAll"></a>
+<h3 class="bodydecl">unsigned long CTR_8254ReadAll( unsigned long DeviceIndex, unsigned short *pData )</h3>
+<p class="indent1">Reads the current count values of all the counters.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">USB-CTR-15 only; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">pData</span> - a pointer to the first of an array of 16-bit integers in
+which will be stored the values latched and read from the counters</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="CTR_8254ReadLatched"></a>
+<h3 class="bodydecl">unsigned long CTR_8254ReadLatched( unsigned long DeviceIndex, unsigned short *pData )</h3>
+<p class="indent1">Reads the current count values of all the counters.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">USB-CTR-15 only; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">pData</span> - a pointer to the first of an array of 16-bit integers in
+which will be stored the values latched and read from the counters. After the array in the pointer buffer is an
+additional 8-bit byte. This byte contains useful information when optimizing polling rates. If the value of the
+byte is “0", you’re looking at old data, and are reading faster than your gate signal is running.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="CTR_8254ReadModeLoad"></a>
+<h3 class="bodydecl">unsigned long CTR_8254ReadModeLoad( unsigned long DeviceIndex, unsigned long BlockIndex,
+unsigned long CounterIndex, unsigned long Mode, unsigned short LoadValue, unsigned short *pReadValue )</h3>
+<p class="indent1">Reads a counter's current count value, then sets a new mode and loads a new count value
+into the counter.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Counter timers; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">BlockIndex</span> - number indicating which 8254 you wish to read, mode,
+and load</p>
+<p class="indent2"><span class="varname">CounterIndex</span> - number from 0-2 indicating which counter on the
+specified 8254 you wish to read, mode, and load (see note about <a href="#CounterAddressing">counter addressing</a>)</p>
+<p class="indent2"><span class="varname">Mode</span> - a number from 0-5 specifying the 8254 counter mode</p>
+<p class="indent2"><span class="varname">LoadValue</span> - a number from 0 to 65535 which you wish loaded into the
+specified counter</p>
+<p class="indent2"><span class="varname">pReadValue</span> - a pointer to a 16-bit integer in which will be stored
+the value latched and read from the specified counter. The reading is taken <span class="italic">before</span> the
+mode and load occur.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="CTR_8254ReadStatus"></a>
+<h3 class="bodydecl">unsigned long CTR_8254ReadStatus( unsigned long DeviceIndex, unsigned long BlockIndex,
+unsigned long CounterIndex, unsigned short *pReadValue, unsigned char *pStatus )</h3>
+<p class="indent1">Reads a counter's current count value and status.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Counter timers; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">BlockIndex</span> - number indicating which 8254 you wish to read</p>
+<p class="indent2"><span class="varname">CounterIndex</span> - number from 0-2 indicating which counter on the
+specified 8254 you wish to read (see note about <a href="#CounterAddressing">counter addressing</a>)</p>
+<p class="indent2"><span class="varname">pReadValue</span> - a pointer to a 16-bit integer in which will be stored
+the value latched and read from the specified counter.</p>
+<p class="indent2"><span class="varname">pStatus</span> - a pointer to an 8-bit byte in which will be stored
+the status latched and read from the specified counter.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="CTR_8254SelectGate"></a>
+<h3 class="bodydecl">unsigned long CTR_8254SelectGate( unsigned long DeviceIndex, unsigned long GateIndex )</h3>
+<p class="indent1">Selects the counter to use as a gate in frequency measurement on other counters.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">USB-CTR-15 only; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">GateIndex</span> - number from 0-14 indicating which counter you wish to
+select as a gate (using <a href="#CounterAddressing">sequential counter addressing</a>)</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="CTR_StartOutputFreq"></a>
+<h3 class="bodydecl">unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex, unsigned long BlockIndex, double *pHz )</h3>
+<p class="indent1">Selects an output frequency for a counter block and starts the counters.</p>
+<p class="indent1"><a href="#CTR_8254SelectGate"><span class="funcname">CTR_8254SelectGate()</span></a> and
+<a href="#CTR_8254ReadLatched"><span class="funcname">CTR_8254ReadLatched()</span></a> are used in measuring
+frequency. To measure frequency one must count pulses for a known duration. In simplest terms, the number of
+pulses that occur for 1 second translates directly to Hertz. In the USB-CTR-15 and other supported devices,
+you can create a known duration by configuring one counter to act as a “gating” signal for any collection of
+other counters. The other “measurement” counters will only count during the “high” side of the gate signal,
+which we can control.</p>
+<p class="indent1">So, to measure frequency you:</p>
+<ol class="indent1">
+	<li><p>Create a gate signal of known duration</p>
+	<li><p>Connect this gating signal to the gate pins of all the “measurement” counters</p>
+	<li><p>Call <a href="#CTR_8254SelectGate"><span class="funcname">CTR_8254SelectGate()</span></a> to tell the
+	board which counter is generating that gate</p>
+	<li><p>Call <a href="#CTR_8254ReadLatched"><span class="funcname">CTR_8254ReadLatched()</span></a> periodically
+	to read the latched count values from all the “measurement” counters.</p>
+</ol>
+<p class="indent1">In practice, it may not be possible to generate a gating signal of sufficient duration from
+a single counter. Simply concatenate two or more counters into a series, or daisy-chain, and use the last counter’s
+output as your gating signal. This last counter in the chain should be reported as the “gate source” using
+<a href="#CTR_8254SelectGate"><span class="funcname">CTR_8254SelectGate()</span></a>.</p>
+<p class="indent1">Once a value has been read from a counter using the
+<a href="#CTR_8254ReadLatched"><span class="funcname">CTR_8254ReadLatched()</span></a> call, it can be translated
+into actual Hz by dividing the count value returned by the high-side-duration of the gating signal, in seconds.
+For example, if your gate is configured for 10Hz, the high-side lasts 0.05seconds; if you read 1324 counts via the
+<a href="#CTR_8254ReadLatched"><span class="funcname">CTR_8254ReadLatched()</span></a> call, the frequency would be
+“1324 / 0.05", or 26.48KHz.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Counter timers; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">BlockIndex</span> - number indicating which 8254 you wish to output a output
+a frequency</p>
+<p class="indent2"><span class="varname">pHz</span> - pointer to a double precision IEEE floating point number containing
+the desired output frequency (in Hertz). This variable is set by the driver to the actual frequency that will be output,
+as limited by the device’s capabilities.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<h2 class="body">ADC Functions</h2>
+<a name="ADC_ADMode"></a>
+<h3 class="bodydecl">unsigned long ADC_ADMode( unsigned long DeviceIndex, unsigned char TriggerMode, unsigned char CalMode )</h3>
+<p class="indent1">Sets the A/D trigger and calibration modes. The USB-AI12-16E does not support calibration, and will use
+CalMode 0.</p>
+<p class="indent1">Linux: there is a parallel set of convenience functions for configuring the A/D. Refer to
+<a href="#AIOUSB_SetTriggerMode"><span class="funcname">AIOUSB_SetTriggerMode()</span></a> and
+<a href="#AIOUSB_SetCalMode"><span class="funcname">AIOUSB_SetCalMode()</span></a> for more information.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">TriggerMode</span> - byte indicating which A/D trigger source to use, see the
+manual for details. Also sets the clock source for counter 0.</p>
+<p class="indent2">Linux: You may use a bitwise OR of the
+<a href="#AIOUSB_SetTriggerMode"><span class="constname">AD_TRIGGER_*</span></a> values.</p>
+<p class="indent2"><span class="varname">CalMode</span> - byte indicating which A/D source to use. May be one of:</p>
+<p class="indent3"><span class="constname">00 hex</span> - actual inputs</p>
+<p class="indent3"><span class="constname">01 hex</span> - calibration ground reference</p>
+<p class="indent3"><span class="constname">03 hex</span> - calibration high reference</p>
+<p class="indent2">Other values will cause the function to fail and return an error result.</p>
+<p class="indent2">Linux: You may use one of the
+<a href="#AIOUSB_SetCalMode"><span class="constname">AD_CAL_MODE_*</span></a> values.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="ADC_BulkAcquire"></a>
+<h3 class="bodydecl">unsigned long ADC_BulkAcquire( unsigned long DeviceIndex, unsigned long BufSize, void *pBuf )</h3>
+<p class="indent1">Starts a large A/D acquisition operation and returns immediately. A <a href="#ResultCodes">result code</a>
+of <span class="constname">AIOUSB_SUCCESS / ERROR_SUCCESS</span> indicates that A/D data is being acquired in the
+background, and the buffer should not be deallocated or moved. Use
+<a href="#ADC_BulkPoll"><span class="funcname">ADC_BulkPoll()</span></a> to query the status of this background operation.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">BufSize</span> - the size, in bytes, of the buffer to receive the data</p>
+<p class="indent2"><span class="varname">pBuf</span> - a pointer to the beginning of the buffer to receive the data</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="ADC_BulkPoll"></a>
+<h3 class="bodydecl">unsigned long ADC_BulkPoll( unsigned long DeviceIndex, unsigned long *BytesLeft )</h3>
+<p class="indent1">Queries the status of a background A/D acquisition operation initiated by a call to
+<a href="#ADC_BulkAcquire"><span class="funcname">ADC_BulkAcquire()</span></a>, returning the number of bytes yet
+to be transferred.</p>
+<p class="indent1">Any data that has been taken is available in the buffer, starting from the beginning. For example,
+if <a href="#ADC_BulkAcquire"><span class="funcname">ADC_BulkAcquire()</span></a> was called to take 1024 MB of data, and
+<span class="funcname">ADC_BulkPoll()</span> indicates 768 MB remains to be taken, the first 256 MB of data is available.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">BytesLeft</span> - a pointer to a variable which will be set to the number of
+bytes of A/D data remaining to be taken</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="ADC_GetChannelV"></a>
+<h3 class="bodydecl">unsigned long ADC_GetChannelV( unsigned long DeviceIndex, unsigned long ChannelIndex, double *pBuf )</h3>
+<p class="indent1">Reads a voltage from a single channel, averaging any oversamples, if so configured. This function is
+easy to use, but relatively slow and often can’t achieve more than 100Hz sampling rates.</p>
+<p class="indent1">Linux: the channel scan range is temporarily changed to include <span class="italic">only</span>
+<span class="varname">ChannelIndex</span>. This feature ensures that <span class="funcname">ADC_GetChannelV()</span>
+will always return valid data. It also improves performance by reading just the channel requested instead of the entire
+channel scan range <span class="italic">(see <a href="#ADC_SetScanLimits"><span class="funcname">ADC_SetScanLimits()</span></a>)</span>.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">ChannelIndex</span> - number indicating which channel to read</p>
+<p class="indent2"><span class="varname">pBuf</span> - a pointer to a double precision IEEE floating point number which
+will receive the value read (in Volts)</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="ADC_GetConfig"></a>
+<h3 class="bodydecl">unsigned long ADC_GetConfig( unsigned long DeviceIndex, unsigned char *pConfigBuf,
+unsigned long *ConfigBufSize )</h3>
+<p class="indent1">Gets the current A/D configuration from the device. The format of the configuration data
+returned is described in <a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a>.</p>
+<p class="indent1">Linux: there is a parallel set of convenience functions for configuring the A/D. Refer to
+<a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> for more information.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">pConfigBuf</span> - a pointer to the first of an array in which configuration
+bytes will be returned</p>
+<p class="indent2"><span class="varname">ConfigBufSize</span> - a pointer to a variable holding the number of
+configuration bytes to read. Will be set to the number of configuration bytes read.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="ADC_GetScan"></a>
+<h3 class="bodydecl">unsigned long ADC_GetScan( unsigned long DeviceIndex, unsigned short *pBuf )</h3>
+<p class="indent1">Takes one scan of A/D data, from <span class="varname">start-channel</span> to
+<span class="varname">end-channel</span>, averaging any oversamples for each channel, if so configured.
+The input array <span class="varname">pBuf</span> must contain one entry per A/D channel on the board, even
+though only entries <span class="varname">start-channel</span> through <span class="varname">end-channel</span>
+are altered. This function is easy to use, but relatively slow and often can’t achieve more than several hundred
+Hertz sampling rates.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">pBuf</span> - a pointer to the first of an array of 16-bit integers which
+will each receive the value from one channel (in A/D counts)</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="ADC_GetScanV"></a>
+<h3 class="bodydecl">unsigned long ADC_GetScanV( unsigned long DeviceIndex, double *pBuf )</h3>
+<p class="indent1">Takes one scan of A/D data, from <span class="varname">start-channel</span> to
+<span class="varname">end-channel</span>, averaging any oversamples for each channel, if so configured.
+The input array <span class="varname">pBuf</span> must contain one entry per A/D channel on the board, even
+though only entries <span class="varname">start-channel</span> through <span class="varname">end-channel</span>
+are altered. This function is easy to use, but relatively slow and often can’t achieve more than several hundred
+Hertz sampling rates.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">pBuf</span> - a pointer to the first of an array of double precision IEEE
+floating point numbers which will each receive the value read from one channel (in Volts)</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="ADC_Initialize"></a>
+<h3 class="bodydecl">unsigned long ADC_Initialize( unsigned long DeviceIndex,
+unsigned char *pConfigBuf, unsigned long *ConfigBufSize, const char *CalFileName )</h3>
+<p class="indent1">Sets the A/D configuration in the device and/or loads a calibration table into the device.
+If <span class="varname">pConfigBuf</span> or <span class="varname">ConfigBufSize</span> are
+<span class="constname">NULL (0)</span>, the A/D will not be configured. If <span class="varname">CalFileName</span>
+is <span class="constname">NULL (0)</span>, the calibration table will not be loaded. If all three parameters are
+<span class="constname">NULL (0)</span>, no action will be performed.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">pConfigBuf</span> - a pointer to the first of an array of configuration bytes
+<span class="italic">(see <a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a>)</span></p>
+<p class="indent2"><span class="varname">ConfigBufSize</span> - a pointer to a variable holding the number of
+configuration bytes to write
+<span class="italic">(see <a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a>)</span></p>
+<p class="indent2"><span class="varname">CalFileName</span> - the name of a calibration file to load
+<span class="italic">(see <a href="#ADC_SetCal"><span class="funcname">ADC_SetCal()</span></a>)</span></p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="ADC_QueryCal"></a>
+<h3 class="bodydecl">unsigned long ADC_QueryCal( unsigned long DeviceIndex )</h3>
+<p class="indent1">Queries the device to determine if it supports A/D calibration. A <a href="#ResultCodes">result code</a>
+of <span class="constname">AIOUSB_SUCCESS / ERROR_SUCCESS</span> indicates that the device does support A/D calibration.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="ADC_Range1"></a>
+<h3 class="bodydecl">unsigned long ADC_Range1( unsigned long DeviceIndex, unsigned long ADChannel, unsigned char GainCode,
+unsigned long bSingleEnded )</h3>
+<p class="indent1">Sets the range and "ended" mode for an A/D channel.</p>
+<p class="indent1">Linux: there is a parallel set of convenience functions for configuring the A/D. Refer to
+<a href="#AIOUSB_SetGainCode"><span class="funcname">AIOUSB_SetGainCode()</span></a> and
+<a href="#AIOUSB_SetDifferentialMode"><span class="funcname">AIOUSB_SetDifferentialMode()</span></a> for more information.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">ADChannel</span> - number from 0-15 indicating an A/D channel on the device</p>
+<p class="indent2"><span class="varname">GainCode</span> - the gain code
+<span class="italic">(see <a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a>)</span></p>
+<p class="indent2">Linux: You may use one of the
+<a href="#AIOUSB_SetGainCode"><span class="constname">AD_GAIN_CODE_*</span></a> values.</p>
+<p class="indent2"><span class="varname">bSingleEnded</span> - for channels 0-7, use <span class="constname">AIOUSB_TRUE, TRUE</span>
+for single-ended mode, or use <span class="constname">AIOUSB_FALSE, FALSE</span> to pair it with the respective channel 8-15 in
+differential mode. For channels 8-15, use <span class="constname">AIOUSB_FALSE, FALSE</span>.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="ADC_RangeAll"></a>
+<h3 class="bodydecl">unsigned long ADC_RangeAll( unsigned long DeviceIndex, unsigned char *pGainCodes,
+unsigned long bSingleEnded )</h3>
+<p class="indent1">Sets the range and "ended" mode for all A/D channels.</p>
+<p class="indent1">Linux: there is a parallel set of convenience functions for configuring the A/D. Refer to
+<a href="#AIOUSB_SetAllGainCodeAndDiffMode"><span class="funcname">AIOUSB_SetAllGainCodeAndDiffMode()</span></a>
+for more information.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">pGainCodes</span> - a pointer to the first of an array of 16 bytes, each of
+which contains a gain code. This does not include single-ended/differential configuration. To configure
+single-ended/differential mode on a per-channel basis, use <a href="#ADC_Range1"><span class="funcname">ADC_Range1()</span></a>
+or <a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a>.
+<p class="indent2">Linux: You may use one of the
+<a href="#AIOUSB_SetGainCode"><span class="constname">AD_GAIN_CODE_*</span></a> values for each of the gain codes.</p>
+<p class="indent2"><span class="varname">bSingleEnded</span> - Use <span class="constname">AIOUSB_TRUE, TRUE</span>
+for 16-channel single-ended mode, or use <span class="constname">AIOUSB_FALSE, FALSE</span> for 8-channel differential mode.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="ADC_SetCal"></a>
+<h3 class="bodydecl">unsigned long ADC_SetCal( unsigned long DeviceIndex, const char *CalFileName )</h3>
+<p class="indent1">Loads a calibration table into the A/D. The calibration table can either be loaded from
+a file or generated automaticallly, depending on the file name passed to <span class="funcname">ADC_SetCal()</span>.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">CalFileName</span> - this can be a full path to a calibration file or
+simply a file name in the current directory. To generate a calibration table automatically, one of these special
+command strings (case-sensitive) may be used instead of an actual file name:</p>
+<p class="indent3"><span class="constname">":AUTO:"</span> - automatically calibrates the A/D using internal ground and
+reference measurements and creates an appropriate calibration table, which is loaded into the A/D</p>
+<p class="indent3"><span class="constname">":NONE:"</span> - generates a default, uncalibrated table, which is loaded
+into the A/D</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="ADC_SetConfig"></a>
+<h3 class="bodydecl">unsigned long ADC_SetConfig( unsigned long DeviceIndex, unsigned char *pConfigBuf,
+unsigned long *ConfigBufSize )</h3>
+<p class="indent1">Sets the A/D configuration in the device.</p>
+<p class="indent1">Linux: there is a parallel set of convenience functions for configuring the A/D. Refer to
+<a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> for more information.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">pConfigBuf</span> - a pointer to the first of an array of configuration bytes
+<span class="italic">(described below)</span></p>
+<p class="indent2"><span class="varname">ConfigBufSize</span> - a pointer to a variable holding the number of
+configuration bytes to write. Will be set to the number of configuration bytes written.</p>
+<table class="indent2" border="3" cellpadding="4" cellspacing="0">
+	<tr>
+		<th colspan="10" valign="top">
+			Configuration bytes for analog input boards (such as USB-AI16-16 family)
+		</th>
+	</tr>
+	<tr valign="top">
+		<td>Byte 00</td>
+		<td colspan="3">Bytes 01-0E</td>
+		<td>0F</td>
+		<td>10</td>
+		<td>11</td>
+		<td>12</td>
+		<td>13</td>
+		<td>14</td>
+	</tr>
+	<tr valign="top">
+		<td>Channel 0 Gain Code</td>
+		<td colspan="3">Channels 1-14 Gain Code</td>
+		<td>Channel 15 Gain Code</td>
+		<td>Calibration Mode</td>
+		<td>Trigger &amp; Counter Clock</td>
+		<td>Scan Start &amp; End Channel</td>
+		<td>Oversample</td>
+		<td>MUX Scan Start &amp; End Channel</td>
+	</tr>
+	<tr>
+		<td colspan="10" valign="top">
+			A configuration of all zeroes is close to an "ordinary" use; you'll likely want to set external
+			or timer trigger, and start and end channels.
+		</td>
+	</tr>
+	<tr>
+		<th colspan="10" valign="top">
+			Channel 0-15 Gain Codes (bytes 00-0F)
+		</th>
+	</tr>
+	<tr valign="top">
+		<td colspan="2">Gain Code</td>
+		<td>00</td>
+		<td>01</td>
+		<td>02</td>
+		<td>03</td>
+		<td>04</td>
+		<td>05</td>
+		<td>06</td>
+		<td>07</td>
+	</tr>
+	<tr valign="top">
+		<td colspan="2">Range</td>
+		<td>0-10V</td>
+		<td>±10V</td>
+		<td>0-5V</td>
+		<td>±5V</td>
+		<td>0-2V</td>
+		<td>±2V</td>
+		<td>0-1V</td>
+		<td>±1V</td>
+	</tr>
+	<tr>
+		<td colspan="10" valign="top">
+			Add 08 to the gain code for channel 0-7 to pair it with the respective channel 8-15 in differential mode.
+		</td>
+	</tr>
+	<tr>
+		<th colspan="10" valign="top">
+			Calibration Mode (byte 10)
+		</th>
+	</tr>
+	<tr valign="top">
+		<td colspan="1">Cal. Mode</td>
+		<td colspan="3">00</td>
+		<td colspan="3">01</td>
+		<td colspan="3">03</td>
+	</tr>
+	<tr valign="top">
+		<td colspan="1">Effect</td>
+		<td colspan="3">Acquire Normal Data</td>
+		<td colspan="3">Acquire Cal. Ground (0.0114V @ 0-10V)</td>
+		<td colspan="3">Acquire Cal. Reference (9.9V @ 0-10V)</td>
+	</tr>
+	<tr>
+		<th colspan="10" valign="top">
+			Trigger &amp; Counter Clock (byte 11)
+		</th>
+	</tr>
+	<tr valign="top">
+		<td colspan="2">Bit</td>
+		<td>7</td>
+		<td>6</td>
+		<td>5</td>
+		<td>4</td>
+		<td>3</td>
+		<td>2</td>
+		<td>1</td>
+		<td>0</td>
+	</tr>
+	<tr valign="top">
+		<td colspan="2">Value</td>
+		<td colspan="3">Reserved, use 0</td>
+		<td>CTR0 EXT</td>
+		<td>Falling Edge</td>
+		<td>Scan</td>
+		<td>External Trigger</td>
+		<td>Timer Trigger</td>
+	</tr>
+	<tr>
+		<td colspan="10" valign="top">
+			<ul>
+				<li>If CTR0 EXT is set, counter 0 is externally-triggered; otherwise, counter 0 is triggered
+				by the onboard 10MHz clock.
+				<li>If Falling Edge is set, A/D is triggered by the falling edge of its trigger source;
+				otherwise, A/D is triggered by the rising edge of its trigger source.
+				<li>If Scan is set, a single A/D trigger will acquire all channels from start to end,
+				oversampling if so configured, at maximum speed. Otherwise, a single A/D trigger will
+				cause a single acquisition, "walking" through oversamples and channels.
+				<li>If External Trigger is set, the external A/D trigger pin is an A/D trigger source.
+				Otherwise, it's ignored.
+				<li>If Timer Trigger is set, counter 2 is an A/D trigger source. Otherwise, it's ignored.
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<th colspan="10" valign="top">
+			Scan Start &amp; End Channel (byte 12)
+		</th>
+	</tr>
+	<tr>
+		<td colspan="10" valign="top">
+			The start channel (0-F) is specified in bits 0-3, and the end channel (0-F) is specified in bits
+			4-7. If the end channel is less than the start channel, then the board's behavior is unspecified.
+		</td>
+	</tr>
+	<tr>
+		<th colspan="10" valign="top">
+			Oversample (byte 13)
+		</th>
+	</tr>
+	<tr>
+		<td colspan="10" valign="top">
+			A number indicating how many <span class="italic">extra</span> samples should be acquired from each
+			channel before moving on to the next channel. In a noisy environment, the samples can be averaged
+			together by software to effectively reduce noise.
+		</td>
+	</tr>
+	<tr>
+		<th colspan="10" valign="top">
+			MUX Scan Start &amp; End Channel (byte 14)
+		</th>
+	</tr>
+	<tr>
+		<td colspan="10" valign="top">
+			In devices with a MUX (i.e. more than 16 channels), the low 4-bits of the start and end channels are stored
+			in byte 12, described above, and the high 4-bits of the start and end channels are stored here in byte 14.
+			The high 4-bits of the start channel are specified in bits 0-3, and the high 4-bits of the end channel are
+			specified in bits 4-7.
+		</td>
+	</tr>
+</table>
+<br>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="ADC_SetOversample"></a>
+<h3 class="bodydecl">unsigned long ADC_SetOversample( unsigned long DeviceIndex, unsigned char Oversample )</h3>
+<p class="indent1">Sets the number of over-samples for all A/D channels.</p>
+<p class="indent1">Linux: there is a parallel set of convenience functions for configuring the A/D. Refer to
+<a href="#AIOUSB_SetOversample"><span class="funcname">AIOUSB_SetOversample()</span></a>
+for more information.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">Oversample</span> - the number of extra samples to take from each channel
+in a scan <span class="italic">(see <a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a>)</span></p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="ADC_SetScanLimits"></a>
+<h3 class="bodydecl">unsigned long ADC_SetScanLimits( unsigned long DeviceIndex, unsigned long StartChannel,
+unsigned long EndChannel )</h3>
+<p class="indent1">Sets the start and end channels for A/D scans.</p>
+<p class="indent1">Linux: there is a parallel set of convenience functions for configuring the A/D. Refer to
+<a href="#AIOUSB_SetScanRange"><span class="funcname">AIOUSB_SetScanRange()</span></a>
+for more information.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">StartChannel</span> - the number of the first channel you want in a scan</p>
+<p class="indent2"><span class="varname">EndChannel</span> - the number of the last channel you want in a scan
+<span class="italic">(must be greater than or equal to <span class="varname">StartChannel</span>)</span></p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<h2 class="body">Extended ADC Functions</h2>
+<a name="AIOUSB_ADC_ExternalCal"></a>
+<h3 class="bodydecl">unsigned long AIOUSB_ADC_ExternalCal( unsigned long DeviceIndex, const double points[], int numPoints,
+unsigned short returnCalTable[], const char *saveFileName )</h3>
+<p class="indent1">Permits the A/D to be calibrated using an external voltage source. The proper way to use this function
+is to configure the A/D with a default calibration table (such as by calling
+<a href="#ADC_SetCal"><span class="funcname">ADC_SetCal()</span></a> or
+<a href="#AIOUSB_ADC_InternalCal"><span class="funcname">AIOUSB_ADC_InternalCal()</span></a>). Then inject a series
+of voltages into one of the A/D input channels, recording the count values reported by the A/D (by calling
+<a href="#ADC_GetScan"><span class="funcname">ADC_GetScan()</span></a>). It's also a good idea to enable oversampling
+while recording these values in order to obtain the most stable readings. Alternatively, since
+<span class="varname">points</span> is an array of <span class="typename">double</span> values, you can obtain individual
+A/D count measurements and average them yourself, producing a <span class="typename">double</span> average, and put
+that value into the <span class="varname">points</span> array.</p>
+<p class="indent1">The <span class="varname">points</span> array consists of <span class="italic">voltage-count</span>
+pairs; <span class="varname">points[0]</span> is the first input voltage; <span class="varname">points[1]</span> is the
+corresponding count value measured by the A/D; <span class="varname">points[2]</span> and <span class="varname">points[3]</span>
+contain the second pair of <span class="italic">voltage-count</span> values; and so on. You can provide any number of pairs,
+although more than a few dozen is probably overkill, not to mention would take a lot of effort to acquire.</p>
+<p class="indent1">This calibration procedure uses the current gain A/D setting for channel 0, so it must be the same as that
+used to collect the measured A/D counts. It's recommended that all the channels be set to the same gain, the one that will
+be used during normal operation. The calibration is gain dependent, so switching the gain after calibrating may introduce
+slight offset or gain changes. So for best results, the A/D should be calibrated on the same gain setting that will be
+used during normal operation. You can create any number of calibration tables. If your application needs to switch between
+ranges, you may wish to create a separate calibration table for each range your application will use. Then when switching
+to a different range, the application can load the appropriate calibration table.</p>
+<p class="indent1">Although calibrating in this manner does take some effort, it produces the best results, eliminating
+all sources of error from the input pins onward. Furthermore, the calibration table can be saved to a file and reloaded
+into the A/D, ensuring consistency.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">points</span> - array of <span class="italic">voltage-count</span> pairs to
+calibrate the A/D with</p>
+<p class="indent2"><span class="varname">numPoints</span> - number of <span class="italic">voltage-count</span> pairs
+in <span class="varname">points</span> (minimum of 2)</p>
+<p class="indent2"><span class="varname">returnCalTable</span> - pointer to an array of 65,536 16-bit integers in
+which the generated calibration table will be returned (may be subsequently loaded into the A/D using
+<a href="#AIOUSB_ADC_SetCalTable"><span class="funcname">AIOUSB_ADC_SetCalTable()</span></a>); if this parameter is 0,
+nothing is returned</p>
+<p class="indent2"><span class="varname">saveFileName</span> - the name of a file in which the generated calibration
+table will be saved (may be subsequently loaded into the A/D using <a href="#ADC_SetCal"><span class="funcname">ADC_SetCal()</span></a>
+or <a href="#AIOUSB_ADC_LoadCalTable"><span class="funcname">AIOUSB_ADC_LoadCalTable()</span></a>); if this parameter
+is 0, the calibration table is not saved to a file</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="AIOUSB_ADC_InternalCal"></a>
+<h3 class="bodydecl">unsigned long AIOUSB_ADC_InternalCal( unsigned long DeviceIndex, AIOUSB_BOOL autoCal,
+unsigned short returnCalTable[], const char *saveFileName )</h3>
+<p class="indent1">Calibrates the A/D in the same manner as <a href="#ADC_SetCal"><span class="funcname">ADC_SetCal()</span></a>,
+generating either a default table or using the internal voltage references to generate a calibration table. The advantage
+of <span class="funcname">AIOUSB_ADC_InternalCal()</span> over <a href="#ADC_SetCal"><span class="funcname">ADC_SetCal()</span></a>
+is that <span class="funcname">AIOUSB_ADC_InternalCal()</span> can return the calibration table or save it in a file.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">autoCal</span> - <span class="constname">AIOUSB_TRUE</span> uses the internal
+voltage references to automatically calibrate the A/D; <span class="constname">AIOUSB_FALSE</span> generates a default
+(uncalibrated) table</p>
+<p class="indent2"><span class="varname">returnCalTable</span> - pointer to an array of 65,536 16-bit integers in
+which the generated calibration table will be returned (may be subsequently loaded into the A/D using
+<a href="#AIOUSB_ADC_SetCalTable"><span class="funcname">AIOUSB_ADC_SetCalTable()</span></a>); if this parameter is 0,
+nothing is returned</p>
+<p class="indent2"><span class="varname">saveFileName</span> - the name of a file in which the generated calibration
+table will be saved (may be subsequently loaded into the A/D using <a href="#ADC_SetCal"><span class="funcname">ADC_SetCal()</span></a>
+or <a href="#AIOUSB_ADC_LoadCalTable"><span class="funcname">AIOUSB_ADC_LoadCalTable()</span></a>); if this parameter
+is 0, the calibration table is not saved to a file</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="AIOUSB_ADC_LoadCalTable"></a>
+<h3 class="bodydecl">unsigned long AIOUSB_ADC_LoadCalTable( unsigned long DeviceIndex, const char *fileName )</h3>
+<p class="indent1">Loads a calibration table from a file into the A/D in the same manner as
+<a href="#ADC_SetCal"><span class="funcname">ADC_SetCal()</span></a>.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">fileName</span> - the name of a file containing the calibration table (such as
+created by <a href="#AIOUSB_ADC_InternalCal"><span class="funcname">AIOUSB_ADC_InternalCal()</span></a> or
+<a href="#AIOUSB_ADC_ExternalCal"><span class="funcname">AIOUSB_ADC_ExternalCal()</span></a>).</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="AIOUSB_ADC_SetCalTable"></a>
+<h3 class="bodydecl">unsigned long AIOUSB_ADC_SetCalTable( unsigned long DeviceIndex, const unsigned short calTable[] )</h3>
+<p class="indent1">Sets the calibration table in the A/D to the contents of <span class="varname">calTable</span>.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">calTable</span> - pointer to an array of 65,536 16-bit integers containing
+the calibration table (such as created by <a href="#AIOUSB_ADC_InternalCal"><span class="funcname">AIOUSB_ADC_InternalCal()</span></a>
+or <a href="#AIOUSB_ADC_ExternalCal"><span class="funcname">AIOUSB_ADC_ExternalCal()</span></a>).</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="AIOUSB_CountsToVolts"></a>
+<h3 class="bodydecl">double AIOUSB_CountsToVolts( unsigned long DeviceIndex, unsigned channel, unsigned short counts )</h3>
+<p class="indent1">Converts a single A/D count value to volts, based on the device’s current gain setting for the
+specified channel. Be careful to ensure that the count value was actually obtained from the specified channel and
+that the gain hasn’t changed since the count value was obtained.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">channel</span> - the channel number to use for converting counts to volts</p>
+<p class="indent2"><span class="varname">counts</span> - the count value to convert to volts</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">Volts</p>
+<hr class="body">
+<a name="AIOUSB_GetCalMode"></a>
+<h3 class="bodydecl">unsigned AIOUSB_GetCalMode( const ADConfigBlock *config )</h3>
+<p class="indent1">Returns the current calibration mode. (Must call
+<a href="#ADC_GetConfig"><span class="funcname">ADC_GetConfig()</span></a> first to get configuration from device.)</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">config</span> - pointer to a properly initialized
+<a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> structure</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">Current calibration mode (one of the
+<a href="#AIOUSB_SetCalMode"><span class="constname">AD_CAL_MODE_*</span></a> values)</p>
+<hr class="body">
+<a name="AIOUSB_GetEndChannel"></a>
+<h3 class="bodydecl">unsigned AIOUSB_GetEndChannel( const ADConfigBlock *config )</h3>
+<p class="indent1">Returns the current end channel for A/D scans. (Must call
+<a href="#ADC_GetConfig"><span class="funcname">ADC_GetConfig()</span></a> first to get configuration from device.)</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">config</span> - pointer to a properly initialized
+<a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> structure</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">Current end channel for A/D scans</p>
+<hr class="body">
+<a name="AIOUSB_GetGainCode"></a>
+<h3 class="bodydecl">unsigned AIOUSB_GetGainCode( const ADConfigBlock *config, unsigned channel )</h3>
+<p class="indent1">Returns the current gain code for <span class="varname">channel</span>. (Must call
+<a href="#ADC_GetConfig"><span class="funcname">ADC_GetConfig()</span></a> first to get configuration from device.)</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">config</span> - pointer to a properly initialized
+<a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> structure</p>
+<p class="indent2"><span class="varname">channel</span> - the channel for which to obtain the current gain code</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">Current gain code for <span class="varname">channel</span> (one of the
+<a href="#AIOUSB_SetGainCode"><span class="constname">AD_GAIN_CODE_*</span></a> values)</p>
+<hr class="body">
+<a name="AIOUSB_GetOversample"></a>
+<h3 class="bodydecl">unsigned AIOUSB_GetOversample( const ADConfigBlock *config )</h3>
+<p class="indent1">Returns the current number of over-samples. (Must call
+<a href="#ADC_GetConfig"><span class="funcname">ADC_GetConfig()</span></a> first to get configuration from device.)</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">config</span> - pointer to a properly initialized
+<a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> structure</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">Current number of over-samples (0-255)</p>
+<hr class="body">
+<a name="AIOUSB_GetStartChannel"></a>
+<h3 class="bodydecl">unsigned AIOUSB_GetStartChannel( const ADConfigBlock *config )</h3>
+<p class="indent1">Returns the current start channel for A/D scans. (Must call
+<a href="#ADC_GetConfig"><span class="funcname">ADC_GetConfig()</span></a> first to get configuration from device.)</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">config</span> - pointer to a properly initialized
+<a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> structure</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">Current start channel for A/D scans</p>
+<hr class="body">
+<a name="AIOUSB_GetTriggerMode"></a>
+<h3 class="bodydecl">unsigned AIOUSB_GetTriggerMode( const ADConfigBlock *config )</h3>
+<p class="indent1">Returns the current trigger mode. (Must call
+<a href="#ADC_GetConfig"><span class="funcname">ADC_GetConfig()</span></a> first to get configuration from device.)</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">config</span> - pointer to a properly initialized
+<a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> structure</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">Current trigger mode (a bitwise OR of the
+<a href="#AIOUSB_SetTriggerMode"><span class="constname">AD_TRIGGER_*</span></a> values)</p>
+<hr class="body">
+<a name="AIOUSB_InitConfigBlock"></a>
+<h3 class="bodydecl">void AIOUSB_InitConfigBlock( ADConfigBlock *config, unsigned long DeviceIndex, AIOUSB_BOOL defaults )</h3>
+<p class="indent1">Initializes an <a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> instance
+for the specified device index. <span class="bold">Must</span> be called before passing <span class="varname">config</span>
+to any other A/D configuration block functions.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">config</span> - pointer to an uninitialized
+<a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> structure</p>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">defaults</span> - <span class="constname">AIOUSB_TRUE</span> will fully initialize the
+block to proper default values, suitable for passing to <a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a>;
+<span class="constname">AIOUSB_FALSE</span> performs a minimal initialization, preparing the configuration block for passing to
+<a href="#ADC_GetConfig"><span class="funcname">ADC_GetConfig()</span></a></p>
+<hr class="body">
+<a name="AIOUSB_IsDifferentialMode"></a>
+<h3 class="bodydecl">AIOUSB_BOOL AIOUSB_IsDifferentialMode( const ADConfigBlock *config, unsigned channel )</h3>
+<p class="indent1">Tells if <span class="varname">channel</span> is configured for single-ended or differential mode. (Must call
+<a href="#ADC_GetConfig"><span class="funcname">ADC_GetConfig()</span></a> first to get configuration from device.)</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">config</span> - pointer to a properly initialized
+<a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> structure</p>
+<p class="indent2"><span class="varname">channel</span> - the channel for which to obtain the current differential mode</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2"><span class="constname">AIOUSB_TRUE</span> indicates differential mode; <span class="constname">AIOUSB_FALSE</span>
+indicates single-ended mode</p>
+<hr class="body">
+<a name="AIOUSB_IsDiscardFirstSample"></a>
+<h3 class="bodydecl">AIOUSB_BOOL AIOUSB_IsDiscardFirstSample( unsigned long DeviceIndex )</h3>
+<p class="indent1">Tells if the ADC functions will discard the first A/D sample taken. Discarding the first sample
+may be useful in cases in which voltage "residue" from reading a different channel affects the channel currently
+being read.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2"><span class="constname">AIOUSB_FALSE</span> indicates that no samples will be discarded;
+<span class="constname">AIOUSB_TRUE</span> indicates that the first sample will be discarded</p>
+<hr class="body">
+<a name="AIOUSB_MultipleCountsToVolts"></a>
+<h3 class="bodydecl">unsigned long AIOUSB_MultipleCountsToVolts( unsigned long DeviceIndex,
+unsigned startChannel, unsigned endChannel, const unsigned short counts[], double volts[] )</h3>
+<p class="indent1">Converts an array of A/D count values to volts, based on the device’s current gain settings for
+the specified channels. Be careful to ensure that the count values were actually obtained from the specified channels
+and that the gains haven’t changed since the count values were obtained. The arrays must be large enough to accommodate all
+the channels the device supports, even though only the count values for <span class="varname">startChannel</span> through
+<span class="varname">endChannel</span> are converted from counts to volts. An array of count values returned by
+<a href="#ADC_GetScan"><span class="funcname">ADC_GetScan()</span></a> may be passed to
+<span class="funcname">AIOUSB_MultipleCountsToVolts()</span> directly.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">startChannel</span> - start channel to convert</p>
+<p class="indent2"><span class="varname">endChannel</span> - end channel to convert (must be greater than or equal to
+<span class="varname">startChannel</span>)</p>
+<p class="indent2"><span class="varname">counts</span> - array of A/D counts, such as obtained from
+<a href="#ADC_GetScan"><span class="funcname">ADC_GetScan()</span></a></p>
+<p class="indent2"><span class="varname">volts</span> - array in which the converted volts will be returned</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="AIOUSB_MultipleVoltsToCounts"></a>
+<h3 class="bodydecl">unsigned long AIOUSB_MultipleVoltsToCounts( unsigned long DeviceIndex,
+unsigned startChannel, unsigned endChannel, const double volts[], unsigned short counts[] )</h3>
+<p class="indent1">Converts an array of voltage values to A/D counts, based on the device’s current gain settings for
+the specified channels. Be careful to ensure that the voltage values were actually obtained from the specified channels
+and that the gains haven’t changed since the voltage values were obtained. The arrays must be large enough to accommodate all
+the channels the device supports, even though only the voltage values for <span class="varname">startChannel</span> through
+<span class="varname">endChannel</span> are converted from volts to counts. An array of voltage values returned by
+<a href="#ADC_GetScanV"><span class="funcname">ADC_GetScanV()</span></a> may be passed to
+<span class="funcname">AIOUSB_MultipleVoltsToCounts()</span> directly.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">startChannel</span> - start channel to convert</p>
+<p class="indent2"><span class="varname">endChannel</span> - end channel to convert (must be greater than or equal to
+<span class="varname">startChannel</span>)</p>
+<p class="indent2"><span class="varname">volts</span> - array of voltage values, such as obtained from
+<a href="#ADC_GetScanV"><span class="funcname">ADC_GetScanV()</span></a></p>
+<p class="indent2"><span class="varname">counts</span> - array in which the converted A/D counts will be returned</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="AIOUSB_SetAllGainCodeAndDiffMode"></a>
+<h3 class="bodydecl">void AIOUSB_SetAllGainCodeAndDiffMode( ADConfigBlock *config, unsigned gainCode, AIOUSB_BOOL differentialMode )</h3>
+<p class="indent1">Sets all the A/D channels to the same gain code and differential mode. (Must call
+<a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a> to send configuration to device.)</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">config</span> - pointer to a properly initialized
+<a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> structure</p>
+<p class="indent2"><span class="varname">gainCode</span> - one of the
+<a href="#AIOUSB_SetGainCode"><span class="constname">AD_GAIN_CODE_*</span></a> values</p>
+<p class="indent2"><span class="varname">differentialMode</span> - <span class="constname">AIOUSB_TRUE</span> selects differential mode;
+<span class="constname">AIOUSB_FALSE</span> selects single-ended mode</p>
+<hr class="body">
+<a name="AIOUSB_SetCalMode"></a>
+<h3 class="bodydecl">void AIOUSB_SetCalMode( ADConfigBlock *config, unsigned calMode )</h3>
+<p class="indent1">Sets the A/D calibration mode. (Must call <a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a>
+to send configuration to device.)</p>
+<p class="indent1">Linux: If ground or reference mode is selected, only one A/D sample may be taken at a time. That means,
+one channel and no oversampling. Attempting to read more than one channel or use an oversample setting of more than
+zero will result in a timeout error because the device will not send more than one sample. In order to protect users
+from accidentally falling into this trap, function <a href="#ADC_GetScan"><span class="funcname">ADC_GetScan()</span></a>
+automatically and temporarily corrects the scan parameters, restoring them when it completes.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">config</span> - pointer to a properly initialized
+<a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> structure</p>
+<p class="indent2"><span class="varname">calMode</span> - the calibration mode. May be one of:</p>
+<p class="indent3"><span class="constname">AD_CAL_MODE_NORMAL (0)</span> - normal measurement</p>
+<p class="indent3"><span class="constname">AD_CAL_MODE_GROUND (1)</span> - measure ground</p>
+<p class="indent3"><span class="constname">AD_CAL_MODE_REFERENCE (3)</span> - measure reference</p>
+<hr class="body">
+<a name="AIOUSB_SetDifferentialMode"></a>
+<h3 class="bodydecl">void AIOUSB_SetDifferentialMode( ADConfigBlock *config, unsigned channel, AIOUSB_BOOL differentialMode )</h3>
+<p class="indent1">Sets a single A/D channel to differential or single-ended mode. (Must call
+<a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a> to send configuration to device.)</p>
+<p class="indent1">When using differential mode, one should have a good understanding of how the hardware implements it.
+Considering the simple case of a device with only sixteen input channels, when differential mode is enabled
+for a channel, that channel is paired with another channel, eight higher than the one for which differential
+mode is enabled. For instance, if differential mode is enabled for channel 1, then it is paired with channel 9,
+meaning that channel 1 will return the voltage difference between channels 1 and 9, and channel 9 will no longer
+return a meaningful reading.</p>
+<p class="indent1">This scheme also means that enabling differential mode for channels 8-15 has no effect. In fact, if
+one attempts to enable differential mode for channels 8-15, nothing happens and if the differential mode setting
+is read back from the device for those channels, it will likely no longer be enabled! Further confusing matters is
+that some newer firmware does not clear the differential mode setting for channels 8-15, meaning that it will be
+returned from the device exactly as set even though it has no effect. So ... one should not rely on the
+differential mode setting for channels 8-15 to behave in a consistent or predictable manner.</p>
+<p class="indent1">For consistency and simplicity, one may read counts or volts from channels 8-15 even while differential
+mode is enabled, but the readings will not be meaningful. In differential mode, only the base channel (0-7) of the
+pair that's enabled for differential mode will return a meaningful reading. Channels 8-15 which are not enabled
+for differential mode will continue to return meaningful readings. For example, if differential mode is enabled
+for channel 1, then channel 1 will return a meaningful reading, channel 9 will not, and channels 8 and
+10-15 will.</p>
+<p class="indent1">Considering the more complex case of a device such as the USB-AI16-64MA, which has an additional MUX
+affording 32 differential, or 64 single-ended inputs, things are a bit more complex. In this case, channels
+0-3 share the same differential mode (and gain) setting; channels 4-7 share the same setting; and so on. For the
+sake of simplicity and to support future designs which may have distinct settings for all channels, this software
+permits the differential mode (and gain) to be specified for <span class="italic">any</span> MUXed channel, even though
+ultimately multiple channels may share the same setting. For example, on such a device as this, setting the differential
+mode (or gain) of channel 1 also sets the differential mode (or gain) of channels 0, 2 and 3.</p>
+<p class="indent1">There is yet another case to consider, that of devices such as the USB-AI16-128A. This device may have
+up to 128 channels, which share settings in groups of eight rather than four on the USB-AI16-64MA.</p>
+<p class="indent1">This topic is discussed more thoroughly in
+<a href="http://accesio.com/MANUALS/USB-AI%20FAMILY.PDF"><span class="bold">http://accesio.com/MANUALS/USB-AI FAMILY.PDF</span></a>.
+The foregoing description also applies to the gain setting, so one should refer to
+<a href="#AIOUSB_SetGainCode"><span class="funcname">AIOUSB_SetGainCode()</span></a> as well.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">config</span> - pointer to a properly initialized
+<a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> structure</p>
+<p class="indent2"><span class="varname">channel</span> - the channel for which to set differential or single-ended mode</p>
+<p class="indent2"><span class="varname">differentialMode</span> - <span class="constname">AIOUSB_TRUE</span> selects differential mode;
+<span class="constname">AIOUSB_FALSE</span> selects single-ended mode</p>
+<hr class="body">
+<a name="AIOUSB_SetDiscardFirstSample"></a>
+<h3 class="bodydecl">unsigned long AIOUSB_SetDiscardFirstSample( unsigned long DeviceIndex, AIOUSB_BOOL discard )</h3>
+<p class="indent1">Specifies whether the ADC functions will discard the first A/D sample taken. Discarding the first sample
+may be useful in cases in which voltage "residue" from reading a different channel affects the channel currently being read.
+(Must call <a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a> to send configuration to device.)</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">discard</span> - <span class="constname">AIOUSB_FALSE</span> indicates that no samples
+will be discarded; <span class="constname">AIOUSB_TRUE</span> indicates that the first sample will be discarded</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="AIOUSB_SetGainCode"></a>
+<h3 class="bodydecl">void AIOUSB_SetGainCode( ADConfigBlock *config, unsigned channel, unsigned gainCode )</h3>
+<p class="indent1">Sets the gain code for a single A/D channel. (Must call
+<a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a> to send configuration to device.)</p>
+<p class="indent1">Linux: see also <a href="#AIOUSB_SetDifferentialMode"><span class="funcname">AIOUSB_SetDifferentialMode()</span></a>.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">config</span> - pointer to a properly initialized
+<a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> structure</p>
+<p class="indent2"><span class="varname">channel</span> - the channel for which to set the gain code</p>
+<p class="indent2"><span class="varname">gainCode</span> - the gain code (voltage range) for the channel.
+May be one of:</p>
+<p class="indent3"><span class="constname">AD_GAIN_CODE_0_10V (0)</span> - 0-10V</p>
+<p class="indent3"><span class="constname">AD_GAIN_CODE_10V (1)</span> - +/-10V</p>
+<p class="indent3"><span class="constname">AD_GAIN_CODE_0_5V (2)</span> - 0-5V</p>
+<p class="indent3"><span class="constname">AD_GAIN_CODE_5V (3)</span> - +/-5V</p>
+<p class="indent3"><span class="constname">AD_GAIN_CODE_0_2V (4)</span> - 0-2V</p>
+<p class="indent3"><span class="constname">AD_GAIN_CODE_2V (5)</span> - +/-2V</p>
+<p class="indent3"><span class="constname">AD_GAIN_CODE_0_1V (6)</span> - 0-1V</p>
+<p class="indent3"><span class="constname">AD_GAIN_CODE_1V (7)</span> - +/-1V</p>
+<hr class="body">
+<a name="AIOUSB_SetOversample"></a>
+<h3 class="bodydecl">void AIOUSB_SetOversample( ADConfigBlock *config, unsigned overSample )</h3>
+<p class="indent1">Sets the number of over-samples for all A/D channels. (Must call
+<a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a> to send configuration to device.)</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">config</span> - pointer to a properly initialized
+<a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> structure</p>
+<p class="indent2"><span class="varname">overSample</span> - number of over-samples (0-255)</p>
+<hr class="body">
+<a name="AIOUSB_SetScanRange"></a>
+<h3 class="bodydecl">void AIOUSB_SetScanRange( ADConfigBlock *config, unsigned startChannel, unsigned endChannel )</h3>
+<p class="indent1">Sets the start and end channels for A/D scans. (Must call
+<a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a> to send configuration to device.)</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">config</span> - pointer to a properly initialized
+<a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> structure</p>
+<p class="indent2"><span class="varname">startChannel</span> - start channel</p>
+<p class="indent2"><span class="varname">endChannel</span> - end channel <span class="italic">(must be greater than
+or equal to <span class="varname">startChannel</span>)</span></p>
+<hr class="body">
+<a name="AIOUSB_SetTriggerMode"></a>
+<h3 class="bodydecl">void AIOUSB_SetTriggerMode( ADConfigBlock *config, unsigned triggerMode )</h3>
+<p class="indent1">Sets the trigger mode. (Must call <a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a>
+to send configuration to device.)</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">config</span> - pointer to a properly initialized
+<a href="#ADConfigBlock"><span class="typename">ADConfigBlock</span></a> structure</p>
+<p class="indent2"><span class="varname">triggerMode</span> - a bitwise OR of these flags:</p>
+<p class="indent3"><span class="constname">AD_TRIGGER_CTR0_EXT (0x10)</span> - if set, counter 0 is externally
+triggered. Otherwise, counter 0 is triggered by the onboard 10MHz clock.</p>
+<p class="indent3"><span class="constname">AD_TRIGGER_FALLING_EDGE (0x08)</span> - if set, the A/D is triggered by
+the falling edge of its trigger source. Otherwise, the A/D is triggered by the rising edge of its trigger source.</p>
+<p class="indent3"><span class="constname">AD_TRIGGER_SCAN (0x04)</span> - if set, a single A/D trigger will
+acquire all channels from start to end, oversampling if so configured, at maximum speed. Otherwise, a single A/D
+trigger will cause a single acquisition, "walking" through oversamples and channels.</p>
+<p class="indent3"><span class="constname">AD_TRIGGER_EXTERNAL (0x02)</span> - if set, the external A/D trigger pin
+is an A/D trigger source. Otherwise, it's ignored.</p>
+<p class="indent3"><span class="constname">AD_TRIGGER_TIMER (0x01)</span> - if set, counter 2 is an A/D trigger source.
+Otherwise, it's ignored.</p>
+<hr class="body">
+<a name="AIOUSB_VoltsToCounts"></a>
+<h3 class="bodydecl">unsigned short AIOUSB_VoltsToCounts( unsigned long DeviceIndex, unsigned channel, double volts )</h3>
+<p class="indent1">Converts a single voltage value to A/D counts, based on the device’s current gain setting for the
+specified channel. Be careful to ensure that the voltage value was actually obtained from the specified channel and
+that the gain hasn’t changed since the voltage value was obtained.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog inputs; Linux</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">channel</span> - the channel number to use for converting volts to counts</p>
+<p class="indent2"><span class="varname">volts</span> - the voltage to convert to A/D counts</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A/D counts</p>
+<h2 class="body">DAC Functions</h2>
+<a name="DACDirect"></a>
+<h3 class="bodydecl">unsigned long DACDirect( unsigned long DeviceIndex, unsigned short Channel, unsigned short Value )</h3>
+<p class="indent1">Writes a count value to a D/A channel.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog outputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">Channel</span> - the channel number of the D/A you wish to set. The number of
+channels varies from model to model.</p>
+<p class="indent2"><span class="varname">Value</span> - the D/A count value to output. The number of bits of resolution
+for the D/A outputs varies from model to model, however it's usually 12- or 16-bits. Moreover, some of the 12-bit models
+actually accept a 16-bit value and simply truncate the least significant 4 bits. Consult the manual for the specific
+device to determine the range of D/A values the device will accept. In general, 12-bit devices accept a count range of
+0-FFFh, and 16-bit devices accept a count range of 0-FFFFh.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DACMultiDirect"></a>
+<h3 class="bodydecl">unsigned long DACMultiDirect( unsigned long DeviceIndex, unsigned short *pDACData,
+unsigned long DACDataCount )</h3>
+<p class="indent1">Writes a block of count values to one or more D/A channels.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">Analog outputs; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">pDACData</span> - a pointer to an array of 16-bit integers representing
+channel/count <span class="italic">pairs</span>. The first integer of each pair is the D/A channel number and the
+second integer is the D/A count value to output to the specified channel. Refer to
+<a href="#DACDirect"><span class="funcname">DACDirect()</span></a> for an explanation of the channel addressing and
+count values.</p>
+<p class="indent2"><span class="varname">DACDataCount</span> - number indicating how many channel/count
+<span class="italic">pairs</span> are in the array referenced by <span class="varname">pDACData</span></p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DACSetBoardRange"></a>
+<h3 class="bodydecl">unsigned long DACSetBoardRange( unsigned long DeviceIndex, unsigned long RangeCode )</h3>
+<p class="indent1">Sets the voltage range of the D/A outputs.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">USB-AO16-16A family; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">RangeCode</span> - the voltage range to select. May be one of:</p>
+<p class="indent3"><span class="constname">DAC_RANGE_0_5V (0)</span> - 0-5V</p>
+<p class="indent3"><span class="constname">DAC_RANGE_5V (1)</span> - +/-5V</p>
+<p class="indent3"><span class="constname">DAC_RANGE_0_10V (2)</span> - 0-10V</p>
+<p class="indent3"><span class="constname">DAC_RANGE_10V (3)</span> - +/-10V</p>
+<p class="indent3">Linux: Use the named constants listed above.</p>
+<p class="indent3">Windows: Use the numeric values shown in parenthesis.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<h2 class="body">DAC Streaming Functions (Advanced)</h2>
+<a name="DACOutputClose"></a>
+<h3 class="bodydecl">unsigned long DACOutputClose( unsigned long DeviceIndex, unsigned long bWait )</h3>
+<p class="indent1">Ends and closes a DAC streaming process. <span class="italic">Deprecated:
+<a href="#DACOutputCloseNoEnd"><span class="funcname">DACOutputCloseNoEnd()</span></a> is preferred.</span></p>
+<p class="indent1">Linux: Not yet implemented.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">USB-DA12-8A; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">bWait</span> - reserved for future expansion; currently, this function always
+waits for the streaming process to complete before returning</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DACOutputCloseNoEnd"></a>
+<h3 class="bodydecl">unsigned long DACOutputCloseNoEnd( unsigned long DeviceIndex, unsigned long bWait )</h3>
+<p class="indent1">Closes a DAC streaming process <span class="italic">without</span> ending it. This is most
+useful when you've set LOOP or EOM via <a href="#DACOutputFrameRaw"><span class="funcname">DACOutputFrameRaw()</span></a>.</p>
+<p class="indent1">Linux: Not yet implemented.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">USB-DA12-8A; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">bWait</span> - reserved for future expansion; currently, this function always
+waits for the streaming process to complete before returning</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DACOutputFrame"></a>
+<h3 class="bodydecl">unsigned long DACOutputFrame( unsigned long DeviceIndex, unsigned long FramePoints,
+unsigned short *FrameData )</h3>
+<p class="indent1">Writes a group of points (a “frame”) into the DAC stream. <span class="italic">Deprecated:
+<a href="#DACOutputFrameRaw"><span class="funcname">DACOutputFrameRaw()</span></a> is preferred.</span></p>
+<p class="indent1">All points in a frame control the same number of DACs; if, for example, you wish to output one
+point with all 8 DACs, followed by 99 points with only 2 DACs, set the DAC count to 8, output a frame of just the
+first point, then set the DAC count to 2, and output a frame of the next 99 points. If the driver’s internal buffer
+is full, the function will return “ERROR_NOT_READY” (equal to 21 decimal); try again in a moment, as the driver’s
+buffer should drain some as soon as there’s room in the larger hardware buffer and available time on the USB bus.</p>
+<p class="indent1">Linux: Not yet implemented.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">USB-DA12-8A; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">FramePoints</span> - the number of points (16-bit integers) in the frame</p>
+<p class="indent2"><span class="varname">FrameData</span> - a pointer to the first of an array of 16-bit D/A count
+values to output</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DACOutputFrameRaw"></a>
+<h3 class="bodydecl">unsigned long DACOutputFrameRaw( unsigned long DeviceIndex, unsigned long FramePoints,
+unsigned short *FrameData )</h3>
+<p class="indent1">Writes a group of points (a “frame”) into the DAC stream. Similar to
+<a href="#DACOutputFrame"><span class="funcname">DACOutputFrame()</span></a> except the features are controlled
+by the upper bits in the data array. This provides the greatest flexibility, at the cost of complexity.</p>
+<p class="indent1"></p>
+<p class="indent1">Linux: Not yet implemented.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">USB-DA12-8A; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">FramePoints</span> - the number of points (16-bit integers) in the frame</p>
+<p class="indent2"><span class="varname">FrameData</span> - a pointer to the first of an array of 16-bit D/A count
+values to output. The DAC count determines the number of samples, even though you can place EOD bits
+(<span class="italic">see below</span>) as you wish.</p>
+<table class="indent2" border="3" cellpadding="4" cellspacing="0">
+	<tr>
+		<th colspan="17" valign="top">
+			<span class="varname">FrameData</span> Bit Fields
+		</th>
+	</tr>
+	<tr valign="top">
+		<td>Bit</td>
+		<td>15</td>
+		<td>14</td>
+		<td>13</td>
+		<td>12</td>
+		<td>11</td>
+		<td>10</td>
+		<td>9</td>
+		<td>8</td>
+		<td>7</td>
+		<td>6</td>
+		<td>5</td>
+		<td>4</td>
+		<td>3</td>
+		<td>2</td>
+		<td>1</td>
+		<td>0</td>
+	</tr>
+	<tr valign="top">
+		<td>Meaning</td>
+		<td>EOM</td>
+		<td>EOF</td>
+		<td>EOD</td>
+		<td>LOOP</td>
+		<td colspan="12">DAC Value</td>
+	</tr>
+	<tr>
+		<td colspan="17" valign="top">
+			<ul>
+				<li>If EOM("End Of Movie") is set, the board will stop the waveform after outputting the
+				sample. (Unless LOOP is also set, see below.)
+				<li>If EOF("End Of Frame") is set, the frame pin will be pulsed. This can be used for other
+				things via DACOutputFrameRaw(), but is automatically set on the last sample of each
+				frame by DACOutputFrame().
+				<li>If EOD("End Of DACs") is set, the next sample will go to the first DAC; otherwise, it will
+				go to the next DAC in series. (If this sample goes to the last DAC, this bit isn't needed,
+				but should be set anyway for future expansion.) Going to the first DAC also ends the
+				point, which is significant because each tick clocks out a point.
+				<li>If LOOP is set, the board will "jump" to the beginning of its buffer after outputting the
+				sample. (Unless EOM is also set, see below.) This can be used to stream a
+				"repeatable" waveform, like a sine wave, and then loop it without further attention from
+				the host computer. Indeed, with external power, you can disconnect the USB cable
+				without interrupting the loop.
+			</ul>
+			Note that the EOM and LOOP bits are for mutually exclusive uses. Setting them both issues extended commands
+			instead of treating the sample normally. No extended commands are yet defined, but the feature is reserved
+			for future expansion.
+		</td>
+	</tr>
+</table>
+<br>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DACOutputOpen"></a>
+<h3 class="bodydecl">unsigned long DACOutputOpen( unsigned long DeviceIndex, double *pClockHz )</h3>
+<p class="indent1">Begins a DAC streaming process. The stream is divided into “points”. Each point contains data for
+one or more DACs, and during the streaming process the onboard counter/timer clocks out points at a steady rate.</p>
+<p class="indent1">Linux: Not yet implemented.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">USB-DA12-8A; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">pClockHz</span> - a pointer to a double precision IEEE floating point number
+containing the desired output clock frequency. This value is set by the driver to the actual frequency at which DAC
+data will be clocked out, as limited by the device’s capabilities.</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DACOutputSetCount"></a>
+<h3 class="bodydecl">unsigned long DACOutputSetCount( unsigned long DeviceIndex, unsigned long NewCount )</h3>
+<p class="indent1">Sets the number of DACs involved in each DAC streaming point henceforth. When the driver connects
+to the device, this is initialized to 5 (for ILDA use). You can set this freely between calls to
+<a href="#DACOutputFrame"><span class="funcname">DACOutputFrame()</span></a> and/or
+<a href="#DACOutputFrameRaw"><span class="funcname">DACOutputFrameRaw()</span></a> if you wish.</p>
+<p class="indent1">Linux: Not yet implemented.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">USB-DA12-8A; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">NewCount</span> - number from 1-8 indicating the number of DACs in future points</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DACOutputSetInterlock"></a>
+<h3 class="bodydecl">unsigned long DACOutputSetInterlock( unsigned long DeviceIndex, unsigned long bInterlock )</h3>
+<p class="indent1">Enables or disables interlock. While interlock is enabled, DAC streaming is paused unless the interlock
+pin is grounded, usually through the cable. The interlock pin is pin 12 of the DB25 M connector (or, on the OEM version,
+pin 7 of the connector named J4).</p>
+<p class="indent1">Linux: Not yet implemented.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">USB-DA12-8A; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<p class="indent2"><span class="varname">bInterlock</span> - <span class="constname">AIOUSB_TRUE, TRUE</span> enables interlock;
+<span class="constname">AIOUSB_FALSE, FALSE</span> disables interlock</p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<hr class="body">
+<a name="DACOutputStart"></a>
+<h3 class="bodydecl">unsigned long DACOutputStart( unsigned long DeviceIndex )</h3>
+<p class="indent1">"Manually" starts a DAC streaming process. Normally, DAC streaming will be started automatically by
+streaming 1¼ SRAMs worth of data (160K bytes, i.e. 81920 samples). It's only if you're using a smaller amount of data
+that you'd need to "manually" start DAC streaming with this function.</p>
+<p class="indent1">Note that before starting DAC output you must send the lesser of one SRAM worth of data (128K bytes,
+i.e. 65536 samples) or your entire waveform, due to the use of bank-switched single-ported memory.</p>
+<p class="indent1">Linux: Not yet implemented.</p>
+<h3 class="indent1">Applies To</h3>
+<p class="indent2">USB-DA12-8A; Linux, Windows</p>
+<h3 class="indent1">Parameters</h3>
+<p class="indent2"><span class="varname">DeviceIndex</span> - a standard <a href="#DeviceIndex">device index</a></p>
+<h3 class="indent1">Return Value</h3>
+<p class="indent2">A standard <a href="#ResultCodes">result code</a></p>
+<h2 class="body">Function Parameters</h2>
+<a name="ADConfigBlock"></a>
+<h3 class="bodydecl">struct ADConfigBlock (Linux)</h3>
+<p class="indent1">The <span class="typename">ADConfigBlock</span> structure is initialized by a call to
+<a href="#AIOUSB_InitConfigBlock"><span class="funcname">AIOUSB_InitConfigBlock()</span></a> and defined in
+<span class="filename">aiousb.h</span> as:</p>
+<pre class="indent1 computer output">struct ADConfigBlock {
+  void *device;
+  unsigned long size;
+  unsigned char registers[ AD_MAX_CONFIG_REGISTERS ];
+}; // struct ADConfigBlock</pre>
+<p class="indent1">This structure is intended to be somewhat opaque, its main purpose being to shield users from
+having to fill in the bytes and bit fields of an A/D configuration block which is used in calls to
+<a href="#ADC_GetConfig"><span class="funcname">ADC_GetConfig()</span></a> and
+<a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a>.</p>
+<p class="indent1">In addition to simplifying the getting and setting of the configuration, using
+<span class="typename">ADConfigBlock</span> and its associated functions permits you to change several configuration
+settings and then send them all to the device with a single call to
+<a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a>. The other API functions that manipulate
+individual configuration settings, such as <a href="#ADC_Range1"><span class="funcname">ADC_Range1()</span></a>, send
+the modified configuration to the device immediately. There is nothing wrong with sending the configuration to the
+device after each setting change, but using <span class="typename">ADConfigBlock</span> and its associated functions
+gives users the option of deferring sending the configuration until it's fully set up. Of course,
+<a href="#ADC_SetConfig"><span class="funcname">ADC_SetConfig()</span></a> also lets users send the entire configuration
+in one step, but it requires them to manipulate the bytes and bit fields of the A/D configuration block.</p>
+<p class="indent1">The functions that manipulate <span class="typename">ADConfigBlock</span> are “object-oriented” in
+the sense that the proper way to use them is to create an <span class="typename">ADConfigBlock</span> instance and pass
+it to all these functions. The <span class="typename">ADConfigBlock</span> instance should be initialized immediately
+after it’s declared using <a href="#AIOUSB_InitConfigBlock"><span class="funcname">AIOUSB_InitConfigBlock()</span></a>,
+which is equivalent to a “constructor” in C++. <a href="#AIOUSB_InitConfigBlock"><span class="funcname">AIOUSB_InitConfigBlock()</span></a>
+makes sure that the configuration block is initialized properly for the device with which it will be used.</p>
+<p class="indent1">The following functions are the "methods" that can operate on <span class="typename">ADConfigBlock</span>:</p>
+<p class="indent2">
+<a href="#AIOUSB_GetCalMode"><span class="funcname">AIOUSB_GetCalMode()</span></a><br>
+<a href="#AIOUSB_GetEndChannel"><span class="funcname">AIOUSB_GetEndChannel()</span></a><br>
+<a href="#AIOUSB_GetGainCode"><span class="funcname">AIOUSB_GetGainCode()</span></a><br>
+<a href="#AIOUSB_GetOversample"><span class="funcname">AIOUSB_GetOversample()</span></a><br>
+<a href="#AIOUSB_GetStartChannel"><span class="funcname">AIOUSB_GetStartChannel()</span></a><br>
+<a href="#AIOUSB_GetTriggerMode"><span class="funcname">AIOUSB_GetTriggerMode()</span></a><br>
+<a href="#AIOUSB_InitConfigBlock"><span class="funcname">AIOUSB_InitConfigBlock()</span></a><br>
+<a href="#AIOUSB_IsDifferentialMode"><span class="funcname">AIOUSB_IsDifferentialMode()</span></a><br>
+<a href="#AIOUSB_SetAllGainCodeAndDiffMode"><span class="funcname">AIOUSB_SetAllGainCodeAndDiffMode()</span></a><br>
+<a href="#AIOUSB_SetCalMode"><span class="funcname">AIOUSB_SetCalMode()</span></a><br>
+<a href="#AIOUSB_SetDifferentialMode"><span class="funcname">AIOUSB_SetDifferentialMode()</span></a><br>
+<a href="#AIOUSB_SetGainCode"><span class="funcname">AIOUSB_SetGainCode()</span></a><br>
+<a href="#AIOUSB_SetOversample"><span class="funcname">AIOUSB_SetOversample()</span></a><br>
+<a href="#AIOUSB_SetScanRange"><span class="funcname">AIOUSB_SetScanRange()</span></a><br>
+<a href="#AIOUSB_SetTriggerMode"><span class="funcname">AIOUSB_SetTriggerMode()</span></a>
+</p>
+<p class="indent1">Below is an
+example of the proper way to use <span class="typename">ADConfigBlock</span>.</p>
+<pre class="indent1 computer output">/*
+ * procedure for setting A/D configuration
+ */
+
+// create &quot;instance&quot;
+ADConfigBlock configBlock;
+
+// call &quot;constructor&quot;
+AIOUSB_InitConfigBlock( &amp;configBlock, DeviceIndex, <span class="highlight">AIOUSB_TRUE</span> );
+
+//  ... set properties ...
+
+// send configuration block to device
+ADC_SetConfig( DeviceIndex, configBlock.registers, &amp;configBlock.size );
+
+/*
+ * procedure for reading current A/D configuration
+ */
+
+// create &quot;instance&quot;
+ADConfigBlock configBlock;
+
+// call &quot;constructor&quot;
+AIOUSB_InitConfigBlock( &amp;configBlock, DeviceIndex, <span class="highlight">AIOUSB_FALSE</span> );
+
+// read configuration block from device
+ADC_GetConfig( DeviceIndex, configBlock.registers, &amp;configBlock.size );
+
+//  ... use properties ...</pre>
+<hr class="body">
+<a name="DeviceIndex"></a>
+<h3 class="bodydecl">unsigned long DeviceIndex</h3>
+<p class="indent1">A "handle" to a device on the USB bus. Each device on the USB bus is assigned an index number
+ranging from 0-31. This index number must then be passed to most of the API functions in order to control a specific
+device.</p>
+<p class="indent1">For convenience when writing quick test programs and such, these two special constants may be
+used instead of an actual device index:</p>
+<p class="indent2"><span class="constname">diFirst (0xFFFFFFFEul)</span> - uses the first ACCES device found on the bus</p>
+<p class="indent2"><span class="constname">diOnly (0xFFFFFFFDul)</span> - uses the only ACCES device found on the bus,
+meaning that there must be only one ACCES device on the bus</p>
+<hr class="body">
+<a name="DeviceProperties"></a>
+<h3 class="bodydecl">struct DeviceProperties (Linux)</h3>
+<p class="indent1">The <span class="typename">DeviceProperties</span> structure is filled in by a call to
+<a href="#AIOUSB_GetDeviceProperties"><span class="funcname">AIOUSB_GetDeviceProperties()</span></a> and defined in
+<span class="filename">aiousb.h</span> as:</p>
+<pre class="indent1 computer output">struct DeviceProperties {
+  const char *Name;         // null-terminated device name or 0
+  __uint64_t SerialNumber;  // 64-bit serial number or 0
+  unsigned ProductID;       // 16-bit product ID
+  unsigned DIOPorts;        // number of digital I/O ports (bytes)
+  unsigned Counters;        // number of 8254 counter blocks
+  unsigned Tristates;       // number of tristates
+  long RootClock;           // base clock frequency
+  unsigned DACChannels;     // number of D/A channels
+  unsigned ADCChannels;     // number of A/D channels
+  unsigned ADCMUXChannels;  // number of MUXed A/D channels
+  unsigned ADCChannelsPerGroup;  // number of A/D channels in each config. group
+}; // struct DeviceProperties</pre>
+<br>
+<h2 class="body">Constants</h2>
+<p>This section is a reference for all of the constants used in AIOUSB for Linux which aren't described
+elsewhere in this document. The values shown in parenthesis next to each constant name are the actual values.</p>
+<a name="BoolType"></a>
+<h3 class="bodydecl">AIOUSB_BOOL, AIOUSB_TRUE, AIOUSB_FALSE (Linux)</h3>
+<p class="indent1">In C, the <span class="constname">AIOUSB_BOOL</span> type is declared as an
+<span class="typename">enum</span>. In C++, it's declared as a <span class="typename">bool</span>. Other libraries
+tend to declare the names <span class="constname">BOOL</span>, <span class="constname">TRUE</span> and
+<span class="constname">FALSE</span>, and worse, they declare them using <span class="italic">#defines</span>,
+which can be surprisingly difficult to work around. So we sidestep such potential conflicts by declaring the same names
+prefixed with <span class="constname">AIOUSB_</span>. It's ugly, but if people want to use the shorter names and they are
+certain the shorter names won't conflict with anything else, they can define the <span class="constname">ENABLE_BOOL_TYPE</span>
+macro, which defines the constants <span class="constname">BOOL</span>, <span class="constname">TRUE</span> and
+<span class="constname">FALSE</span>.</p>
+<p class="indent2"><span class="constname">AIOUSB_TRUE, TRUE (1, true)</span> - boolean 'true' (in C, has the value '1';
+in C++, the value 'true')</p>
+<p class="indent2"><span class="constname">AIOUSB_FALSE, FALSE (0, false)</span> - boolean 'false' (in C, has the value '0';
+in C++, the value 'false')</p>
+<p class="indent1">Windows: use the names <span class="constname">TRUE</span> and <span class="constname">FALSE</span>.</p>
+<a name="ResultCodes"></a>
+<h2 class="body">Result Codes</h2>
+<h3>Implementation Notes</h3>
+<p class="indent1">The AIOUSB function result codes are a bit confusing. The result codes used in the Windows
+implementation of the API are defined in a system file named <span class="filename">winerror.h</span>. These result
+codes are generic and can apply to many applications. They are all prefixed with <span class="constname">ERROR_</span>,
+the very first one, <span class="constname">ERROR_SUCCESS</span>, sounding like an oxymoron. The result codes used in
+<span class="filename">libusb</span> (Linux), on the other hand, are more appealing: the result code for success is
+<span class="constname">LIBUSB_SUCCESS</span>, while the result codes for errors are <span class="constname">LIBUSB_ERROR_xxx</span>.
+Further complicating matters is that the AIOUSB result codes must be non-negative since all the functions return an
+unsigned result, whereas the <span class="filename">libusb</span> result codes are negative in the case of errors.
+Fortunately, both schemes use zero to indicate success. Finally, it's desirable to return the original
+<span class="filename">libusb</span> result code in cases where a <span class="filename">libusb</span> error causes
+an AIOUSB API function to fail. So to satisfy all these requirements, we've employed the following scheme:</p>
+<ul>
+	<li class="indent1"><p>AIOUSB result codes in Linux are prefixed with <span class="constname">AIOUSB_</span>.
+	The result code for success is <span class="constname">AIOUSB_SUCCESS</span>, which has a value of zero. The result
+	codes for errors are <span class="constname">AIOUSB_ERROR_xxx</span>, which have positive values, starting with one (1).</p>
+	<li class="indent1"><p>In order to offer users the option of using result codes whose names are similar to those used
+	in the Windows implementation, we define a second set of result codes with names similar to those used in the Windows
+	implementation but which map to the same values as the <span class="constname">AIOUSB_xxx</span> result codes. These
+	alternate result code names can be enabled by defining the macro <span class="constname">ENABLE_WINDOWS_RESULT_CODES</span>,
+	which is not defined by default.</p>
+	<li class="indent1"><p>In order to preserve the original <span class="filename">libusb</span> result codes and pass
+	them back from an AIOUSB API function, we translate the <span class="filename">libusb</span> result codes to a format
+	that conforms to the one AIOUSB employs and provide macros for converting the AIOUSB result code back to a
+	<span class="filename">libusb</span> result code. Macro <span class="funcname">LIBUSB_RESULT_TO_AIOUSB_RESULT(code)</span>
+	converts a <span class="filename">libusb</span> result code to an AIOUSB result code, and macro
+	<span class="funcname">AIOUSB_RESULT_TO_LIBUSB_RESULT(code)</span> does the reverse.</p>
+	<li class="indent1"><p>In the Linux implementation we provide an extended AIOUSB API function named
+	<a href="#AIOUSB_GetResultCodeAsString"><span class="funcname">AIOUSB_GetResultCodeAsString()</span></a> that returns a
+	string representation of a result code, including those that encapsulate a <span class="filename">libusb</span> result code.</p>
+</ul>
+<a name="LinuxResultCodes"></a>
+<h3>Linux Result Codes</h3>
+<p class="indent1">Each of the result codes shown has two names: the "native" Linux name, and a Windows-style name, which
+can be enabled by defining the macro <span class="constname">ENABLE_WINDOWS_RESULT_CODES</span>.</p>
+<p class="indent2"><span class="constname">AIOUSB_SUCCESS, ERROR_SUCCESS (0)</span> - The function completed successfully.</p>
+<p class="indent2"><span class="constname">AIOUSB_ERROR_DEVICE_NOT_CONNECTED, ERROR_DEVICE_NOT_CONNECTED (1)</span> -
+The internal handle to the device is not valid. This can occur if AIOUSB has not been properly initialized. On Linux this
+can occur because <span class="filename">libusb</span> fails to return a valid handle.</p>
+<p class="indent2"><span class="constname">AIOUSB_ERROR_DUP_NAME, ERROR_DUP_NAME (2)</span> - More than one device was
+found on the bus when <span class="constname">diOnly</span> was specified as a <a href="#DeviceIndex">device index</a>.</p>
+<p class="indent2"><span class="constname">AIOUSB_ERROR_FILE_NOT_FOUND, ERROR_FILE_NOT_FOUND (3)</span> - May mean multiple
+things. May mean that the attempt to load the A/D calibration table in <a href="#ADC_SetCal"><span class="funcname">ADC_SetCal()</span></a>
+failed because the specified file does not exist or cannot be read. May also mean that the attempt to save the A/D calibration
+table to a file in <a href="#ADC_SetCal"><span class="funcname">ADC_SetCal()</span></a> failed because the file could not
+be created. May also mean that no device was found on the bus when <span class="constname">diFirst</span> or
+<span class="constname">diOnly</span> were specified as a <a href="#DeviceIndex">device index</a>.</p>
+<p class="indent2"><span class="constname">AIOUSB_ERROR_INVALID_DATA, ERROR_INVALID_DATA (4)</span> - Data retrieved from
+the device is not valid. May mean that the data is corrupt or that an incorrect amount of data was transferred</p>
+<p class="indent2"><span class="constname">AIOUSB_ERROR_INVALID_INDEX, ERROR_INVALID_INDEX (5)</span> - The
+<a href="#DeviceIndex">device index</a> passed to an function is invalid.</p>
+<p class="indent2"><span class="constname">AIOUSB_ERROR_INVALID_MUTEX, ERROR_INVALID_MUTEX (6)</span> - An internal mutex
+is invalid. This usually means the library was unable to initialize the mutex.</p>
+<p class="indent2"><span class="constname">AIOUSB_ERROR_INVALID_PARAMETER, ERROR_INVALID_PARAMETER (7)</span> -
+One or more parameters passed to a function are invalid, such as outside the allowed range or null pointers.</p>
+<p class="indent2"><span class="constname">AIOUSB_ERROR_INVALID_THREAD, ERROR_INVALID_THREAD (8)</span> - An internal thread
+is invalid. This usually means the library was unable to initialize the thread.</p>
+<p class="indent2"><span class="constname">AIOUSB_ERROR_NOT_ENOUGH_MEMORY, ERROR_NOT_ENOUGH_MEMORY (9)</span> - A function
+was unable to allocate sufficient dynamic memory.</p>
+<p class="indent2"><span class="constname">AIOUSB_ERROR_NOT_SUPPORTED, ERROR_NOT_SUPPORTED (10)</span> - The function is
+not supported for the device specified, for example, trying to perform A/D operations on a device that doesn't have an A/D.</p>
+<p class="indent2"><span class="constname">AIOUSB_ERROR_OPEN_FAILED, ERROR_OPEN_FAILED (11)</span> - Typically means that a
+streaming device is already open for streaming and cannot be opened again until it's closed.</p>
+<p class="indent2"><span class="constname">AIOUSB_ERROR_LIBUSB (100)</span> - If the result code is greater than or equal to
+this value, then it is a <span class="filename">libusb</span> result code indicating an error. Use the
+<span class="funcname">LIBUSB_RESULT_TO_AIOUSB_RESULT(code)</span> macro to extract the original
+<span class="filename">libusb</span> result code, or pass the result code to
+<a href="#AIOUSB_GetResultCodeAsString"><span class="funcname">AIOUSB_GetResultCodeAsString()</span></a> to obtain a string
+representation of it.</p>
+<a name="WindowsResultCodes"></a>
+<h3>Windows Result Codes</h3>
+<p class="indent1">Below is a list (in alphabetical order) of all the result codes returned by functions in the Windows
+implementation of the AIOUSB API. These result codes are defined in a system file named <span class="filename">winerror.h</span>.
+Please consult the relevant Windows documentation for more information.</p>
+<p class="indent2"><span class="constname">
+ERROR_ALREADY_EXISTS<br>
+ERROR_BAD_LENGTH<br>
+ERROR_BAD_TOKEN_TYPE<br>
+ERROR_DEVICE_NOT_CONNECTED<br>
+ERROR_DEVICE_REMOVED<br>
+ERROR_DUP_NAME<br>
+ERROR_FILE_EXISTS<br>
+ERROR_FILE_NOT_FOUND<br>
+ERROR_GEN_FAILURE<br>
+ERROR_HANDLE_EOF<br>
+ERROR_INSUFFICIENT_BUFFER<br>
+ERROR_INTERNAL_ERROR<br>
+ERROR_INVALID_ADDRESS<br>
+ERROR_INVALID_DATA<br>
+ERROR_INVALID_INDEX<br>
+ERROR_INVALID_PARAMETER<br>
+ERROR_NOACCESS<br>
+ERROR_NOT_READY<br>
+ERROR_NOT_SUPPORTED<br>
+ERROR_NO_DATA_DETECTED<br>
+ERROR_OPEN_FAILED<br>
+ERROR_OUTOFMEMORY<br>
+ERROR_SEEK<br>
+ERROR_SUCCESS<br>
+ERROR_TOO_MANY_OPEN_FILES</span></p>
+<h2 class="body">Linux-Specfic Notes</h2>
+<a name="LanguageSupport"></a>
+<h3>Language Support</h3>
+<p class="indent1">The AIOUSB library for Linux is compiled for C and C++, residing within
+<span class="filename">libaiousb.a</span> and <span class="filename">libaiousbcpp.a</span>, respectively. However,
+when using C++, all the public functions, variables, enums and so forth are wrapped up in a
+<span class="typename">namespace AIOUSB</span> declaration to prevent those names from conflicting with anything else.
+All of the C++ sample programs for Linux contain the statement <span class="statement">using namespace AIOUSB;</span>
+immediately after including the file <span class="filename">aiousb.h</span>. Using the namespace in this manner is the
+simplest technique, but if you prefer to explicitly refer to public elements within this namespace, simply prefix all such
+names with <span class="typename">AIOUSB::</span>. For example, instead of calling <span class="funcname">GetDevices()</span>,
+you would explicitly call <span class="funcname">AIOUSB::GetDevices()</span>. Similarly, constant names must be prefixed
+with <span class="typename">AIOUSB::</span>. For example, <span class="constname">AIOUSB_SUCCESS</span> would instead be
+referred to as <span class="constname">AIOUSB::AIOUSB_SUCCESS</span>.</p>
+<hr class="body">
+<a name="MultithreadingSupport"></a>
+<h3>Multithreading Support</h3>
+<p class="indent1">The Linux implementation of <span class="filename">AIOUSB</span> is thread-safe to the extent that the
+internal data structures are protected by a mutex. Furthermore, the lower level <span class="filename">libusb</span> module
+is also thread safe in the same manner. However, neither <span class="filename">AIOUSB</span> nor
+<span class="filename">libusb</span> prevent multiple threads from communicating with the same device. A software design
+that permits multiple threads to communicate with the same device must provide its own mutual exclusion mechanism.
+<span class="filename">AIOUSB</span> for Linux is designed under the premise that one thread will communicate with one device,
+and optionally, another thread may communicate with a different device, and so on. That form of multithreading is supported
+by <span class="filename">AIOUSB</span> for Linux.</p>
+<p class="indent1">Also beware that certain functions, such as <a href="#GetDevices"><span class="funcname">GetDevices()</span></a>
+make substantial changes to the internal state of the AIOUSB module. It is not safe to call such functions while other threads
+are actively communicating with devices! While such internal state changes are made in the context of a locked mutex and will
+probably not cause the software to fail, in all likelihood any threads which are actively communicating with devices will
+subsequently experience communication failures with their respective devices. You should only call such functions when no
+threads are actively communicating with devices. After such changes, threads must reestablish a connection to their devices
+by obtaining a new device index "handle."</p>
+<hr class="body">
+<p class="footer">Document: $Revision: 1.41 $ $Date: 2010/01/29 19:26:26 $</p>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<link rel="stylesheet" href="../../../../../doc/stylesheet.css" type="text/css">
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>USB-IIRO-16 Sample Program Release Notes</title>
+</head>
+<body lang="en-us" dir="ltr">
+<h1>USB-IIRO-16 Sample Program Release Notes</h1>
+<p><a href="../../../../../doc/README.html">Table of Contents</a></p>
+<h2>Overview</h2>
+<p>This directory contains several sample programs for the USB-IIRO-16 which demonstrate use of different
+features and libraries.</p>
+<ul>
+	<li><p><a href="#CppSample">C++ Sample - sample.cpp</a></p>
+	<li><p><a href="#JavaSample">Java Sample - Sample.java</a></p>
+</ul>
+<a name="CppSample"></a>
+<h2>C++ Sample</h2>
+<p><a href="sample.cpp.html" target="_blank"><span class="filename">Sample.cpp</span></a> is a simple
+program to demonstrate controlling an ACCES I/O model USB-IIRO-16 digital I/O board using the AIOUSB
+module and the AIOUSB C++ class library. The program is not intended to be a comprehensive
+demonstration and is limited to demonstrating the following features of the AIOUSB API:</p>
+<ul>
+	<li><p>Initializing and shutting down the API – <span class="funcname">USBDeviceManager::open()</span>,
+		<span class="funcname">USBDeviceManager::close()</span></p>
+	<li><p>Finding devices on the USB bus – <span class="funcname">USBDeviceManager::getDeviceByProductID()</span></p>
+	<li><p>Reading and writing the custom area of the EEPROM – <span class="funcname">USBDevice::customEEPROMRead()</span>,
+		<span class="funcname">USBDevice::customEEPROMWrite()</span></p>
+	<li><p>Configuring the board – <span class="funcname">USBDevice::setCommTimeout()</span>,
+		<span class="funcname">DigitalIOSubsystem::configure()</span></p>
+	<li><p>Writing to individual outputs – <span class="funcname">DigitalIOSubsystem::write()</span>
+	<li><p>Writing to multiple outputs – <span class="funcname">DigitalIOSubsystem::write()</span></p>
+</ul>
+<p>For easy identification, the source code lines prefixed with the comment <span class="computer bold">/*API*/</span>
+denote calls to the AIOUSB and C++ class library API.</p>
+<p>The C++ class library should be considered <span class="italic">beta</span> software and is still being developed.
+Notice, too, that when using the C++ class library it is not necessary (in fact, it's not permitted) to call
+<span class="funcname">AIOUSB_Init()</span> or <span class="funcname">AIOUSB_Exit()</span>. These are implicitly called by
+<span class="typename">USBDeviceManager::open()</span> and <span class="typename">USBDeviceManager::close()</span>. Refer to
+<a href="../../../classlib/doc/index.html">AIOUSB C++ Class Library Reference</a> for detailed documentation on the C++
+class library.</p>
+<h3>Building</h3>
+<p>Before building the program, make sure the <a href="http://www.libusb.org/" target="_blank">libusb</a>
+module is installed. Also refer to the comments at the top of <span class="filename">sample.cpp</span> for additional details.</p>
+<p>Also, make sure that the ACCES I/O AIOUSB module is installed (<span class="italic">see
+<a href="../../../doc/README.html">Installing And Using AIOUSB Library</a></span>).</p>
+<p>The simplest way to build the sample program is to type <span class="computer bold italic">make</span> at the command line.
+The sample program is the default target in <span class="filename">Makefile</span>. Optionally, one can manually compile the
+program with the command:</p>
+<p class="computer bold indent1">g++ sample.cpp -lclassaiousb -laiousbcpp -lusb-1.0 -o sample</p>
+<p>This sample program can demonstrate writing to the EEPROM. That demonstration is disabled by default, but
+if you wish to enable it, simply edit <span class="filename">Sample.java</span> and set the variable named
+<span class="varname">DEMO_EEPROM_WRITE</span> to <span class="italic">true</span>.</p>
+<h3>Executing</h3>
+<p>To execute the program, attach a USB-IIRO-16 analog input board to the USB bus and verify that its LED turns on, indicating
+that firmware has been successfully uploaded to the board. Then simply type <span class="computer bold italic">./sample</span>
+at the command line. There are no command line arguments to worry about. The program will search for the first USB-IIRO-16
+analog input board on the USB bus. If it fails to find such a board, it will print an error message and quit. If it finds such
+a board, the following output will appear:</p>
+<pre class="computer output">USB-IIRO-16 sample program version: 1.6, 25 December 2009
+  AIOUSB C++ library version: 1.7, 23 December 2009
+  AIOUSB library version: 1.84, 22 December 2009
+  This program demonstrates controlling a USB-IIRO-16 device on
+  the USB bus. For simplicity, it uses the first such device found
+  on the bus.
+ACCES devices found:
+  Device at index 0:
+    Product ID: 0x8010
+    Product name: USB-IIRO-16
+    Serial number: 0x40e399d4e1215a84
+    Number of digital I/O ports: 4
+    Number of digital I/O channels: 32
+    Number of tristate groups: 0
+    Number of tristate channels: 0
+  Device at index 1:
+    Product ID: 0x8040
+    Product name: USB-AI16-16A
+    Serial number: 0x40e38f15d5c94894
+    Number of A/D channels: 16
+    Number of MUXed A/D channels: 16
+    Number of digital I/O ports: 2
+    Number of digital I/O channels: 16
+    Number of tristate groups: 0
+    Number of tristate channels: 0
+    Number of counter blocks: 1
+    Number of counters: 3
+EEPROM contents:
+[ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff,
+ ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff, ff]
+Configuring digital I/O ... successful
+In the following demonstrations, you should hear the relays click
+and see the LED on the device blink.
+  CLosing relays: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+  Opening relays: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+Closing all relays ... successful
+Opening all relays ... successful
+CLosing every other relay: 0 2 4 6 8 10 12 14
+Reading back relays:
+  Channel 0 = 0
+  Channel 1 = 1
+  Channel 2 = 0
+  Channel 3 = 1
+  Channel 4 = 0
+  Channel 5 = 1
+  Channel 6 = 0
+  Channel 7 = 1
+  Channel 8 = 0
+  Channel 9 = 1
+  Channel 10 = 0
+  Channel 11 = 1
+  Channel 12 = 0
+  Channel 13 = 1
+  Channel 14 = 0
+  Channel 15 = 1
+Reading isolated inputs:
+  Channel 16 = 0
+  Channel 17 = 0
+  Channel 18 = 0
+  Channel 19 = 0
+  Channel 20 = 0
+  Channel 21 = 0
+  Channel 22 = 0
+  Channel 23 = 0
+  Channel 24 = 0
+  Channel 25 = 0
+  Channel 26 = 0
+  Channel 27 = 0
+  Channel 28 = 0
+  Channel 29 = 0
+  Channel 30 = 0
+  Channel 31 = 0</pre>
+<br>
+<a name="JavaSample"></a>
+<h2>Java Sample</h2>
+<p><a href="Sample.java.html" target="_blank"><span class="filename">Sample.java</span></a> is a Java
+implementation of the above sample program. It demonstrates use of the Java class library, which
+is nearly identical to the C++ class library. Refer to
+<a href="../../../java/doc/index.html">AIOUSB Java Class Library Reference</a> for detailed documentation
+on the Java class library.</p>
+<h3>Building</h3>
+<p>The prerequisites for building <span class="filename">Sample.class</span> are that the
+<a href="http://java.sun.com/" target="_blank">Java Development Kit (JDK)</a> must be installed. In addition,
+the AIOUSB Java library (<span class="filename">aiousb.jar</span>) must be installed somewhere on your system.
+To compile the program, either use the supplied <span class="filename">Makefile</span> or use the command:</p>
+<p class="computer bold indent1">javac -cp ../../java/aiousb.jar Sample.java</p>
+<p>This sample program can demonstrate writing to the EEPROM. That demonstration is disabled by default, but
+if you wish to enable it, simply edit <span class="filename">Sample.java</span> and set the variable named
+<span class="varname">DEMO_EEPROM_WRITE</span> to <span class="italic">true</span>.</p>
+<h3>Executing</h3>
+<p>To execute the program, attach a USB-IIRO-16 analog input board to the USB bus and verify that its LED
+turns on, indicating that firmware has been successfully uploaded to the board. Then type the command:</p>
+<p class="computer bold indent1">java -cp ../../java/aiousb.jar:. Sample</p>
+<p>Notice that multiple class paths are specified in the above command: the path to
+<span class="filename">aiousb.jar</span> and ".", which represents the class path of
+<span class="filename">Sample.class</span> (assuming that it is the current directory).</p>
+<p>Alternatively, assuming you used the make file to build the program, you can run it with the command:</p>
+<p class="computer bold indent1">java -jar Sample.jar</p>
+<p>There are no command line arguments to worry about. The program will search for the first USB-IIRO-16
+analog input board on the USB bus. If it fails to find such a board, it will print an error message and quit.
+If it finds such a board, the following output will appear:</p>
+<pre class="computer output">USB-IIRO-16 sample program version: 1.4, 25 December 2009
+  AIOUSB Java library version: 1.6, 17 December 2009     
+  AIOUSB library version: 1.84, 22 December 2009         
+  JRE version: 1.6.0_17 
+  OS version: Linux amd64 2.6.31.5-0.1-custom            
+  This program demonstrates controlling a USB-IIRO-16 device on                           
+  the USB bus. For simplicity, it uses the first such device found                        
+  on the bus.
+ACCES devices found:
+  Device at index 0
+    Product ID: 0x8010
+    Product name: USB-IIRO-16
+    Serial number: 0x40e399d4e1215a84
+    Number of digital I/O ports: 4
+    Number of digital I/O channels: 32
+    Number of tristate groups: 0                         
+    Number of tristate channels: 0                       
+  Device at index 1
+    Product ID: 0x8040
+    Product name: USB-AI16-16A
+    Serial number: 0x40e38f15d5c94894
+    Number of A/D channels: 16
+    Number of MUXed A/D channels: 16
+    Number of digital I/O ports: 2
+    Number of digital I/O channels: 16
+    Number of tristate groups: 0
+    Number of tristate channels: 0                       
+    Number of counter blocks: 1
+    Number of counters: 3
+EEPROM contents:
+[-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+Configuring digital I/O ... successful
+In the following demonstrations, you should hear the relays click
+and see the LED on the device blink.
+  CLosing relays: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+  Opening relays: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+Closing all relays ... successful
+Opening all relays ... successful
+CLosing every other relay: 0 2 4 6 8 10 12 14
+Reading back relays:
+  Channel 0 = false
+  Channel 1 = true
+  Channel 2 = false
+  Channel 3 = true
+  Channel 4 = false
+  Channel 5 = true
+  Channel 6 = false
+  Channel 7 = true
+  Channel 8 = false
+  Channel 9 = true
+  Channel 10 = false
+  Channel 11 = true
+  Channel 12 = false
+  Channel 13 = true
+  Channel 14 = false
+  Channel 15 = true
+Reading isolated inputs:
+  Channel 16 = false
+  Channel 17 = false
+  Channel 18 = false
+  Channel 19 = false
+  Channel 20 = false
+  Channel 21 = false
+  Channel 22 = false
+  Channel 23 = false
+  Channel 24 = false
+  Channel 25 = false
+  Channel 26 = false
+  Channel 27 = false
+  Channel 28 = false
+  Channel 29 = false
+  Channel 30 = false
+  Channel 31 = false</pre>
+<p class="footer">Document: $Revision: 1.6 $ $Date: 2010/01/29 18:37:20 $</p>
+</body>
+</html>

@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.8.2
+Created-By: JDotSoft
+Main-Class: MainTestApp
+Build-Date: 08-05-16 12:14PM
+

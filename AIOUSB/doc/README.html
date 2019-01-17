@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<link rel="stylesheet" href="../../../doc/stylesheet.css" type="text/css">
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>Installing And Using AIOUSB Library</title>
+</head>
+<body lang="en-us" dir="ltr">
+<h1>Installing And Using AIOUSB Library</h1>
+<p><a href="../../../doc/README.html">Table of Contents</a></p>
+<h2 style="text-indent: 5px; color: #ffffff; background: #3677ac;">Overview</h2>
+<p>AIOUSB for Linux is a collection of C, C++ and Java libraries for controlling ACCES I/O USB devices, as summarized
+in the diagram below.</p>
+<center>
+	<table width="500px" border="1" cellpadding="4" cellspacing="0">
+		<tr valign="top" bgcolor="#9bbbd5">
+			<td width="50%" align="center">C++ application programs</td>
+			<td width="50%" align="center">Java application programs</td>
+		</tr>
+		<tr valign="top" bgcolor="#eeffff">
+			<td align="center"><a href="../classlib/doc/index.html">C++ Class Library</a></td>
+			<td align="center"><a href="../java/doc/index.html">Java Class Library</a></td>
+		</tr>
+		<tr valign="top" bgcolor="#f8f8fa">
+			<td colspan="2" align="center"><a href="../lib/doc/Reference.html">AIOUSB C Library</a></td>
+		</tr>
+		<tr valign="top" bgcolor="#fdfbda">
+			<td colspan="2" align="center"><a href="http://libusb.info" target="_blank">libusb</a></td>
+		</tr>
+	</table>
+</center>
+<br>
+<h2 style="text-indent: 5px; color: #ffffff; background: #3677ac;">AIOUSB C Library</h2>
+<p>The AIOUSB C language library implements the core functionality of the entire suite of libraries, supporting
+the capabilities of all of ACCES' USB products. (The only deficiency is that the D/A streaming functions in
+the USB-DA12-8A product are not currently implemented, although they will be eventually.) This library is
+written in C and compiled for both C (gcc) and C++ (g++) and may be used as-is with C and C++ programs. This
+library utilizes <a href="http://libusb.info" target="_blank">libusb</a> (preferred version 1.0.6) for all USB
+communications.</p>
+<h3>Installing</h3>
+<p>Assuming you’re starting from the root directory of the distribution, installing AIOUSB consists of performing
+these few simple steps (logged in as 'root', of course).</p>
+<p class="computer bold indent1">mkdir /usr/local/include/aiousb<br>
+cp -p lib/aiousb.h /usr/local/include/aiousb<br>
+cp -p lib/libaiousb*.a /usr/local/lib<br>
+export CPATH=/usr/local/include/libusb-1.0/:/usr/local/include/aiousb</p>
+<p>You can, of course, place the AIOUSB files (<span class="filename">aiousb.h</span>,
+<span class="filename">libaiousb*.a</span>) elsewhere, such as in the local directory of the application
+program that will use AIOUSB. The above steps are suggested in order to conform to the usual Linux conventions
+and make the AIOUSB files available to all users and all application programs.</p>
+<p>If you do locate the libraries and header files somewhere else, there is an environment variable you can
+set which is used by the sample program make files:</p>
+<p class="computer bold indent1">export AIOUSBLIBDIR="path to the AIOUSB libraries"</p>
+<p>There are several variations of the AIOUSB C library. They all begin with "libaiousb" and have an extension of ".a".
+There are currently no shared versions of the AIOUSB C library. The library files which contain the string "cpp"
+contain object modules that are compiled for use with C++ (using "g++"). They are <span class="italic">not</span> C++
+class libraries (see below for information about the genuine C++ class library). The library files which contain the
+string "dbg" are compiled for source level debugging with the "-ggdb" compiler option. At present, there are four
+variations of the AIOUSB C library: C or C++, and release or debug.</p>
+<h3>Documentation</h3>
+<p>Complete documentation for the AIOUSB C library may be found in <a href="../lib/doc/Reference.html">AIOUSB API Reference</a>.
+This document is based on the <a href="http://accesio.com/MANUALS/USB%20Software%20Reference.pdf">USB Software Reference Manual</a>,
+but adds considerably more detail and includes documentation for the many new functions added to the Linux
+implementation. This documentation is also intended to be useful as a reference for the Windows implementation of
+AIOUSB, with differences between the Linux and Windows implementations clearly highlighted.</p>
+<h3>Compiling Programs</h3>
+<p>Assuming you have installed the AIOUSB C library according to the above instructions, compiling a program to use
+it is as simple as:</p>
+<p><span class="computer bold indent1">g++ -pthread -fPIC sample.cpp -laiousbcpp -lusb-1.0 -o sample</span> (C++)</p>
+<p>or</p>
+<p><span class="computer bold indent1">gcc -std=gnu99 -D_GNU_SOURCE -pthread -fPIC sample.c -laiousb -lusb-1.0 -lm -o sample</span> (C)</p>
+<h2 style="text-indent: 5px; color: #ffffff; background: #3677ac;">C++ and Java Class Libraries</h2>
+<p>Residing one level above the AIOUSB C library are two additional object-oriented sister libraries: a C++ class library
+and a nearly identical Java class library. Although these class libraries should be considered <span class="italic">beta</span>
+software and are still in development, testing so far shows that they are working reliably enough to use. There are a few
+sample programs in the "samples" directory demonstrating use of both of these class libraries and more such samples will be
+provided in the future.</p>
+<p>The C++ and Java class libraries are designed to be as similar as possible, with the exception of inescapable language
+and library differences. Otherwise, the structure, functionality, class names, method names and parameter names are identical
+between the two. As a result, the documentation for either library can largely serve as the documentation for both.</p>
+<h2 style="text-indent: 5px; color: #ffffff; background: #3677ac;">C++ Class Library</h2>
+<p>The C++ class library implements the entire functionality of the AIOUSB C library and adds substantial ease-of-use
+features, in a robust object-oriented <a href="../classlib/doc/inherits.html">class hierarchy</a>.
+<h3>Installing</h3>
+<p>You may install the C++ class library in the same manner as described for the AIOUSB C library above, using the commands:</p>
+<p class="computer bold indent1">cp -p classlib/*.hpp /usr/local/include/aiousb<br>
+cp -p classlib/libclassaiousb*.a /usr/local/lib</p>
+<p>If you don't wish to copy all those files, then you can use the environment variables (<span class="varname">CPATH</span>
+and <span class="varname">AIOUSBCLASSLIBDIR</span>) instead. As for the AIOUSB C library, there is an environment variable
+that specifies the location of the C++ class libraries for use in the sample program make files:</p>
+<p class="computer bold indent1">export AIOUSBCLASSLIBDIR="path to the AIOUSB C++ class libraries"</p>
+<h3>Documentation</h3>
+<p>Complete documentation for the C++ class library may be found in <a href="../classlib/doc/index.html">AIOUSB C++ Class Library Reference</a>.
+<h3>Compiling Programs</h3>
+<p>Assuming you have installed the C++ class library according to the above instructions, compiling a program to use
+it is as simple as:</p>
+<p><span class="computer bold indent1">g++ -pthread -fPIC sample.cpp -lclassaiousb -laiousbcpp -lusb-1.0 -o sample</span></p>
+<h2 style="text-indent: 5px; color: #ffffff; background: #3677ac;">Java Class Library</h2>
+<p>The Java class library implements the entire functionality of the AIOUSB C library and adds substantial ease-of-use
+features, in a robust object-oriented <a href="../java/doc/com/acces/aiousb/package-tree.html">class hierarchy</a>.
+<h3>Installing</h3>
+<p>There really isn't anything to install with the Java class library. The entire library resides within
+<span class="filename">aiousb.jar</span>. You can use this JAR file as a class path when compiling or executing Java application
+programs, or you can use the directory that contains the actual "*.class" files as the class path, the choice is yours.</p>
+<p>As with the C and C++ libraries, the location of the Java library can be specified in an environment variable which is used
+by the sample program make files:</p>
+<p class="computer bold indent1">export AIOUSBJAVALIBDIR="path to the AIOUSB java libraries"</p>
+<h3>Documentation</h3>
+<p>Complete documentation for the Java class library may be found in <a href="../java/doc/index.html">AIOUSB Java Class Library Reference</a>.
+<h3>Compiling Programs</h3>
+<p>To compile Java programs to use the AIOUSB Java class library, use the command:</p>
+<p><span class="computer bold indent1">javac -cp /path/aiousb.jar Sample.java</span> (where "path" is where you installed
+the Java class library)</p>
+<p>To execute the compiled Java program, use the command:</p>
+<p class="computer bold indent1">java -cp /path/aiousb.jar:. Sample</p>
+<p class="footer">Document: $Revision: 1.28 $ $Date: 2009/12/21 20:06:50 $</p>
+</body>
+</html>

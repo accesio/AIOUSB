@@ -1,0 +1,16 @@
+/*! @page usb_idio_16_8 USB-IDIO-16 and USB-IDIO-8
+
+# Overview
+
+These are the samples of the ACCES I/O Products
+[USB-IDIO](http://accesio.com/?p=../usb/usb-aio16-16a.html) series
+data acquisition cards.
+
+\subpage usb_idio_sample Basic sample for USB-IDIO products
+
+\subpage usb_idio_sample2 Sample program demonstrating stuff
+
+# Build
+
+*/
+

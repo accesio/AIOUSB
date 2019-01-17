@@ -1,0 +1,69 @@
+/*!
+\page classlib AIOUSB C++ Class library
+
+[TOC]
+
+# Introduction {#classlib_Introduction}
+
+The AIOUSB C++ Class Library is an object-oriented C++ layer that runs on top of the AIOUSB library. All access to the USB devices is through fully object-oriented C++ classes. The user never needs to call the underlying AIOUSB library, although that is possible if necessary.
+This C++ library supports all the features of all the USB products except the D/A streaming features of the USB-DA12-8A product, although support for those features will be provided eventually. While the underlying AIOUSB library has been thoroughly tested, this C++ library has not yet been thoroughly tested and should be considered beta software.
+
+# Packaging {#classlib_Packaging}
+
+As with the AIOUSB library, the AIOUSB C++ class library is packaged into several library (.a) files. libclassaiousb.a is a release version of the library and libclassaiousbdbg.a is a debug version, compiled with the "-ggdb" compiler option and with assertion checks enabled. When linking programs that use the AIOUSB C++ class library, you must not only specify the AIOUSB C++ class library on the linker command line, but the AIOUSB C library as well since the AIOUSB C++ class library uses AIOUSB.
+Sample Program
+
+Below is an example of a minimalist C++ program that demonstrates how to properly initialize the library, query the device manager for devices, query an individual device for its product ID and name and then terminate use of the library. If the AIOUSB C library and the AIOUSB C++ class library are properly installed, you should be able to copy this sample program from this document, paste it into a file named test.cpp and compile it using the command shown below. This program uses the first ACCES device it finds on the bus. A "real" application would probably be looking for devices of a particular type, which can be located using one of the AIOUSB::USBDeviceManager::getDeviceByProductID( int productID ) const methods.
+
+~~~{.cpp}
+#include <iostream>
+#include <iomanip>
+#include <USBDeviceManager.hpp>
+using namespace AIOUSB;
+using namespace std;
+int main( int argc, char *argv[] ) {
+  int result = 0;
+  USBDeviceManager deviceManager;
+  try {
+    deviceManager.open();
+    USBDeviceArray devices = deviceManager.getDeviceByProductID( USBDeviceManager::MIN_PRODUCT_ID, USBDeviceManager::MAX_PRODUCT_ID );
+    if( devices.size() > 0 ) {
+      USBDevice &device = *devices.at( 0 );
+      cout << "Found a device with product ID " << hex << device.getProductID() << " and name \'" << device.getName() << "\'" << endl;
+    } else
+      cout << "No devices found" << endl;
+    deviceManager.close();
+  } catch( exception &ex ) {
+    cerr << "Error \'" << ex.what() << "\' occurred while manipulating device" << endl;
+    result = 1;
+    if( deviceManager.isOpen() )
+      deviceManager.close();
+  }  // catch( ...
+  return result;
+}  // main()
+~~~
+
+
+# Deprecated {#classlib_Deprecated}
+
+This API is deprecated by ACCES I/O Products Inc. We are unable to devote our 
+mental compute cycles to maintaining the C++ wrapper code for our existing C
+code.  
+
+We are keeping this directory for legacy customers but we urge new adopters of our
+Hardware and Software to use only the C API which is under ../lib.  We
+provide better support and coverage for that library and will make
+sure that it can be compiled in a manner that will still suit C++
+developers.  In addition, if you are looking to develop an
+application in a language other than C or C++ we provide a wrappers
+directory that includes support for Java, Perl, Python, Ruby, R , Php,
+Octave and Matlab.
+
+
+We apologize for any inconvenience this might have caused,
+
+
+Sincerely,
+
+The ACCES I/O Products Software team.
+*/

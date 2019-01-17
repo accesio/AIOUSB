@@ -1,0 +1,64 @@
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# CMAKE file for building Octave wrappers 
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
+MESSAGE(STATUS "Building Octave wrapper")
+FIND_PACKAGE( SWIG REQUIRED )
+FIND_PACKAGE( Octave REQUIRED )
+INCLUDE(${SWIG_USE_FILE})
+
+MESSAGE( STATUS "Found ${OCTAVE_INCLUDE_DIRS}" )
+INCLUDE_DIRECTORIES( ${OCTAVE_INCLUDE_DIRS} )
+
+SET( CMAKE_C_COMPILER mkoctfile )
+SET(OCTAVE_DEFINES "-DMPICH_SKIP_MPICXX -DOMPI_SKIP_MPICXX" )
+SET(OCTAVE_INCLUDES "-I${CMAKE_CURRENT_SOURCE_DIR}/../../" )
+
+
+FILE(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB.i" ORIG_SWIG_FILE )
+
+add_custom_command( OUTPUT AIOUSB.i
+  COMMAND cmake -E copy_if_different ${ORIG_SWIG_FILE} AIOUSB.i 
+  COMMENT "Copying Swig file"  
+)
+
+add_custom_target( copy_swig_octave ALL
+  DEPENDS AIOUSB.i
+)
+
+MESSAGE(STATUS "Going to install in ${OCTAVE_OCT_LIB_DIR}")
+
+SET( SWIG_COMMAND "swig ${OCTAVE_INCLUDES} -octave -o AIOUSB_wrap.cpp ${CMAKE_CURRENT_BINARY_DIR}/AIOUSB.i" )
+
+ADD_CUSTOM_COMMAND( OUTPUT AIOUSB_wrap.cpp
+  COMMAND swig ${OCTAVE_INCLUDES} -octave -o AIOUSB_wrap.cpp ${CMAKE_CURRENT_BINARY_DIR}/AIOUSB.i
+  DEPENDS copy_swig_octave
+  )
+
+ADD_CUSTOM_TARGET( check_swig ALL
+  DEPENDS AIOUSB_wrap.cpp
+  COMMAND cmake -E echo "Finished something ....")
+  
+
+FILE(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../" HEADER_DIRECTORY )
+# MESSAGE(STATUS "HEADER ${HEADER_DIRECTORY}")
+SET( AIO_HEADER_DIR "-I${HEADER_DIRECTORY}" )
+FILE(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/../../" LIB_DIRECTORY )
+SET( AIO_LIBRARY_DIR "-L${LIB_DIRECTORY}" )
+
+
+ADD_CUSTOM_COMMAND( OUTPUT AIOUSB.oct 
+  COMMAND mkoctfile -o AIOUSB.oct  -DMPICH_SKIP_MPICXX  -DOMPI_SKIP_MPICXX  ${AIO_HEADER_DIR} ${AIO_LIBRARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/AIOUSB_wrap.cpp -laiousb
+  COMMENT "Building Octave Swig file"
+  DEPENDS check_swig
+)
+
+ADD_CUSTOM_TARGET( build_swig_octave ALL
+  DEPENDS AIOUSB.oct
+)
+
+
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_MODULE_PREFIX}AIOUSB${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${OCTAVE_OCT_LIB_DIR} )
+
+

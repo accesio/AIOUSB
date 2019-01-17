@@ -1,0 +1,98 @@
+/******************************************************************************
+ *
+ */
+/*! \page install Compiling and Installation
+
+\addindex installation
+\tableofcontents
+
+\section compile_src_unix Compiling from source on Linux/MacOS X / UNIX  
+
+There are two ways that you can build your software on Linux/MacOS X : one way involves
+using the CMake tool and the other relies solely on GNU make. 
+
+- \ref CMakeBuild 
+- \ref NonCmakeBuild
+
+
+
+\section install_src_windows Compiling from source on Windows
+
+TBD
+
+@todo Complete the Windows port of the AIOUSB libraries
+
+\htmlonly
+Go to the <a href="starting.html">next</a> section or return to the
+ <a href="index.html">index</a>.
+\endhtmlonly
+
+
+\section install_src_unix Installing the Compiled libraries
+
+Assuming you’re starting from the root directory of the distribution,
+installing AIOUSB consists of performing these few simple steps
+(logged in as 'root', of course). 
+
+~~~{.sh}
+mkdir /usr/local/include/aiousb
+cp -p lib/aiousb.h /usr/local/include/aiousb
+cp -p lib/libaiousb*.a /usr/local/lib
+export CPATH=/usr/local/include/libusb-1.0/:/usr/local/include/aiousb
+~~~
+
+You can, of course, place the AIOUSB files (aiousb.h, libaiousb*.a)
+elsewhere, such as in the local directory of the application program
+that will use AIOUSB. The above steps are suggested in order to
+conform to the usual Linux conventions and make the AIOUSB files
+available to all users and all application programs.
+
+If you do locate the libraries and header files somewhere else, there
+is an environment variable you can set which is used by the sample
+program make files:
+
+~~~{.sh}
+export AIOUSBLIBDIR="/path/to/the/AIOUSB_libraries/"
+~~~
+
+There are several variations of the AIOUSB C library. They all begin
+with "libaiousb" and have an extension of ".a". There are currently no
+shared versions of the AIOUSB C library. The library files which
+contain the string "cpp" contain object modules that are compiled for
+use with C++ (using "g++"). They are not C++ class libraries (see
+below for information about the genuine C++ class library). The
+library files which contain the string "dbg" are compiled for source
+level debugging with the "-ggdb" compiler option. At present, there
+are four variations of the AIOUSB C library: C or C++, and release or
+debug.
+
+To take full advantage of the AIOUSB documentation the following additional
+tools should be installed to create both web documentation , pdf
+output and manual pages
+
+<ul>
+<li>GNU make 
+<li>A \LaTeX distribution: for instance
+    <a href="http://www.tug.org/interest.html#free">TeX Live</a>
+    This is needed for generating \LaTeX, Postscript, and PDF output.
+<li><a href="http://www.graphviz.org/">
+    the Graph visualization toolkit version 1.8.10 or higher</a>
+    Needed for the include dependency graphs, 
+    the graphical inheritance graphs, and the collaboration graphs.
+    If you compile graphviz yourself, make sure you do include
+    freetype support (which requires the freetype library and header files), 
+    otherwise the graphs will not render proper text labels.
+<li>For formulas in the HTML output (when MathJax is not used)
+    or in case you do not wish to use `pdflatex,
+    the ghostscript interpreter is needed. You can find it at 
+    <a href="http://www.ghostscript.com/">www.ghostscript.com</a>.
+</ul>
+
+~~~{.sh}
+cd AIOUSB-$VERSION
+mkdir build
+~~~
+
+
+*/
+

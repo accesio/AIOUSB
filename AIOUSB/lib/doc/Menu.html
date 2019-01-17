@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<link rel="stylesheet" href="../../../../doc/stylesheet.css" type="text/css">
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>AIOUSB API Reference</title>
+	<style type="text/css">
+		.menuitem {
+			font-family: "Nimbus Sans L", sans-serif;
+			font-weight: bold;
+			margin-bottom: 0cm;
+			margin-top: 0cm;
+		}
+	</style>
+</head>
+<body lang="en-us" dir="ltr">
+<h2>Overview</h2>
+<p class="menuitem">
+<a href="Body.html#Synopsis" target="Content">Synopsis</a><br>
+<a href="Body.html#DocumentOrganization" target="Content">Document Organization and Conventions</a><br>
+<a href="Body.html#SampleProgram" target="Content">Sample Program</a>
+</p>
+<br>
+<h2>Functions</h2>
+<h3>General Functions</h3>
+<p class="menuitem">
+<a href="Body.html#AIOUSB_ClearFIFO" target="Content">AIOUSB_ClearFIFO</a><br>
+<a href="Body.html#AIOUSB_GetStreamingBlockSize" target="Content">AIOUSB_GetStreamingBlockSize</a><br>
+<a href="Body.html#AIOUSB_SetStreamingBlockSize" target="Content">AIOUSB_SetStreamingBlockSize</a><br>
+<a href="Body.html#ClearDevices" target="Content">ClearDevices</a><br>
+<a href="Body.html#CustomEEPROMRead" target="Content">CustomEEPROMRead</a><br>
+<a href="Body.html#CustomEEPROMWrite" target="Content">CustomEEPROMWrite</a><br>
+<a href="Body.html#GetDeviceBySerialNumber" target="Content">GetDeviceBySerialNumber</a><br>
+<a href="Body.html#GetDevices" target="Content">GetDevices</a><br>
+<a href="Body.html#GetDeviceSerialNumber" target="Content">GetDeviceSerialNumber</a><br>
+<a href="Body.html#QueryDeviceInfo" target="Content">QueryDeviceInfo</a><br>
+<a href="Body.html#ResolveDeviceIndex" target="Content">ResolveDeviceIndex</a>
+</p>
+<br>
+<h3>Extended General Functions</h3>
+<p class="menuitem">
+<a href="Body.html#AIOUSB_Exit" target="Content">AIOUSB_Exit</a><br>
+<a href="Body.html#AIOUSB_GetCommTimeout" target="Content">AIOUSB_GetCommTimeout</a><br>
+<a href="Body.html#AIOUSB_GetDeviceByProductID" target="Content">AIOUSB_GetDeviceByProductID</a><br>
+<a href="Body.html#AIOUSB_GetDeviceProperties" target="Content">AIOUSB_GetDeviceProperties</a><br>
+<a href="Body.html#AIOUSB_GetMiscClock" target="Content">AIOUSB_GetMiscClock</a>
+<a href="Body.html#AIOUSB_GetResultCodeAsString" target="Content">AIOUSB_GetResultCodeAsString</a><br>
+<a href="Body.html#AIOUSB_GetVersion" target="Content">AIOUSB_GetVersion</a><br>
+<a href="Body.html#AIOUSB_GetVersionDate" target="Content">AIOUSB_GetVersionDate</a><br>
+<a href="Body.html#AIOUSB_Init" target="Content">AIOUSB_Init</a><br>
+<a href="Body.html#AIOUSB_ListDevices" target="Content">AIOUSB_ListDevices</a><br>
+<a href="Body.html#AIOUSB_SetCommTimeout" target="Content">AIOUSB_SetCommTimeout</a><br>
+<a href="Body.html#AIOUSB_SetMiscClock" target="Content">AIOUSB_SetMiscClock</a>
+</p>
+<br>
+<h3>DIO Functions</h3>
+<p class="menuitem">
+<a href="Body.html#DIO_ConfigurationQuery" target="Content">DIO_ConfigurationQuery</a><br>
+<a href="Body.html#DIO_Configure" target="Content">DIO_Configure</a><br>
+<a href="Body.html#DIO_ConfigureEx" target="Content">DIO_ConfigureEx</a><br>
+<a href="Body.html#DIO_Read1" target="Content">DIO_Read1</a><br>
+<a href="Body.html#DIO_Read8" target="Content">DIO_Read8</a><br>
+<a href="Body.html#DIO_ReadAll" target="Content">DIO_ReadAll</a><br>
+<a href="Body.html#DIO_Write1" target="Content">DIO_Write1</a><br>
+<a href="Body.html#DIO_Write8" target="Content">DIO_Write8</a><br>
+<a href="Body.html#DIO_WriteAll" target="Content">DIO_WriteAll</a>
+</p>
+<br>
+<h3>DIO Streaming Functions (Advanced)</h3>
+<p class="menuitem">
+<a href="Body.html#DIO_StreamClose" target="Content">DIO_StreamClose</a><br>
+<a href="Body.html#DIO_StreamFrame" target="Content">DIO_StreamFrame</a><br>
+<a href="Body.html#DIO_StreamOpen" target="Content">DIO_StreamOpen</a><br>
+<a href="Body.html#DIO_StreamSetClocks" target="Content">DIO_StreamSetClocks</a><br>
+</p>
+<br>
+<h3>CTR Functions</h3>
+<p class="menuitem">
+<a href="Body.html#CounterAddressing" target="Content">Counter Addressing</a><br>
+<a href="Body.html#CTR_8254Load" target="Content">CTR_8254Load</a><br>
+<a href="Body.html#CTR_8254Mode" target="Content">CTR_8254Mode</a><br>
+<a href="Body.html#CTR_8254ModeLoad" target="Content">CTR_8254ModeLoad</a><br>
+<a href="Body.html#CTR_8254Read" target="Content">CTR_8254Read</a><br>
+<a href="Body.html#CTR_8254ReadAll" target="Content">CTR_8254ReadAll</a><br>
+<a href="Body.html#CTR_8254ReadLatched" target="Content">CTR_8254ReadLatched</a><br>
+<a href="Body.html#CTR_8254ReadModeLoad" target="Content">CTR_8254ReadModeLoad</a><br>
+<a href="Body.html#CTR_8254ReadStatus" target="Content">CTR_8254ReadStatus</a><br>
+<a href="Body.html#CTR_8254SelectGate" target="Content">CTR_8254SelectGate</a><br>
+<a href="Body.html#CTR_StartOutputFreq" target="Content">CTR_StartOutputFreq</a>
+</p>
+<br>
+<h3>ADC Functions</h3>
+<p class="menuitem">
+<a href="Body.html#ADC_ADMode" target="Content">ADC_ADMode</a><br>
+<a href="Body.html#ADC_BulkAcquire" target="Content">ADC_BulkAcquire</a><br>
+<a href="Body.html#ADC_BulkPoll" target="Content">ADC_BulkPoll</a><br>
+<a href="Body.html#ADC_GetChannelV" target="Content">ADC_GetChannelV</a><br>
+<a href="Body.html#ADC_GetConfig" target="Content">ADC_GetConfig</a><br>
+<a href="Body.html#ADC_GetScan" target="Content">ADC_GetScan</a><br>
+<a href="Body.html#ADC_GetScanV" target="Content">ADC_GetScanV</a><br>
+<a href="Body.html#ADC_Initialize" target="Content">ADC_Initialize</a><br>
+<a href="Body.html#ADC_QueryCal" target="Content">ADC_QueryCal</a><br>
+<a href="Body.html#ADC_Range1" target="Content">ADC_Range1</a><br>
+<a href="Body.html#ADC_RangeAll" target="Content">ADC_RangeAll</a><br>
+<a href="Body.html#ADC_SetCal" target="Content">ADC_SetCal</a><br>
+<a href="Body.html#ADC_SetConfig" target="Content">ADC_SetConfig</a><br>
+<a href="Body.html#ADC_SetOversample" target="Content">ADC_SetOversample</a><br>
+<a href="Body.html#ADC_SetScanLimits" target="Content">ADC_SetScanLimits</a>
+</p>
+<br>
+<h3>Extended ADC Functions</h3>
+<p class="menuitem">
+<a href="Body.html#AIOUSB_ADC_ExternalCal" target="Content">AIOUSB_ADC_ExternalCal</a><br>
+<a href="Body.html#AIOUSB_ADC_InternalCal" target="Content">AIOUSB_ADC_InternalCal</a><br>
+<a href="Body.html#AIOUSB_ADC_LoadCalTable" target="Content">AIOUSB_ADC_LoadCalTable</a><br>
+<a href="Body.html#AIOUSB_ADC_SetCalTable" target="Content">AIOUSB_ADC_SetCalTable</a><br>
+<a href="Body.html#AIOUSB_CountsToVolts" target="Content">AIOUSB_CountsToVolts</a><br>
+<a href="Body.html#AIOUSB_GetCalMode" target="Content">AIOUSB_GetCalMode</a><br>
+<a href="Body.html#AIOUSB_GetEndChannel" target="Content">AIOUSB_GetEndChannel</a><br>
+<a href="Body.html#AIOUSB_GetGainCode" target="Content">AIOUSB_GetGainCode</a><br>
+<a href="Body.html#AIOUSB_GetOversample" target="Content">AIOUSB_GetOversample</a><br>
+<a href="Body.html#AIOUSB_GetStartChannel" target="Content">AIOUSB_GetStartChannel</a><br>
+<a href="Body.html#AIOUSB_GetTriggerMode" target="Content">AIOUSB_GetTriggerMode</a><br>
+<a href="Body.html#AIOUSB_InitConfigBlock" target="Content">AIOUSB_InitConfigBlock</a><br>
+<a href="Body.html#AIOUSB_IsDifferentialMode" target="Content">AIOUSB_IsDifferentialMode</a><br>
+<a href="Body.html#AIOUSB_IsDiscardFirstSample" target="Content">AIOUSB_IsDiscardFirstSample</a><br>
+<a href="Body.html#AIOUSB_MultipleCountsToVolts" target="Content">AIOUSB_MultipleCountsToVolts</a><br>
+<a href="Body.html#AIOUSB_MultipleVoltsToCounts" target="Content">AIOUSB_MultipleVoltsToCounts</a>
+<a href="Body.html#AIOUSB_SetAllGainCodeAndDiffMode" target="Content">AIOUSB_SetAllGainCodeAndDiffMode</a><br>
+<a href="Body.html#AIOUSB_SetCalMode" target="Content">AIOUSB_SetCalMode</a><br>
+<a href="Body.html#AIOUSB_SetDifferentialMode" target="Content">AIOUSB_SetDifferentialMode</a><br>
+<a href="Body.html#AIOUSB_SetDiscardFirstSample" target="Content">AIOUSB_SetDiscardFirstSample</a><br>
+<a href="Body.html#AIOUSB_SetGainCode" target="Content">AIOUSB_SetGainCode</a><br>
+<a href="Body.html#AIOUSB_SetOversample" target="Content">AIOUSB_SetOversample</a><br>
+<a href="Body.html#AIOUSB_SetScanRange" target="Content">AIOUSB_SetScanRange</a><br>
+<a href="Body.html#AIOUSB_SetTriggerMode" target="Content">AIOUSB_SetTriggerMode</a>
+<a href="Body.html#AIOUSB_VoltsToCounts" target="Content">AIOUSB_VoltsToCounts</a>
+</p>
+<br>
+<h3>DAC Functions</h3>
+<p class="menuitem">
+<a href="Body.html#DACDirect" target="Content">DACDirect</a><br>
+<a href="Body.html#DACMultiDirect" target="Content">DACMultiDirect</a><br>
+<a href="Body.html#DACSetBoardRange" target="Content">DACSetBoardRange</a>
+</p>
+<br>
+<h3>DAC Streaming Functions (Advanced)</h3>
+<p class="menuitem">
+<a href="Body.html#DACOutputClose" target="Content">DACOutputClose</a><br>
+<a href="Body.html#DACOutputCloseNoEnd" target="Content">DACOutputCloseNoEnd</a><br>
+<a href="Body.html#DACOutputFrame" target="Content">DACOutputFrame</a><br>
+<a href="Body.html#DACOutputFrameRaw" target="Content">DACOutputFrameRaw</a><br>
+<a href="Body.html#DACOutputOpen" target="Content">DACOutputOpen</a><br>
+<a href="Body.html#DACOutputSetCount" target="Content">DACOutputSetCount</a><br>
+<a href="Body.html#DACOutputSetInterlock" target="Content">DACOutputSetInterlock</a><br>
+<a href="Body.html#DACOutputStart" target="Content">DACOutputStart</a><br>
+</p>
+<br>
+<h2>Function Parameters</h2>
+<p class="menuitem">
+<a href="Body.html#ADConfigBlock" target="Content">ADConfigBlock</a><br>
+<a href="Body.html#DeviceIndex" target="Content">DeviceIndex</a><br>
+<a href="Body.html#DeviceProperties" target="Content">DeviceProperties</a>
+</p>
+<br>
+<h2>Constants</h2>
+<p class="menuitem">
+<a href="Body.html#AIOUSB_SetCalMode" target="Content">AD_CAL_MODE_*</a><br>
+<a href="Body.html#AIOUSB_SetGainCode" target="Content">AD_GAIN_CODE_*</a><br>
+<a href="Body.html#AIOUSB_SetTriggerMode" target="Content">AD_TRIGGER_*</a><br>
+<a href="Body.html#BoolType" target="Content">AIOUSB_BOOL, AIOUSB_TRUE, AIOUSB_FALSE</a><br>
+<a href="Body.html#AIOUSB_ClearFIFO" target="Content">CLEAR_FIFO_METHOD_*</a><br>
+<a href="Body.html#DACSetBoardRange" target="Content">DAC_RANGE_*</a><br>
+<a href="Body.html#DeviceIndex" target="Content">diFirst, diOnly</a><br>
+<a href="Body.html#ResolveDeviceIndex" target="Content">diNone</a>
+</p>
+<br>
+<h2>Result Codes</h2>
+<p class="menuitem">
+<a href="Body.html#ResultCodes" target="Content">Implementation Notes</a><br>
+<a href="Body.html#LinuxResultCodes" target="Content">Linux Result Codes</a><br>
+<a href="Body.html#WindowsResultCodes" target="Content">Windows Result Codes</a>
+</p>
+<br>
+<h2>Linux-Specfic Notes</h2>
+<p class="menuitem">
+<a href="Body.html#LanguageSupport" target="Content">Language Support</a><br>
+<a href="Body.html#MultithreadingSupport" target="Content">Multithreading Support</a>
+</p>
+</body>
+</html>

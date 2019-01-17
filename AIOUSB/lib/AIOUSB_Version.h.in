@@ -1,0 +1,21 @@
+/**
+ * @file   AIOUSB_Version.h
+ *
+ */
+#ifndef AIOUSB_VERSION_H
+#define AIOUSB_VERSION_H
+
+#ifdef __cplusplus
+namespace AIOUSB {
+#endif
+
+const char VERSION_TAG[] = "@ACCESIO_TAG_VERSION@";
+const char VERSION_NUMBER[] = "$Format: %h$";
+const char VERSION_DATE[] = "@ACCESIO_DATE@";
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+

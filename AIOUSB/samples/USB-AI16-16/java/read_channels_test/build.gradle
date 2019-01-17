@@ -1,0 +1,63 @@
+
+buildscript {
+    repositories {
+        maven { 
+            url "https://plugins.gradle.org/m2/"
+        }
+        jcenter()
+    }
+    dependencies {
+        classpath "com.tkruse.gradle:gradle-groovysh-plugin:1.0.8"
+    }
+}
+
+plugins { 
+    id "java"
+    id "com.github.tkruse.groovysh" version "1.0.8"
+}
+
+version = '1.0'
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+
+task checkProjectSetup << {
+    if( System.getenv()["AIO_LIB_DIR"] == null ) { 
+        throw new GradleException('You must source sourceme.sh first !')
+    }
+}
+
+
+task fatJar(type: Jar) {
+    dependsOn checkProjectSetup
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',  
+        	'Implementation-Version': version,
+        	'Main-Class': 'com.accesio.MyAppLauncher'
+    }
+    baseName = project.name + '-all'
+    from(System.getenv()["AIO_LIB_DIR"] + "/wrappers/java") { 
+        include '*AIOUSB*.so'
+        include "AIOUSB.jar"
+    }
+    from(System.getenv()["AIO_LIB_DIR"] ) { 
+        include "libaiousbdbg.so"
+    }
+
+
+    with jar
+}
+
+
+//Get dependencies from Maven central repository
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+//Project dependencies
+dependencies {
+	compile 'ch.qos.logback:logback-classic:1.1.2'
+        compile files(System.getenv()["AIO_LIB_DIR"] + "/wrappers/java/AIOUSB.jar")
+}
+

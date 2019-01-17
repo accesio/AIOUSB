@@ -1,0 +1,184 @@
+/*!
+\page aiousbFirmware Firmware
+
+[TOC]
+
+# Introduction {#firmware_Introduction}
+
+
+Configuring ACCES I/O USB Devices To Work Under Linux
+
+# Overview {#fxload_Overview}
+
+This document explains how to set up and use ACCES USB devices in Linux. This document describes only configuring Linux to recognize connected devices and upload firmware to the devices. For information on using the AIOUSB library, refer to Installing And Using AIOUSB Library.
+
+Besides merely attaching an ACCES USB device to the computer by means of a USB cable, ACCES' USB devices also require that firmware be uploaded to them before they can function properly. There are two means to accomplish this: automatically and manually, both of which are described below.
+
+# Automatic Device Initialization {#fxload_devinit}
+
+With Linux's udev feature, the operating system can be configured to automatically upload the correct firmware whenever an ACCES USB device is plugged into the computer. This is definitely the preferred method of uploading firmware to the devices since it's automatic.
+
+Setting up the operating system to automatically upload the firmware to the devices is exceedingly simple, consisting of just two simple steps, described below. The steps below generally must be performed as the 'root' user.
+
+# Copy Firmware Files To Share Directory {#fxload_copyfirmware}
+
+The first step is to copy the ACCES device firmware files (.hex) somewhere on the system. On some Linux systems, /usr/share/usb/ is already intended for this purpose, so that's the location we recommend. The commands to copy the firmware files are simply:
+
+\code{.sh}
+mkdir -p /usr/share/usb # if the directory does not already exist
+cp -p *.hex /usr/share/usb/
+chown root:root /usr/share/usb/*.hex # optional
+chmod 444 /usr/share/usb/*.hex # optional
+\endcode
+
+You may, of course, put the firmware files anywhere on your system,
+but if you put them somewhere other than the default of
+/usr/share/usb/, you will have to modify the 10-acces_usb.rules file
+and change all occurrences of "/usr/share/usb/" to the location where
+the firmware files reside. If you intend to use the accesloader.pl
+script, then it will also have to modified similarly.
+
+Assuming you have copied the firmware files to the default location, a directory listing of /usr/share/usb/ should look similar to this:
+
+\code{.sh}
+shell> ls /usr/share/usb/
+total 244
+drwxr-xr-x   2 root root  4096 2009-12-18 19:41 ./
+drwxr-xr-x 476 root root 20480 2009-12-12 07:17 ../
+-r--r--r--   1 root root  4026 2009-10-23 19:04 a3load.hex
+-r--r--r--   1 root root 10657 2009-06-16 13:00 PICO-DIO16RO8.hex
+-r--r--r--   1 root root 20787 2009-12-22 14:27 USB-AI16-16.hex
+-r--r--r--   1 root root 18190 2009-11-10 12:39 USB-AO16-16.hex
+-r--r--r--   1 root root 13683 2009-07-22 12:25 USB-CTR-15.hex
+-r--r--r--   1 root root  4383 2009-04-28 09:41 USB-DA12-8A.hex
+-r--r--r--   1 root root  4285 2008-12-02 15:19 USB-DA12-8E.hex
+-r--r--r--   1 root root 16972 2009-05-14 11:16 USB-DIO-16A.hex
+-r--r--r--   1 root root 12333 2009-12-22 14:24 USB-DIO-32.hex
+-r--r--r--   1 root root 12589 2009-11-06 14:53 USB-DIO-48.hex
+-r--r--r--   1 root root 11151 2009-02-25 16:37 USB-DIO-96.hex
+-r--r--r--   1 root root 13149 2009-12-04 13:53 USB-IDIO-16.hex
+-r--r--r--   1 root root 11694 2008-03-17 12:51 USB-IIRO-16.hex
+-r--r--r--   1 root root 11139 2006-04-25 11:10 USB-IIRO4-2SM.hex
+-r--r--r--   1 root root 11139 2006-04-25 11:10 USB-IIRO4-COM.hex
+-r--r--r--   1 root root 10657 2009-06-16 13:04 USBP-DIO16RO8.hex
+\endcode
+
+(The file a3load.hex shown above is part of the fxload package and should be left alone.)
+
+# Copy Udev Rules File To System Directory  {#fxload_copyudev}
+
+The second step to automatically load firmware into the devices is to add a udev rules file to the system, which you can do using the command:
+
+\code{.sh}
+cp -p 10-acces_usb.rules /etc/udev/rules.d/
+chown root:root /etc/udev/rules.d/10-acces_usb.rules (optional)
+chmod 444 /etc/udev/rules.d/10-acces_usb.rules (optional)
+\endcode
+
+A directory listing of /etc/udev/rules.d/ should look similar to this:
+
+\code{.sh}
+shell> /bin/ls -l /etc/udev/rules.d/
+total 348
+drwxr-xr-x 2 root root   4096 2010-01-22 17:35 ./
+drwxr-xr-x 3 root root   4096 2009-10-27 01:56 ../
+-r--r--r-- 1 root root  26983 2009-12-04 19:34 10-acces_usb.rules
+-rw-r--r-- 1 root root    357 2009-10-23 21:11 40-alsa.rules
+-rw-r--r-- 1 root root   2230 2009-10-19 11:09 40-lomoco.rules
+-rw-r--r-- 1 root root    218 2009-08-04 15:03 40-xend.rules
+-rw-r--r-- 1 root root    750 2009-10-27 09:18 40-xen.rules
+-rw-r--r-- 1 root root     99 2009-10-23 21:20 41-soundfont.rules
+...
+\endcode
+
+Once these two simple steps are completed, plugging an ACCES USB device into the system should result in its firmware being automatically uploaded and the device being made available for use.
+
+# Troubleshooting The Udev Rules File {#fxload_debugudev}
+
+It seems that some versions of Linux (older ones?) prefer referring to device nodes with $ENV{DEVNAME}, while other versions of Linux (newer ones?) prefer $tempnode. So if one form doesn't work, try the other. The file 10-acces_usb.rules uses the $tempnode syntax and the file 10-acces_usb.alt.rules uses the $ENV{DEVNAME} syntax. Also, the MODE= action doesn't seem to work on some versions of Linux, which is why chmod is used instead.
+
+# Manually Uploading Firmware to USB Devices {#fxload_manualupload}
+
+If automatic device configuration with udev doesn't work, ACCES USB devices can be initialized manually, using the accesloader.pl script. This script must be run with 'root' privileges and will display something like the following on the screen:
+
+This script will upload the appropriate firmware to any ACCES USB devices that are found
+on the system. If firmware is uploaded to any devices, then the script will pause for five
+seconds before attempting to make all ACCES USB devices on the system usable by users other
+than root. This script must be run with root privileges.
+
+\code{.sh}
+fxload -t fx2 -D /dev/bus/usb/008/006 -I /usr/share/usb/USB-AI16-16.hex
+chmod 0666 /dev/bus/usb/008/007
+\endcode
+
+In the above example a model USB-AI16-16A device was detected, the appropriate firmware was uploaded to it and it was made readable and writable by all users.
+
+# Minimum Required Files {#fxload_fxloadmin}
+
+The table below summarizes the files and utilities required for automatic and manual configuration of ACCES' USB devices.
+
+<table width="60%" border="1" cellpadding="4" cellspacing="0">
+	<tr>
+		<th colspan="3" valign="top">
+			Required Files and Utilities
+		</th>
+	</tr>
+	<tr>
+		<th valign="top">Files</th>
+		<th valign="top">Automatic configuration</th>
+		<th valign="top">Manual configuration</th>
+	</tr>
+	<tr valign="top">
+		<td width="50%" align="center">*.hex files copied to /usr/share/usb/</td>
+		<td width="25%" align="center">X</td>
+		<td align="center">X</td>
+	</tr>
+	<tr valign="top">
+		<td align="center">10-acces_usb.rules file copied to /etc/udev/rules.d/</td>
+		<td align="center">X</td>
+		<td align="center">&nbsp;</td>
+	</tr>
+	<tr valign="top">
+		<td align="center">accesloader.pl</td>
+		<td align="center">&nbsp;</td>
+		<td align="center">X</td>
+	</tr>
+	<tr valign="top">
+		<td align="center">fxload <sup>1</sup></td>
+		<td align="center">X</td>
+		<td align="center">X</td>
+	</tr>
+	<tr valign="top">
+		<td align="center">chmod</td>
+		<td align="center">X</td>
+		<td align="center">X</td>
+	</tr>
+	<tr valign="top">
+		<td align="center">lsusb</td>
+		<td align="center">&nbsp;</td>
+		<td align="center">X</td>
+	</tr>
+	<tr valign="top">
+		<td align="center">perl <sup>2</sup></td>
+		<td align="center">&nbsp;</td>
+		<td align="center">X</td>
+	</tr>
+	<tr valign="top">
+		<td colspan="3">
+			<p>1. In order to upload firmware to USB devices you must have the <span class="filename">fxload</span> package
+			installed on your system. To check if you have <span class="filename">fxload</span> installed on your system simply
+			type <span class="computer bold italic">fxload -V</span> or <span class="computer bold italic">/sbin/fxload -V</span>
+			on the command line. If <span class="filename">fxload</span> is installed on your system you will see version
+			information displayed on your screen. If <span class="filename">fxload</span> is not installed on your system you
+			can find more information at
+			<a href="http://linux-hotplug.sourceforge.net/" target="_blank">http://linux-hotplug.sourceforge.net/</a> (click
+			on the "Downloads" link or use this
+			<a href="http://sourceforge.net/projects/linux-hotplug/files/fxload/2008_10_13/fxload-2008_10_13.tar.gz/download" target="_blank">link</a>
+			to download <span class="filename">fxload</span>). You can also check the package manager for your Linux distribution
+			to see if the <span class="filename">fxload</span> package is available for installation.</p>
+			<p>2. A recent version of perl is required, with the <span class="italic">switch</span> module installed.</p>
+		</td>
+	</tr>
+</table>
+
+*/

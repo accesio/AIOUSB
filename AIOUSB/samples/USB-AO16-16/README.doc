@@ -1,0 +1,60 @@
+/*! @page usb_ao16_16 USB-AO16-16
+
+USB-AO16-16A Sample Program Release Notes
+
+[TOC]
+
+# Overview {#ao16_16_overview}
+
+Sample.cpp is a simple program to demonstrate using the AIOUSB module to control an ACCES I/O model USB-AO16-16A analog output board. The program is not intended to be a comprehensive demonstration and is limited to demonstrating the following features of the AIOUSB API:
+
+- Initializing and shutting down the API – AIOUSB_Init(), AIOUSB_Exit()
+- Identifying devices on the USB bus – QueryDeviceInfo()
+- Obtaining the serial number of a device on the bus – GetDeviceSerialNumber()
+- Setting the output range – DACSetBoardRange()
+- Writing to a single D/A channel – DACDirect()
+- Writing to multiple D/A channels – DACMultiDirect()
+
+For easy identification, the source code lines prefixed with the comment API denote calls to the AIOUSB API.
+
+## Building {#ao16_16_building}
+
+Before building the program, make sure the libusb module is installed. Also refer to the comments at the top of sample.cpp for additional details.
+
+Also, make sure that the ACCES I/O AIOUSB module is installed (see Installing And Using AIOUSB Library).
+
+The simplest way to build the sample program is to type make at the command line. The sample program is the default target in Makefile. Optionally, one can manually compile the program with the command:
+
+g++ sample.cpp -laiousb -lusb-1.0 -o sample
+
+## Executing {#ao16_16_executing}
+
+Before executing the sample program, make sure the Linux system is configured to automatically detect ACCES I/O devices plugged into the USB bus and upload the appropriate firmware to those devices. The files that support this automatic configuration have recently been updated and new documentation prepared. Please refer to Configuring ACCES I/O USB Devices To Work Under Linux for details.
+
+To execute the program, attach a USB-AO16-16A analog output board to the USB bus and verify that its LED turns on, indicating that firmware has been successfully uploaded to the board. Then simply type ./sample at the command line. There are no command line arguments to worry about. The program will search for the first USB-AO16-16A analog output board on the USB bus. If it fails to find such a board, it will print an error message and quit. If it finds such a board, the following output will appear:
+
+@code{.sh}
+USB-AO16-16A sample program version 1.13, 26 November 2009
+  AIOUSB library version 1.84, 22 December 2009
+  This program demonstrates controlling a USB-AO16-16A device on
+  the USB bus. For simplicity, it uses the first such device found
+  on the bus.
+ACCES devices found:
+  Device at index 0:
+    Product ID: 0x8040
+    Product name: USB-AI16-16A
+    Number of digital I/O bytes: 2
+    Number of counters: 1
+  Device at index 1:
+    Product ID: 0x8060
+    Product name: USB-AO16-16A
+    Number of digital I/O bytes: 2
+    Number of counters: 0
+Serial number of device at index 1: 40e39396fc4198c0
+D/A output range successfully set
+32767 D/A counts successfully output to channel 0
+D/A counts successfully output to 16 channels simultaneously
+The sample program prints out a list of all the ACCES devices found on the USB bus and then proceeds to exercise the first USB-AO16-16A board found. Notice in the above example, the sample program also found a model USB-AI16-16A on the bus.
+@endcode
+
+*/

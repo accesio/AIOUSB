@@ -1,0 +1,450 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<link rel="stylesheet" href="../../../../../doc/stylesheet.css" type="text/css">
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>USB-AI16-16A Sample Program Release Notes</title>
+</head>
+<body lang="en-us" dir="ltr">
+<h1>USB-AI16-16A Sample Program Release Notes</h1>
+<p><a href="../../../../../doc/README.html">Table of Contents</a></p>
+<h2>Overview</h2>
+<p>This directory contains several sample programs for the USB-AI16-16A which demonstrate use of different
+features and libraries.</p>
+<ul>
+	<li><p><a href="#BasicAIOUSBSampleC">Basic AIOUSB Sample - sample2.c, sample.cpp</a></p>
+	<li><p><a href="#AIOUSBJavaSample">AIOUSB Java Sample - Sample.java</a></p>
+	<li><p><a href="#ExternalCalibrationToolCpp">External Calibration Tool - C++ Version - extcal.cpp</a></p>
+	<li><p><a href="#ExternalCalibrationToolJava">External Calibration Tool - Java Version - Extcal.java</a></p>
+</ul>
+<a name="BasicAIOUSBSample"></a>
+<h2>Basic AIOUSB Sample</h2>
+<p><a href="sample2.c.html" target="_blank"><span class="filename">Sample2.c</span></a> and
+<a href="sample.cpp.html" target="_blank"><span class="filename">sample.cpp</span></a> are simple
+programs to demonstrate using the AIOUSB module to control an ACCES I/O model USB-AI16-16A analog input
+board. These programs are nearly identical, one written for the standard gcc compiler and the other
+written for the g++ compiler. They are not intended to be comprehensive demonstrations and are limited to
+demonstrating the following features of the AIOUSB API:</p>
+<ul>
+	<li><p>Initializing and shutting down the API – <span class="funcname">AIOUSB_Init()</span>,
+		<span class="funcname">AIOUSB_Exit()</span></p>
+	<li><p>Identifying devices on the USB bus – <span class="funcname">QueryDeviceInfo()</span></p>
+	<li><p>Obtaining the serial number of a device on the bus – <span class="funcname">GetDeviceSerialNumber()</span></p>
+	<li><p>Configuring the board – <span class="funcname">ADC_SetConfig()</span></p>
+	<li><p>Calibrating the converter – <span class="funcname">ADC_SetCal()</span></p>
+	<li><p>Reading the analog inputs – <span class="funcname">ADC_GetScan()</span>,
+		<span class="funcname">ADC_GetScanV()</span>, <span class="funcname">ADC_GetChannelV()</span></p>
+	<li><p>Bulk reading of analog inputs – <span class="funcname">ADC_BulkAcquire()</span>,
+		<span class="funcname">ADC_BulkPoll()</span>, <span class="funcname">AIOUSB_SetStreamingBlockSize()</span></p>
+</ul>
+<p>For easy identification, the source code lines prefixed with the comment <span class="computer bold">/*API*/</span>
+denote calls to the AIOUSB API.</p>
+<h3>Building</h3>
+<p>Before building the program, make sure the <a href="http://www.libusb.org/" target="_blank">libusb</a>
+module is installed. Also refer to the comments at the top of <span class="filename">sample.cpp</span> for additional details.</p>
+<p>Also, make sure that the ACCES I/O AIOUSB module is installed (<span class="italic">see
+<a href="../../../doc/README.html">Installing And Using AIOUSB Library</a></span>).</p>
+<p>The simplest way to build the sample program is to type <span class="computer bold italic">make</span> at the command line.
+The sample program is the default target in <span class="filename">Makefile</span>. Optionally, one can manually compile the
+program with the command:</p>
+<p class="computer bold indent1">g++ sample.cpp -laiousb -lusb-1.0 -o sample</p>
+<h3>Executing</h3>
+<p>Before executing the sample program, make sure the Linux system is configured to automatically
+detect ACCES I/O devices plugged into the USB bus and upload the appropriate firmware to those devices.
+The files that support this automatic configuration have recently been updated and new documentation
+prepared. Please refer to <a href="../../../../Firmware/doc/README.html">Configuring ACCES I/O USB Devices To Work Under Linux</a>
+for details.</p>
+<p>To execute the program, attach a USB-AI16-16A analog input board to the USB bus and verify that its LED turns on, indicating
+that firmware has been successfully uploaded to the board. Then simply type <span class="computer bold italic">./sample</span>
+at the command line. There are no command line arguments to worry about. The program will search for the first USB-AI16-16A
+analog input board on the USB bus. If it fails to find such a board, it will print an error message and quit. If it finds such
+a board, the following output will appear:</p>
+<pre class="computer output">USB-AI16-16A sample program version 1.26, 22 December 2009
+  AIOUSB library version 1.84, 22 December 2009
+  This program demonstrates controlling a USB-AI16-16A device on
+  the USB bus. For simplicity, it uses the first such device found
+  on the bus.
+ACCES devices found:
+  Device at index 0:
+    Product ID: 0x8045
+    Product name: USB-AI16-64MA
+    Number of digital I/O bytes: 2
+    Number of counters: 1
+Serial number of device at index 0: 40e39bb62c62cd35
+A/D settings successfully configured
+Automatic calibration completed successfully
+Ground counts = 0 (should be approx. 0)
+Reference counts = 65130 (should be approx. 65130)
+Volts read:
+  Channel  0 = 0.006256
+  Channel  1 = 0.006104
+  Channel  2 = 0.006104
+  Channel  3 = 0.006256
+  Channel  4 = 0.107729
+  Channel  5 = 0.084840
+  Channel  6 = 0.066529
+  Channel  7 = 0.052796
+  Channel  8 = 0.009308
+  Channel  9 = 0.008850
+  Channel 10 = 0.008698
+  Channel 11 = 0.008392
+  Channel 12 = 0.000000
+  Channel 13 = 0.000000
+  Channel 14 = 0.000000
+  Channel 15 = 0.001373
+Volts read from A/D channel 5 = 0.006409
+Started bulk acquire of 35200000 bytes
+  34397184 bytes remaining
+  33393664 bytes remaining
+  32390144 bytes remaining
+  31386624 bytes remaining
+  30383104 bytes remaining
+  29379584 bytes remaining
+  28376064 bytes remaining
+  27573248 bytes remaining
+  26569728 bytes remaining
+  25566208 bytes remaining
+  24562688 bytes remaining
+  23559168 bytes remaining
+  22555648 bytes remaining
+  21552128 bytes remaining
+  20548608 bytes remaining
+  19745792 bytes remaining
+  18742272 bytes remaining
+  17738752 bytes remaining
+  16735232 bytes remaining
+  15731712 bytes remaining
+  14728192 bytes remaining
+  13724672 bytes remaining
+  12721152 bytes remaining
+  11918336 bytes remaining
+  10914816 bytes remaining
+  9911296 bytes remaining
+  8907776 bytes remaining
+  7904256 bytes remaining
+  6900736 bytes remaining
+  5897216 bytes remaining
+  4893696 bytes remaining
+  4090880 bytes remaining
+  3087360 bytes remaining
+  2083840 bytes remaining
+  1080320 bytes remaining
+  0 bytes remaining
+Successfully bulk acquired 35200000 bytes</pre>
+<p>The sample program prints out a list of all the ACCES devices found on the USB bus and then proceeds
+to exercise the first USB-AI16-16A board found.</p>
+<a name="AIOUSBJavaSample"></a>
+<h2>AIOUSB Java Sample</h2>
+<p><a href="Sample.java.html" target="_blank"><span class="filename">Sample.java</span></a> is a Java
+implementation of the above sample program. It demonstrates use of the Java class library, which
+is nearly identical to the C++ class library. Refer to
+<a href="../../../java/doc/index.html">AIOUSB Java Class Library Reference</a> for detailed documentation
+on the Java class library.</p>
+<h3>Building</h3>
+<p>The prerequisites for building <span class="filename">Sample.class</span> are that the
+<a href="http://java.sun.com/" target="_blank">Java Development Kit (JDK)</a> must be installed. In addition,
+the AIOUSB Java library (<span class="filename">aiousb.jar</span>) must be installed somewhere on your system.
+To compile the program, either use the supplied <span class="filename">Makefile</span> or use the command:</p>
+<p class="computer bold indent1">javac -cp ../../java/aiousb.jar Sample.java</p>
+<p>This sample program will write the bulk A/D data it receives from the device to a file named
+<span class="filename">bulkdata</span> in the current directory. With the default settings, this file will be
+2,000,000 bytes in size. If you prefer not to have the program create such a file, simply edit
+<span class="filename">Sample.java</span> and set the variable named
+<span class="varname">SAVE_DATA_TO_FILE</span> to <span class="italic">false</span>.</p>
+<p>In addition, the probram checks the data received for zero, which, using the default settings would indicate
+some sort of problem with the hardware or software. However, if zero is a legitimate count value for the device
+to measure (i.e. you are feeding a voltage into the board that is at or below the board's minimum measurement
+range), then you may wish to turn off that data check as well. You can do so by setting the variable named
+<span class="varname">CHECK_FOR_ZERO_DATA</span> to <span class="italic">false</span>.</p>
+<h3>Executing</h3>
+<p>To execute the program, attach a USB-AI16-16A analog input board to the USB bus and verify that its LED
+turns on, indicating that firmware has been successfully uploaded to the board. Then type the command:</p>
+<p class="computer bold indent1">java -cp ../../java/aiousb.jar:. Sample</p>
+<p>Notice that multiple class paths are specified in the above command: the path to
+<span class="filename">aiousb.jar</span> and ".", which represents the class path of
+<span class="filename">Sample.class</span> (assuming that it is the current directory).</p>
+<p>Alternatively, assuming you used the make file to build the program, you can run it with the command:</p>
+<p class="computer bold indent1">java -jar Sample.jar</p>
+<p>There are no command line arguments to worry about. The program will search for the first USB-AI16-16A
+analog input board on the USB bus. If it fails to find such a board, it will print an error message and quit.
+If it finds such a board, the following output will appear:</p>
+<pre class="computer output">USB-AI16-16A sample program version: 1.22, 25 December 2009
+  AIOUSB Java library version: 1.6, 17 December 2009
+  AIOUSB library version: 1.84, 22 December 2009
+  JRE version: 1.6.0_17
+  OS version: Linux amd64 2.6.31.5-0.1-custom
+  This program demonstrates controlling a USB-AI16-16A family device on
+  the USB bus. For simplicity, it uses the first such device found
+  on the bus and supports these product IDs:[USB-AI16-16A, USB-AI16-16E,
+  USB-AI12-16A, USB-AI12-16, USB-AI12-16E, USB-AI16-64MA, USB-AI16-64ME,
+  USB-AI12-64MA, USB-AI12-64M, USB-AI12-64ME, USB-AI16-32A, USB-AI16-32E,
+  USB-AI12-32A, USB-AI12-32, USB-AI12-32E, USB-AI16-64A, USB-AI16-64E,
+  USB-AI12-64A, USB-AI12-64, USB-AI12-64E, USB-AI16-96A, USB-AI16-96E,
+  USB-AI12-96A, USB-AI12-96, USB-AI12-96E, USB-AI16-128A, USB-AI16-128E,
+  USB-AI12-128A, USB-AI12-128, USB-AI12-128E]
+ACCES devices found:
+  Device at index 0
+    Product ID: 0x8045
+    Product name: USB-AI16-64MA
+    Serial number: 0x40e39bb62c62cd35
+    Number of A/D channels: 16
+    Number of MUXed A/D channels: 64
+    Number of digital I/O ports: 2
+    Number of digital I/O channels: 16
+    Number of tristate groups: 0
+    Number of tristate channels: 0
+    Number of counter blocks: 1
+    Number of counters: 3
+EEPROM contents:
+[32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+ 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32]
+A/D successfully configured
+Calibrating A/D, may take a few seconds ... successful
+Read from channel 0 to channel 63 using 50 oversamples:
+  Channel 0 = 32812 (0.0067903 volts)
+  Channel 1 = 32812 (0.0067903 volts)
+  Channel 2 = 32812 (0.0067903 volts)
+  Channel 3 = 32813 (0.0069429 volts)
+  Channel 4 = 32864 (0.0147250 volts)
+  ...
+  Channel 59 = 32884 (0.0177768 volts)
+  Channel 60 = 33169 (0.0612650 volts)
+  Channel 61 = 33065 (0.0453956 volts)
+  Channel 62 = 32992 (0.0342565 volts)
+  Channel 63 = 32941 (0.0264744 volts)
+Analog input data set captured from USB-AI16-64MA (S/N 0x40e39bb62c62cd35):
+  Time stamp: Fri Dec 25 09:44:51 PST 2009
+  Calibration mode: 0
+  Trigger mode: 4
+  Over-sample: 50
+  Discard first sample: true
+  64 data points:
+    Channel 000, 32816 A/D counts,  0.0074006V, +/-5V, single-ended
+    Channel 001, 32817 A/D counts,  0.0075532V, +/-5V, single-ended
+    Channel 002, 32818 A/D counts,  0.0077058V, +/-5V, single-ended
+    Channel 003, 32819 A/D counts,  0.0078584V, +/-5V, single-ended
+    Channel 004, 33478 A/D counts,  0.1084154V, +/-5V, single-ended
+    ...
+    Channel 059, 32889 A/D counts,  0.0185397V, +/-5V, single-ended
+    Channel 060, 33194 A/D counts,  0.0650797V, +/-5V, single-ended
+    Channel 061, 33081 A/D counts,  0.0478370V, +/-5V, single-ended
+    Channel 062, 33003 A/D counts,  0.0359350V, +/-5V, single-ended
+    Channel 063, 32949 A/D counts,  0.0276951V, +/-5V, single-ended
+Bulk read 4000 samples, 996000 remaining
+Bulk read 8000 samples, 992000 remaining
+Bulk read 12000 samples, 988000 remaining
+Bulk read 16000 samples, 984000 remaining
+Bulk read 20000 samples, 980000 remaining
+...
+Bulk read 984000 samples, 16000 remaining
+Bulk read 988000 samples, 12000 remaining
+Bulk read 992000 samples, 8000 remaining
+Bulk read 996000 samples, 4000 remaining
+Bulk read 1000000 samples, 0 remaining</pre>
+<br>
+<a name="ExternalCalibrationToolCpp"></a>
+<h2>External Calibration Tool - C++ Version</h2>
+<p><a href="extcal.cpp.html" target="_blank"><span class="filename">Extcal.cpp</span></a> is another simple
+program to demonstrate using the AIOUSB module and AIOUSB C++ class library to perform an external calibration
+of an ACCES I/O model USB-AI16-16A analog input board. The program is not intended to be a comprehensive
+demonstration and is limited to demonstrating the following features of the AIOUSB API:</p>
+<ul>
+	<li><p>Initializing and shutting down the API – <span class="funcname">USBDeviceManager::open()</span>,
+		<span class="funcname">USBDeviceManager::close()</span></p>
+	<li><p>Finding devices on the USB bus – <span class="funcname">USBDeviceManager::getDeviceByProductID()</span></p>
+	<li><p>Configuring the board – <span class="funcname">USBDevice::setCommTimeout()</span>,
+		<span class="funcname">AnalogInputSubsystem::setCalMode()</span>,
+		<span class="funcname">AnalogInputSubsystem::setDiscardFirstSample()</span>,
+		<span class="funcname">AnalogInputSubsystem::setTriggerMode()</span>,
+		<span class="funcname">AnalogInputSubsystem::setGainCodeAndDiffMode()</span>,
+		<span class="funcname">AnalogInputSubsystem::setOversample()</span></p>
+	<li><p>Installing a default calibration table – <span class="funcname">AnalogInputSubsystem::calibrate(bool,...)</span></p>
+	<li><p>Reading the analog inputs in counts – <span class="funcname">AnalogInputSubsystem::read()</span>
+	<li><p>Generating an external calibration table – <span class="funcname">AnalogInputSubsystem::calibrate(double[],...)</span></p>
+</ul>
+<p>As with the sample program described above, the source code lines prefixed with the comment
+<span class="computer bold">/*API*/</span> denote calls to the AIOUSB and C++ class library API.</p>
+<p>The C++ class library should be considered <span class="italic">beta</span> software and is still being developed.
+Notice, too, that when using the C++ class library it is not necessary (in fact, it's not permitted) to call
+<span class="funcname">AIOUSB_Init()</span> or <span class="funcname">AIOUSB_Exit()</span>. These are implicitly called by
+<span class="typename">USBDeviceManager::open()</span> and <span class="typename">USBDeviceManager::close()</span>. Refer to
+<a href="../../../classlib/doc/index.html">AIOUSB C++ Class Library Reference</a> for detailed documentation on the C++
+class library.</p>
+<h3>Building</h3>
+<p>The prerequisites for building <span class="filename">extcal</span> are the same as those for building
+the sample program described above, with the added requirement that the C++ class library also be installed.
+The program can be built using the make file provided or the explicit command:</p>
+<p class="computer bold indent1">g++ extcal.cpp -lclassaiousb -laiousbcpp -lusb-1.0 -o extcal</p>
+<h3>Executing</h3>
+<p>To execute the program, attach a USB-AI16-16A analog input board to the USB bus and verify that its LED turns on, indicating
+that firmware has been successfully uploaded to the board. Then simply type <span class="computer bold italic">./extcal</span>
+at the command line. There are no command line arguments to worry about. The program will search for the first USB-AI16-16A
+analog input board on the USB bus. If it fails to find such a board, it will print an error message and quit. If it finds such
+a board, the following output will appear:</p>
+<pre class="computer output">USB-AI16-16 sample program version 1.18, 25 December 2009
+  AIOUSB C++ class library version 1.7, 23 December 2009
+  AIOUSB library version 1.84, 22 December 2009
+
+  This program demonstrates external calibration of a USB-AI16-16 device
+  on the USB bus. For simplicity, it uses the first such device found on
+  the bus and supports these product IDs: USB-AI16-16A, USB-AI16-16E,
+  USB-AI12-16A, USB-AI12-16, USB-AI12-16E, USB-AI16-64MA, USB-AI16-64ME,
+  USB-AI12-64MA, USB-AI12-64M, USB-AI12-64ME, USB-AI16-32A, USB-AI16-32E,
+  USB-AI12-32A, USB-AI12-32, USB-AI12-32E, USB-AI16-64A, USB-AI16-64E,
+  USB-AI12-64A, USB-AI12-64, USB-AI12-64E, USB-AI16-96A, USB-AI16-96E,
+  USB-AI12-96A, USB-AI12-96, USB-AI12-96E, USB-AI16-128A, USB-AI16-128E,
+  USB-AI12-128A, USB-AI12-128, USB-AI12-128E.
+
+  This external calibration procedure allows you to inject a sequence of
+  precise voltages into the USB-AI16-16 that will be used to calibrate its
+  A/D. This procedure calibrates the A/D using channel 0 on the 0-10V range.
+  A minimum of 2 calibration points are required. The procedure is as follows:
+
+  1) Adjust a precision voltage source to a desired target voltage. These
+     target voltages do not have to be evenly spaced or provided in any
+     particular order.
+
+  2) When you have adjusted the precision voltage source to your desired
+     target, type in the exact voltage being fed into the USB-AI16-16 and
+     press &lt;Enter&gt;. This program will read the A/D and display the reading,
+     asking you to accept it or not. If it looks acceptable, press 'y'.
+     Otherwise, press any other key and the program will retake the reading.
+
+  3) When you are finished calibrating, press &lt;Enter&gt; without entering a
+     voltage, and the A/D will be calibrated using the data entered, and
+     the calibration table will be saved to a file in a format that can be
+     subsequently loaded into the A/D.
+
+ACCES devices found:
+  Device at index 0:
+    Product ID: 0x8040
+    Product name: USB-AI16-16A
+    Serial number: 0x40e38f15d5c94894
+    Number of A/D channels: 16
+    Number of MUXed A/D channels: 16
+    Number of digital I/O ports: 2
+    Number of digital I/O channels: 16
+    Number of tristate groups: 0
+    Number of tristate channels: 0
+    Number of counter blocks: 1
+    Number of counters: 3
+Calibrating A/D, may take a few seconds ... successful
+Measuring calibration point 1:
+  Feed a voltage into channel 0 and enter voltage here
+  (enter nothing to finish and calibrate A/D): 0
+  Read 115 A/D counts (0.0175479 volts), accept (y/n)? y
+Measuring calibration point 2:
+  Feed a voltage into channel 0 and enter voltage here
+  (enter nothing to finish and calibrate A/D): 9.9
+  Read 64851 A/D counts (9.8956283 volts), accept (y/n)? y
+Measuring calibration point 3:
+  Feed a voltage into channel 0 and enter voltage here
+  (enter nothing to finish and calibrate A/D):
+External calibration of A/D successful, table saved in ADC-Ext-Cal-Table-40e38f15d5c94894</pre>
+<br>
+<a name="ExternalCalibrationToolJava"></a>
+<h2>External Calibration Tool - Java Version</h2>
+<p><a href="Extcal.java.html" target="_blank"><span class="filename">Extcal.java</span></a> is a Java
+implementation of the above calibration utility. It demonstrates use of the Java class library, which
+is nearly identical to the C++ class library. Refer to
+<a href="../../../java/doc/index.html">AIOUSB Java Class Library Reference</a> for detailed documentation
+on the Java class library.</p>
+<h3>Building</h3>
+<p>The prerequisites for building <span class="filename">Extcal.class</span> are that the
+<a href="http://java.sun.com/" target="_blank">Java Development Kit (JDK)</a> must be installed. In addition,
+the AIOUSB Java library (<span class="filename">aiousb.jar</span>) must be installed somewhere on your system.
+To compile the program, either use the supplied <span class="filename">Makefile</span> or use the command:</p>
+<p class="computer bold indent1">javac -cp ../../java/aiousb.jar Extcal.java</p>
+<h3>Executing</h3>
+<p>To execute the program, attach a USB-AI16-16A analog input board to the USB bus and verify that its LED
+turns on, indicating that firmware has been successfully uploaded to the board. Then type the command:</p>
+<p class="computer bold indent1">java -cp ../../java/aiousb.jar:. Extcal</p>
+<p>Notice that multiple class paths are specified in the above command: the path to
+<span class="filename">aiousb.jar</span> and ".", which represents the class path of
+<span class="filename">Extcal.class</span> (assuming that it is the current directory).</p>
+<p>Alternatively, assuming you used the make file to build the program, you can run it with the command:</p>
+<p class="computer bold indent1">java -jar Extcal.jar</p>
+<p>There are no command line arguments to worry about. The program will search for the first USB-AI16-16A
+analog input board on the USB bus. If it fails to find such a board, it will print an error message and quit.
+If it finds such a board, the following output will appear:</p>
+<pre class="computer output">USB-AI16-16A sample program version: 1.11, 25 December 2009
+  AIOUSB Java library version: 1.6, 17 December 2009
+  AIOUSB library version: 1.84, 22 December 2009
+  JRE version: 1.6.0_17
+  OS version: Linux amd64 2.6.31.5-0.1-custom
+
+  This program demonstrates external calibration of a USB-AI16-16 device
+  on the USB bus. For simplicity, it uses the first such device found on
+  the bus.
+
+  This external calibration procedure allows you to inject a sequence of
+  precise voltages into the USB-AI16-16 that will be used to calibrate its
+  A/D. This procedure calibrates the A/D using channel 0 on the 0-10V range.
+  A minimum of 2 calibration points are required. The procedure is as follows:
+
+  1) Adjust a precision voltage source to a desired target voltage. These
+     target voltages do not have to be evenly spaced or provided in any
+     particular order.
+
+  2) When you have adjusted the precision voltage source to your desired
+     target, type in the exact voltage being fed into the USB-AI16-16 and
+     press &lt;Enter&gt;. This program will read the A/D and display the reading,
+     asking you to accept it or not. If it looks acceptable, press 'y'.
+     Otherwise, press any other key and the program will retake the reading.
+
+  3) When you are finished calibrating, press &lt;Enter&gt; without entering a
+     voltage, and the A/D will be calibrated using the data entered, and
+     the calibration table will be saved to a file in a format that can be
+     subsequently loaded into the A/D.
+
+ACCES devices found:
+  Device at index 0
+    Product ID: 0x8045
+    Product name: USB-AI16-64MA
+    Serial number: 0x40e39bb62c62cd35
+    Number of A/D channels: 16
+    Number of MUXed A/D channels: 64
+    Number of digital I/O ports: 2
+    Number of digital I/O channels: 16
+    Number of tristate groups: 0
+    Number of tristate channels: 0
+    Number of counter blocks: 1
+    Number of counters: 3
+Calibrating A/D, may take a few seconds ... successful
+Measuring calibration point 1:
+  Feed a voltage into channel 0 and enter voltage here
+  (enter nothing to finish and calibrate A/D):
+  ...</pre>
+<p class="footer">Document: $Revision: 1.35 $ $Date: 2010/01/29 18:37:20 $</p>
+</body>
+</html>

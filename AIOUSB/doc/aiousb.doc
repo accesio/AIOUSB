@@ -1,0 +1,40 @@
+/*! \page aiousblib AIOUSB C libary
+
+\addindex AIOUSB
+\tableofcontents
+
+\section aiousb_overview Overview
+
+The AIOUSB C language library implements the core functionality of the entire suite of libraries, supporting the capabilities of all of ACCES' USB products. (The only deficiency is that the D/A streaming functions in the USB-DA12-8A product are not currently implemented, although they will be eventually.) This library is written in C and compiled for both C (gcc) and C++ (g++) and may be used as-is with C and C++ programs. This library utilizes libusb (preferred version 1.0.6) for all USB communications.
+Installing
+
+Assuming you’re starting from the root directory of the distribution, installing AIOUSB consists of performing these few simple steps (logged in as 'root', of course).
+
+@code{.sh}
+mkdir /usr/local/include/aiousb
+cp -p lib/aiousb.h /usr/local/include/aiousb
+cp -p lib/libaiousb*.a /usr/local/lib
+export CPATH=/usr/local/include/libusb-1.0/:/usr/local/include/aiousb
+@endcode
+
+\section aiousb_other_stuff Other stuff
+
+You can, of course, place the AIOUSB files (aiousb.h, libaiousb*.a) elsewhere, such as in the local directory of the application program that will use AIOUSB. The above steps are suggested in order to conform to the usual Linux conventions and make the AIOUSB files available to all users and all application programs.
+
+If you do locate the libraries and header files somewhere else, there is an environment variable you can set which is used by the sample program make files:
+
+export AIOUSBLIBDIR="path to the AIOUSB libraries"
+
+
+There are several variations of the AIOUSB C library. They all begin with "libaiousb" and have an extension of ".a". There are currently no shared versions of the AIOUSB C library. The library files which contain the string "cpp" contain object modules that are compiled for use with C++ (using "g++"). They are not C++ class libraries (see below for information about the genuine C++ class library). The library files which contain the string "dbg" are compiled for source level debugging with the "-ggdb" compiler option. At present, there are four variations of the AIOUSB C library: C or C++, and release or debug.
+Documentation
+
+Complete documentation for the AIOUSB C library may be found in AIOUSB API Reference. This document is based on the USB Software Reference Manual, but adds considerably more detail and includes documentation for the many new functions added to the Linux implementation. This documentation is also intended to be useful as a reference for the Windows implementation of AIOUSB, with differences between the Linux and Windows implementations clearly highlighted.
+Compiling Programs
+
+Assuming you have installed the AIOUSB C library according to the above instructions, compiling a program to use it is as simple as:
+
+\section aiousb_compile_sample Compiling samples
+
+Please see \ref UnixBuild "compiling for Linux / Mac" or \ref WindowsBuild "compiling on windows".
+*/

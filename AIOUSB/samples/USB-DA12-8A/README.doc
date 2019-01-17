@@ -1,0 +1,156 @@
+/*! @page usb_da12_8a USB-DA12-8A
+
+USB-DA12-8A Sample Program Release Notes
+
+[TOC]
+
+# Overview {#usb_da12_8a_overview}
+
+This directory contains several sample programs for the USB-DA12-8A which demonstrate use of different features and libraries.
+
+- AIOUSB C Sample - sample.cpp
+
+- AIOUSB C++ Sample - SampleClass.cpp
+
+- AIOUSB Java Sample - Sample.java
+
+# AIOUSB C Sample {#usb_da12_8a_c_sample}
+
+Sample.cpp is a simple program to demonstrate using the AIOUSB module to control an ACCES I/O model USB-DA12-8A analog output board. The program is not intended to be a comprehensive demonstration and is limited to demonstrating the following features of the AIOUSB API:
+
+- Initializing and shutting down the API – AIOUSB_Init(), AIOUSB_Exit()
+
+- Identifying devices on the USB bus – QueryDeviceInfo()
+
+- Obtaining the serial number of a device on the bus – GetDeviceSerialNumber()
+
+- Writing to a single D/A channel – DACDirect()
+
+- Writing to multiple D/A channels – DACMultiDirect()
+
+- For easy identification, the source code lines prefixed with the comment \/\*API\*\/ denote calls to the AIOUSB API.
+
+## Building {#usb_da12_8a_building}
+
+Before building the program, make sure the libusb module is installed. Also refer to the comments at the top of sample.cpp for additional details.
+
+Also, make sure that the ACCES I/O AIOUSB module is installed (see Installing And Using AIOUSB Library).
+
+The simplest way to build the sample program is to type make at the command line. The sample program is the default target in Makefile. Optionally, one can manually compile the program with the command:
+
+g++ sample.cpp -laiousbcpp -lusb-1.0 -o sample
+
+## Executing {#usb_da12_8a_executing}
+
+Before executing the sample program, make sure the Linux system is configured to automatically detect ACCES I/O devices plugged into the USB bus and upload the appropriate firmware to those devices. The files that support this automatic configuration have recently been updated and new documentation prepared. Please refer to Configuring ACCES I/O USB Devices To Work Under Linux for details.
+
+To execute the program, attach a USB-DA12-8A analog output board to the USB bus and verify that its LED turns on, indicating that firmware has been successfully uploaded to the board. Then simply type ./sample at the command line. There are no command line arguments to worry about. The program will search for the first USB-DA12-8A analog output board on the USB bus. If it fails to find such a board, it will print an error message and quit. If it finds such a board, the following output will appear:
+
+@code{.sh}
+USB-DA12-8A sample program version 1.1, 29 January 2010
+  AIOUSB library version 1.88, 18 January 2010
+  This program demonstrates controlling a USB-DA12-8A device on
+  the USB bus. For simplicity, it uses the first such device found
+  on the bus.
+ACCES devices found:
+  Device at index 0:
+    Product ID: 0x4002
+    Product name: USB-DA12-8A
+    Number of digital I/O bytes: 0
+    Number of counters: 0
+Serial number of device at index 0: 40e3a0d0a78887c2
+Device properties successfully retrieved
+2047 D/A counts successfully output to channel 0
+D/A counts successfully output to 8 channels simultaneously
+@endcode
+
+The sample program prints out a list of all the ACCES devices found on the USB bus and then proceeds to exercise the first USB-DA12-8A board found.
+
+# AIOUSB C++ Sample {#usb_da12_8a_cppsample}
+
+SampleClass.cpp is a C++ implementation of the above sample program. It demonstrates use of the C++ class library, which utilizes the AIOUSB C-language library. Refer to AIOUSB C++ Class Library Reference for detailed documentation on the C++ class library.
+
+## Building {#usb_da12_8a_cpp_building}
+
+The prerequisites for building SampleClass are the same as for sample described above. In addition, the C++ class libraries must be installed and be accessible in the include path and linker library path. Once these requirements are satisfied, you can build the sample program with the supplied Makefile.
+
+## Executing {#usb_da12_8a_cpp_executing}
+
+Assuming you have an USB-DA12-8A device up and running (as indicated by its illuminated LED), type the following command to execute the sample program:
+
+./SampleClass
+
+There are no command line arguments to worry about. The program will search for the first USB-DA12-8A device on the USB bus. If it fails to find such a board, it will print an error message and quit. If it finds such a device, the following output will appear:
+
+@code{.sh}
+USB-DA12-8A sample program version 1.1, 29 January 2010
+  AIOUSB C++ class library version 1.8, 18 January 2010
+  AIOUSB library version 1.88, 18 January 2010
+
+  This program demonstrates controlling a USB-DA12-8A family device on
+  the USB bus. For simplicity, it uses the first such device found
+  on the bus and supports these product IDs: USB-DA12-8A-A, USB-DA12-8A
+ACCES devices found:
+  Device at index 0:
+    Product ID: 0x4002
+    Product name: USB-DA12-8A
+    Serial number: 0x40e3a0d0a78887c2
+    Number of D/A channels: 8
+    D/A count range: 0-fff
+Found device 'USB-DA12-8A' with serial number 40e3a0d0a78887c2
+2047 D/A counts successfully output to channel 0
+Multiple D/A counts successfully output to 8 channels
+5 volts (3071 D/A counts) successfully output to channel 0
+Multiple volts successfully output to 8 channels
+@endcode
+
+# AIOUSB Java Sample {#usb_da12_8a_java_sample}
+
+Sample.java is a Java implementation of the above sample program. It demonstrates use of the Java class library, which utilizes the AIOUSB C-language library. Refer to AIOUSB Java Class Library Reference for detailed documentation on the Java class library.
+
+## Building {#usb_da12_8a_java_building}
+
+The prerequisites for building Sample.jar are that the Java Development Kit (JDK) must be installed. In addition, the AIOUSB Java library (aiousb.jar) must be installed somewhere on your system. To compile the program, either use the supplied Makefile or use the command:
+
+javac -cp ../../java/aiousb.jar Sample.java
+
+## Executing {#usb_da12_8a_java_executing}
+
+Assuming you have an USB-DA12-8A device up and running (as indicated by its illuminated LED), type the following command to execute the sample program:
+
+@code{.sh}
+java -jar Sample.jar
+@endcode
+
+or
+
+@code{.sh}
+java -cp ../../java/aiousb.jar:. Sample
+@endcode
+
+There are no command line arguments to worry about. The program will search for the first USB-DA12-8A device on the USB bus. If it fails to find such a board, it will print an error message and quit. If it finds such a device, the following output will appear:
+
+@code{.sh}
+USB-DA12-8A sample program version: 1.1, 29 January 2010
+  AIOUSB Java library version: 1.7, 18 January 2010
+  AIOUSB library version: 1.88, 18 January 2010
+  JRE version: 1.6.0_17
+  OS version: Linux amd64 2.6.31.5-0.1-custom
+  This program demonstrates controlling a USB-DA12-8A device on
+  the USB bus. For simplicity, it uses the first such device found
+  on the bus.
+ACCES devices found:
+  Device at index 0
+    Product ID: 0x4002
+    Product name: USB-DA12-8A
+    Serial number: 0x40e3a0d0a78887c2
+    Number of D/A channels: 8
+    D/A count range: 0-fff
+Found device 'USB-DA12-8A' with serial number 40e3a0d0a78887c2
+2047 D/A counts successfully output to channel 0
+Multiple D/A counts successfully output to 8 channels
+5.0 volts (3071 D/A counts) successfully output to channel 0
+Multiple volts successfully output to 8 channels
+@endcode
+
+*/
