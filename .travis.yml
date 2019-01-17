@@ -1,0 +1,15 @@
+language: cpp
+
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install libusb-1.0
+compiler:  
+    - gcc
+    - clang
+
+before_script:
+    - mkdir AIOUSB/build
+    - cd AIOUSB/build
+    - cmake ..
+
+script: make  
