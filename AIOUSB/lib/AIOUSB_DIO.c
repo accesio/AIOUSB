@@ -1,8 +1,8 @@
 /**
  * @file   AIOUSB_DIO.c
- * @author $Format: %an <%ae>$
- * @date   $Format: %ad$
- * @version $Format: %h$
+ * @author  Jimi Damon <jdamon@accesio.com>
+ * @date    Thu Jul 20 14:41:44 2017 -0700
+ * @version  cfdbc9a
  * @brief Core code to interface with Digital cards
  */
 
@@ -403,7 +403,7 @@ AIORESULT DIO_Write1(
     AIORET_TYPE retval;
     AIOUSBDevice *deviceDesc = _check_dio( DeviceIndex, &result );
     USBDevice *usb;
-    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
+    AIO_ASSERT_AIORET_TYPE( result, result == AIOUSB_SUCCESS );
     AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_PARAMETER, BYTE_INDEX(BitIndex) < deviceDesc->DIOBytes );
     AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_PARAMETER, bData == AIOUSB_FALSE || bData == AIOUSB_TRUE );
 
@@ -753,7 +753,7 @@ AIORESULT DIO_StreamFrame(
                           unsigned long FramePoints,
                           unsigned short *pFrameData,
                           unsigned long *BytesTransferred
-                          )
+                          ) 
 {
 
     AIO_ASSERT( pFrameData );
@@ -764,7 +764,7 @@ AIORESULT DIO_StreamFrame(
     AIORESULT result = AIOUSB_SUCCESS;
     USBDevice *deviceHandle = _check_dio_get_device_handle( DeviceIndex, &device, &result );
 
-    AIO_ERROR_VALID_DATA(AIOUSB_ERROR_DEVICE_NOT_CONNECTED, deviceHandle );
+    AIO_ERROR_VALID_DATA(AIOUSB_ERROR_DEVICE_NOT_CONNECTED, deviceHandle ); 
     AIO_ERROR_VALID_DATA(result, result == AIOUSB_SUCCESS );
 
     int streamingBlockSize = ( int )device->StreamingBlockSize;
@@ -773,57 +773,35 @@ AIORESULT DIO_StreamFrame(
      * @note convert parameter types to those that libusb likes
      */
     unsigned char *data = ( unsigned char* )pFrameData;
-    unsigned char *tmpdata = (unsigned char *)malloc(streamingBlockSize * sizeof(unsigned char));
-
     int remaining = ( int )FramePoints * sizeof(unsigned short);
     int total = 0;
-    int libusbResult;
-    int minval;
-    int bytes;
-
-    //
-    // If its a stream write operation have to preload tmpdata with the first 'N' bytes
-    //   
-    if (!(device->bDIORead))
-            memcpy(tmpdata, data, MIN(streamingBlockSize,remaining));
-   
     while (remaining > 0) {
-        minval = ((remaining < streamingBlockSize) ? pow_of_minsize(remaining) : streamingBlockSize);
-        libusbResult = deviceHandle->usb_bulk_transfer(deviceHandle,
+        int bytes;
+        int libusbResult = deviceHandle->usb_bulk_transfer(deviceHandle, 
                                                            GET_ENDPOINT( device->bDIORead ),
-                                                           tmpdata,
-                                                           minval,
-                                                           &bytes,
-                                                           10000
+                                                           data,
+                                                           (remaining < streamingBlockSize) ? remaining : streamingBlockSize,
+                                                           &bytes, 
+                                                           device->commTimeout
                                                            );
 
         if (libusbResult == LIBUSB_SUCCESS || libusbResult == LIBUSB_ERROR_OVERFLOW ) {
             if (bytes > 0) {
-                if (device->bDIORead) {
-                    memcpy(data, tmpdata, MIN(bytes,remaining));
-                    data += MIN(bytes, remaining );
-                    total += MIN(bytes, remaining);
-                    remaining -= MIN(bytes,remaining);
-                } else {
-                    data += MIN(bytes, remaining );
-                    total += MIN(bytes, remaining);
-                    remaining -= MIN(bytes,remaining);
-                    memcpy(tmpdata, data, MIN(bytes,remaining));
-
-                }
-            } else {
-                result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
-                break;
+                int TransferredBytes = MIN(bytes,remaining);
+                total += TransferredBytes;
+                data += TransferredBytes;
+                remaining -= TransferredBytes;
             }
+        } else {
+            result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
+            break;
         }
     }
     if (result == AIOUSB_SUCCESS)
         *BytesTransferred = total;
 
-    free(tmpdata);
     return result;
 }
-
 
 
 #ifdef __cplusplus
