@@ -1537,7 +1537,7 @@ AIORET_TYPE AIODeviceTablePopulateTable(void)
     int size = 0;
     libusb_device **deviceList = 0;
 
-    result = AddAllACCESUSBDevices( deviceList, &usbdevices , &size );
+    result = AddAllACCESUSBDevices( &deviceList, &usbdevices , &size );
 
     if ( result < AIOUSB_SUCCESS ) 
         return result;
@@ -1551,7 +1551,6 @@ AIORET_TYPE AIODeviceTablePopulateTable(void)
         CheckPNPData( i );
 
     }
-
     libusb_free_device_list(deviceList, AIOUSB_TRUE);    
 
     return AIOUSB_SUCCESS;

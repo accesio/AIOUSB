@@ -57,7 +57,7 @@ PUBLIC_EXTERN USBDevice * NewUSBDevice(libusb_device *dev, libusb_device_handle 
 PUBLIC_EXTERN void DeleteUSBDevice( USBDevice *dev );
 PUBLIC_EXTERN USBDevice *CopyUSBDevice( USBDevice *usb );
 PUBLIC_EXTERN AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args );
-PUBLIC_EXTERN AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs , int *size );
+PUBLIC_EXTERN AIORET_TYPE AddAllACCESUSBDevices( libusb_device ***deviceList , USBDevice **devs , int *size );
 PUBLIC_EXTERN void DeleteUSBDevices( USBDevice *devs);
 PUBLIC_EXTERN int USBDeviceClose( USBDevice *dev );
 

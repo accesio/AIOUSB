@@ -178,15 +178,15 @@ int USBDeviceClose( USBDevice *usb )
 }
 
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs , int *size )
+AIORET_TYPE AddAllACCESUSBDevices( libusb_device ***deviceList , USBDevice **devs , int *size )
 {
     AIORET_TYPE result = AIOUSB_ERROR_DEVICE_NOT_FOUND;
     int numAccesDevices = 0;
-    int numDevices = libusb_get_device_list(NULL, &deviceList);
+    int numDevices = libusb_get_device_list(NULL, deviceList);
     if (numDevices > 0) {
         for ( int index = 0; index < numDevices && numAccesDevices < MAX_USB_DEVICES; index++, numAccesDevices ++) {
             struct libusb_device_descriptor libusbDeviceDesc;
-            libusb_device *usb_device = deviceList[ index ];
+            libusb_device *usb_device = (*deviceList)[ index ];
 
             int libusbResult = libusb_get_device_descriptor(usb_device, &libusbDeviceDesc);
 
