@@ -124,6 +124,8 @@ int main( int argc, char **argv ) {
 
     if( result == AIOUSB_SUCCESS ) {
         printf( "Automatic calibration completed successfully\n" );
+    } else if (result == AIOUSB_ERROR_NOT_SUPPORTED) {
+        printf ("Automatic calibration not supported on this device\n");
     } else {
         printf( "Error '%s' performing automatic A/D calibration\n", AIOUSB_GetResultCodeAsString( result ) );
         goto out_after_init;
