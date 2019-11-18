@@ -108,9 +108,6 @@ AIOProductGroup::AIOProductGroup( size_t numbergroups, ... ) : _num_groups(numbe
 }
 
 AIOProductGroup::~AIOProductGroup(){
-    for ( int i = 0; i < (int)this->_num_groups; i ++ ) { 
-        free( this->_groups[i] );
-    }
     delete [] this->_groups;
 }
 #endif
