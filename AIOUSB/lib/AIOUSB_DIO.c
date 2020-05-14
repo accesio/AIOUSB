@@ -427,25 +427,14 @@ AIORESULT DIO_Write1(
         deviceDesc->LastDIOData[BYTE_INDEX(BitIndex)] = deviceDesc->LastDIOData[BYTE_INDEX(BitIndex)] & ( ~(1 << (BitIndex & 7)));
     }
     
-    if ( deviceDesc->bFirmware20 && DeviceHasPNPByte( &deviceDesc->PNPData ) && ( deviceDesc->PNPData.HasDIOWrite1 != 0 ) ) {
-        retval = usb->usb_control_transfer( usb,
-                                            USB_WRITE_TO_DEVICE,
-                                            AUR_DIO_WRITE,
-                                            bData,
-                                            BitIndex,
-                                            0,
-                                            0,
-                                            deviceDesc->commTimeout );
-    } else {
-        retval = usb->usb_control_transfer( usb,
-                                            USB_WRITE_TO_DEVICE,
-                                            AUR_DIO_WRITE,
-                                            0,
-                                            0,
-                                            &deviceDesc->LastDIOData[0],
-                                            deviceDesc->DIOBytes,
-                                            deviceDesc->commTimeout );
-    }
+    retval = usb->usb_control_transfer( usb,
+                                        USB_WRITE_TO_DEVICE,
+                                        AUR_DIO_WRITE,
+                                        0,
+                                        0,
+                                        &deviceDesc->LastDIOData[0],
+                                        deviceDesc->DIOBytes,
+                                        deviceDesc->commTimeout );
     if ( retval < 0 ) {
         result = AIOUSB_ERROR_INTERNAL_ERROR;
     }
