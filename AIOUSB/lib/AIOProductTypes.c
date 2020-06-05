@@ -9,12 +9,12 @@ namespace AIOUSB {
 /* Make SURE the number matches the number of AIO_RANGEs */
 AIO_PRODUCT_CONSTANT( AIO_ANALOG_INPUT_OBJ, AIO_ANALOG_INPUT_GROUP, AIO_ANALOG_INPUT,
                       2 ,
-                      AIO_RANGE(USB_AI16_16A,USB_AI12_128E),
-                      AIO_RANGE(USB_AIO16_16A,USB_AIO12_128E) 
+                      AIO_RANGE(USB_AI16_16A,USB_AI16_16F),
+                      AIO_RANGE(USB_AIO16_16A,USB_AIO12_128E)
                       );
 AIO_PRODUCT_CONSTANT( AIO_ANALOG_OUTPUT_OBJ, AIO_ANALOG_OUTPUT_GROUP, AIO_ANALOG_OUTPUT,
                       2 ,
-                      AIO_RANGE(USB_AO16_16A,USB_AIO12_128E) ,
+                      AIO_RANGE(USB_AO16_16A,USB_AIO16_16F) ,
                       AIO_RANGE(USB_DA12_8A_REV_A,USB_DA12_8E)
                       );
 AIO_PRODUCT_CONSTANT( AIO_DIGITAL_HIGHSPEED_OBJ, AIO_DIGITAL_HIGHSPEED_GROUP, AIO_DIGITAL_HIGHSPEED,
@@ -53,7 +53,7 @@ AIO_PRODUCT_CONSTANT( AIO_ANALOG_16BIT_A2D_OBJ, AIO_ANALOG_16BIT_A2D_GROUP, AIO_
                       AIO_RANGE( USB_AO16_16A    ,  USB_AO16_16A    ),
                       AIO_RANGE( USB_AO16_8A     ,  USB_AO16_8A     ),
                       AIO_RANGE( USB_AO16_4A     ,  USB_AO16_4A     ),
-                      AIO_RANGE( USB_AIO16_16A   ,  USB_AIO12_16    )
+                      AIO_RANGE( USB_AIO16_16A   ,  USB_AIO16_16F    )
                       );
 
 AIOProductRange *NewAIOProductRange( unsigned long start, unsigned long end)
@@ -173,7 +173,7 @@ AIOProductGroup *groupcpy( const AIOProductGroup *g )
     AIOProductGroup *tmppg = (AIOProductGroup*)malloc( sizeof(AIOProductGroup));
     int i;
     if ( !tmppg ) goto exitout;
-        
+
     tmppg->_num_groups = g->_num_groups;
     tmppg->_groups = (AIOProductRange**)malloc(sizeof(AIOProductRange*)*tmppg->_num_groups );
     if (!tmppg->_groups ) goto cleanup;
@@ -184,7 +184,7 @@ AIOProductGroup *groupcpy( const AIOProductGroup *g )
         memcpy(tmp, g->_groups[i], sizeof(AIOProductRange));
         tmppg->_groups[i] = tmp;
     }
-        
+
     return tmppg;
 
  err:
@@ -213,14 +213,14 @@ using namespace AIOUSB;
 #include <unistd.h>
 #include <stdio.h>
 
-TEST(AIOProductRange,NewProductRange ) 
+TEST(AIOProductRange,NewProductRange )
 {
     AIOProductRange *tmp = NewAIOProductRange(100,1100);
     ASSERT_TRUE( tmp );
 
     ASSERT_EQ( 1100, AIOProductRangeEnd(tmp));
     ASSERT_EQ( 100 , AIOProductRangeStart(tmp));
-    
+
     DeleteAIOProductRange( tmp );
 }
 
@@ -229,7 +229,7 @@ TEST(AIOProductGroup,NewGroup )
     AIOProductRange *first = NewAIOProductRange(100,1100);
     AIOProductRange *second = NewAIOProductRange(1105,1200);
     AIOProductGroup *pg = NewAIOProductGroup( 2, first, second );
-    
+
     ASSERT_TRUE( pg );
 
 
@@ -243,7 +243,7 @@ TEST(AIOProductGroup,NullGroups )
     AIOProductRange *nullval = NULL;
 
     AIOProductGroup *pg = NewAIOProductGroup( 3, first, second, nullval);
-    
+
     ASSERT_FALSE( pg );
 
 }
@@ -263,7 +263,7 @@ TEST(AIOProductGroup, Defaults )
     ASSERT_GE( AIOProductGroupContains( &mygroup, 11 ), AIOUSB_SUCCESS );
     ASSERT_GE( AIOProductGroupContains( &mygroup, 34 ), AIOUSB_SUCCESS );
     ASSERT_LT( AIOProductGroupContains( &mygroup, 2 ), AIOUSB_SUCCESS );
-    
+
     DeleteAIOProductRange( second );
 
 }
@@ -282,14 +282,14 @@ TEST(AIOProductGroup, CheckConstants )
 TEST(AIOProductGroup,CopyConstant)
 {
     AIOProductGroup *tmp = groupcpy( AIO_ANALOG_OUTPUT_GROUP );
-    
+
     ASSERT_GE( AIOProductGroupContains(tmp, USB_AIO12_16 ), AIOUSB_SUCCESS );
     ASSERT_GE( AIOProductGroupContains(tmp, USB_AIO12_96 ), AIOUSB_SUCCESS );
 
     DeleteAIOProductGroup( tmp );
 
     tmp =  groupcpy( AIO_ANALOG_INPUT_GROUP );
-    
+
     ASSERT_GE( AIOProductGroupContains(tmp, USB_AI12_32 ), AIOUSB_SUCCESS );
 
     ASSERT_GE( AIOProductGroupContains(tmp, USB_AIO12_16 ), AIOUSB_SUCCESS );
@@ -305,13 +305,13 @@ TEST(AIOProductGroup,MacroTypes)
 
 int main(int argc, char *argv[] )
 {
-  
+
   AIORET_TYPE retval;
 
   testing::InitGoogleTest(&argc, argv);
   testing::TestEventListeners & listeners = testing::UnitTest::GetInstance()->listeners();
 
-  return RUN_ALL_TESTS();  
+  return RUN_ALL_TESTS();
 
 }
 

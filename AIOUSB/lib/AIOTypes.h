@@ -3,7 +3,7 @@
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
  * @version $Format: %h$
- * @brief  
+ * @brief
  *
  */
 
@@ -86,10 +86,10 @@ namespace AIOUSB {
 #endif
 
 
-CREATE_ENUM_W_START( THREAD_STATUS , -1 , 
+CREATE_ENUM_W_START( THREAD_STATUS , -1 ,
                      INVALID_OBJECT = -2,
                      NOT_STARTED = 0,
-                     RUNNING = 1, 
+                     RUNNING = 1,
                      WITH_DATA = 2,
                      TERMINATED = 4,
                      RUNNING_OR_WITH_DATA = RUNNING | WITH_DATA,
@@ -146,7 +146,7 @@ enum {
 #define AIO_ASSERT_AIOEITHER(err,msg,...) assert( __VA_ARGS__ ); if ( !(__VA_ARGS__) ) { AIOEither tmp; tmp.left = err; tmp.errmsg=strdup(msg); return tmp; }
 
 /**
- * @brief AIO_ERROR * are just like the regular ASSERTIONS meaning that they 
+ * @brief AIO_ERROR * are just like the regular ASSERTIONS meaning that they
  * argument should evaluate to true otherwise it will fail.
  *
  */
@@ -233,8 +233,8 @@ typedef long double AIO_NUMBER;
 
 
 CREATE_ENUM_W_START(USB_SPEED,0,
-                    usUnknown, 
-                    usLowFull, 
+                    usUnknown,
+                    usLowFull,
                     usHigh);
 
 
@@ -286,6 +286,7 @@ CREATE_ENUM_W_START(ProductIDS,0,
                      USB_DO24           = 0x803E,
                      PICO_DIO16RO8      = 0x8033,
                      USBP_II8IDO4A      = 0x8036,
+                     USB_AI16_16F	    = 0x805f,
                      USB_AI16_16A       = 0x8040,
                      USB_AI16_16E       = 0x8041,
                      USB_AI12_16A       = 0x8042,
@@ -333,6 +334,7 @@ CREATE_ENUM_W_START(ProductIDS,0,
                      USB_AO12_8         = 0x807d,
                      USB_AO12_4A        = 0x807e,
                      USB_AO12_4         = 0x807f,
+                     USB_AIO16_16F      = 0x815f,
                      USB_AIO16_16A      = 0x8140,
                      USB_AIO16_16E      = 0x8141,
                      USB_AIO12_16A      = 0x8142,
@@ -406,7 +408,7 @@ CREATE_ENUM_W_START(FIFO_Method,0,
 
 
 /**
- * @brief 
+ * @brief
  * The AIOUSB function result codes are a bit confusing; the result codes used in the Windows
  * implementation of the API are defined in a system file, winerror.h; these result codes
  * are generic and can apply to many applications; the very first result code, ERROR_SUCCESS,
@@ -727,7 +729,7 @@ typedef enum  {
 
 
 /* For JSON parsing */
-typedef struct lookup { 
+typedef struct lookup {
     int value;
     char *str;
     char *strvalue;
@@ -736,7 +738,7 @@ typedef struct lookup {
 
 #define ROOTCLOCK 10000000
 
-/** 
+/**
  * @brief Allows us to keep track of streaming (bulk) acquires
  * without making the user keep track of the memory management
  */
@@ -756,9 +758,9 @@ typedef struct  {
 } DeviceProperties;
 
 /**
- * @brief Enums that govern how commands are performed and 
+ * @brief Enums that govern how commands are performed and
  * operated
- */ 
+ */
 CREATE_ENUM_W_START( AIOCommandCode, 0 ,
                      GENERIC_DOSOMETHING_PLACEHOLDER,
                      AIO_CONTINUE_RUNNING,

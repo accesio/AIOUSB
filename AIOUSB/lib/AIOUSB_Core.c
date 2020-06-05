@@ -77,6 +77,7 @@ ProductIDName productIDNameTable[] = {
     { USB_DIO16RO8      , "USB-DIO16RO8"   },
     { PICO_DIO16RO8     , "PICO-DIO16RO8"  },
     { USBP_II8IDO4A     , "USBP-II8IDO4A"  },
+    { USB_AI16_16F      , "USB-AI16-16F"   },
     { USB_AI16_16A      , "USB-AI16-16A"   },
     { USB_AI16_16E      , "USB-AI16-16E"   },
     { USB_AI12_16A      , "USB-AI12-16A"   },
@@ -123,6 +124,7 @@ ProductIDName productIDNameTable[] = {
     { USB_AO12_8        , "USB-AO12-8"     },
     { USB_AO12_4A       , "USB-AO12-4A"    },
     { USB_AO12_4        , "USB-AO12-4"     },
+    { USB_AIO16_16F     , "USB-AIO16-16F"  },
     { USB_AIO16_16A     , "USB-AIO16-16A"  },
     { USB_AIO16_16E     , "USB-AIO16-16E"  },
     { USB_AIO12_16A     , "USB-AIO12-16A"  },
@@ -226,7 +228,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOUSB_ResetChip( unsigned long DeviceIndex )
 
 }
 
- 
+
 unsigned long AIOUSB_Validate_Lock(unsigned long *DeviceIndex)
 {
     unsigned long result = (unsigned long)AIOUSB_SUCCESS;
@@ -265,7 +267,7 @@ unsigned long AIOUSB_Validate_Lock(unsigned long *DeviceIndex)
                      * there are multiple devices on the bus
                      */
                     result = AIOUSB_ERROR_DUP_NAME;
-                    break;                             
+                    break;
                 }
             }
         }
@@ -282,7 +284,7 @@ unsigned long AIOUSB_Validate_Lock(unsigned long *DeviceIndex)
     return result;
 }
 
-unsigned long AIOUSB_Validate(unsigned long *DeviceIndex) 
+unsigned long AIOUSB_Validate(unsigned long *DeviceIndex)
 {
     unsigned long result = AIOUSB_ERROR_INVALID_INDEX;
 
@@ -334,7 +336,7 @@ unsigned long AIOUSB_Validate(unsigned long *DeviceIndex)
       else
         result = AIOUSB_ERROR_INVALID_INDEX;
     }
-    
+
     return result;
 }
 
@@ -345,7 +347,7 @@ unsigned long ResolveDeviceIndex(unsigned long DeviceIndex) {
 }
 
 /*------------------------------------------------------------------------*/
-DeviceDescriptor *DeviceTableAtIndex( unsigned long DeviceIndex ) { 
+DeviceDescriptor *DeviceTableAtIndex( unsigned long DeviceIndex ) {
     AIOUSB_Validate( &DeviceIndex  );
 
     DeviceDescriptor * deviceDesc = &deviceTable[ DeviceIndex ];
@@ -358,8 +360,8 @@ DeviceDescriptor *DeviceTableAtIndex( unsigned long DeviceIndex ) {
  * @todo Replace AIOUSB_Lock() with thread safe lock on a per device index basis
  * @todo Insert correct error messages into global error string in case of failure
  */
-DeviceDescriptor *DeviceTableAtIndex_Lock( unsigned long DeviceIndex ) 
-{ 
+DeviceDescriptor *DeviceTableAtIndex_Lock( unsigned long DeviceIndex )
+{
     unsigned long result = AIOUSB_Validate( &DeviceIndex  );
     if ( result != AIOUSB_SUCCESS ) {
         return NULL;
@@ -374,7 +376,7 @@ DeviceDescriptor *DeviceTableAtIndex_Lock( unsigned long DeviceIndex )
 /**
  *
  */
-DeviceDescriptor *AIOUSB_GetDevice( unsigned long DeviceIndex ) 
+DeviceDescriptor *AIOUSB_GetDevice( unsigned long DeviceIndex )
 {
     AIORESULT result = AIOUSB_Validate(&DeviceIndex);
 
@@ -392,7 +394,7 @@ DeviceDescriptor *AIOUSB_GetDevice( unsigned long DeviceIndex )
  */
 ADConfigBlock *AIOUSB_GetConfigBlock( DeviceDescriptor *dev)
 {
-    if ( !dev ) { 
+    if ( !dev ) {
         return NULL;
     } else {
         return &dev->cachedConfigBlock;
@@ -427,7 +429,7 @@ unsigned long AIOUSB_SetStreamingBlockSize(
                              unsigned long DeviceIndex,
                              unsigned long BlockSize
                              ) {
-     
+
      unsigned long result = AIOUSB_Validate(&DeviceIndex);
      if(result != AIOUSB_SUCCESS)
           return result;
@@ -453,7 +455,7 @@ unsigned long AIOUSB_SetStreamingBlockSize(
 unsigned long AIOUSB_ClearFIFO(
                                unsigned long DeviceIndex,
                                FIFO_Method Method
-                               ) 
+                               )
 {
     AIORESULT result = AIOUSB_SUCCESS;
 
@@ -461,10 +463,10 @@ unsigned long AIOUSB_ClearFIFO(
         return AIOUSB_ERROR_INVALID_PARAMETER;
 
     DeviceDescriptor *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS ) 
+    if ( result != AIOUSB_SUCCESS )
         return result;
     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS ) 
+    if ( result != AIOUSB_SUCCESS )
         return result;
 
     /* translate method into vendor request message */
@@ -488,14 +490,14 @@ unsigned long AIOUSB_ClearFIFO(
         break;
 
     }
-          
+
     int bytesTransferred = usb->usb_control_transfer(usb,
-                                                     USB_WRITE_TO_DEVICE, 
-                                                     request, 
-                                                     0, 
-                                                     0, 
-                                                     0, 
-                                                     0, 
+                                                     USB_WRITE_TO_DEVICE,
+                                                     request,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     0,
                                                      deviceDesc->commTimeout
                                                      );
     if(bytesTransferred != 0)
@@ -515,7 +517,7 @@ const char *AIOUSB_GetVersionDate() {
 
 AIORESULT AIOUSB_GetMiscClock(
                               unsigned long DeviceIndex
-                              ) 
+                              )
 {
     double clockHz = 0;                                                         // return reasonable value on error
 
@@ -527,7 +529,7 @@ AIORESULT AIOUSB_GetMiscClock(
 AIORESULT AIOUSB_SetMiscClock(
                               unsigned long DeviceIndex,
                               double clockHz
-                              ) 
+                              )
 {
     if(clockHz <= 0)
         return AIOUSB_ERROR_INVALID_PARAMETER;
@@ -553,7 +555,7 @@ unsigned AIOUSB_GetCommTimeout(
 unsigned long AIOUSB_SetCommTimeout(
                                                   unsigned long DeviceIndex,
                                                   unsigned timeout
-                                    ) 
+                                    )
 {
 
     unsigned long result = AIOUSB_Validate(&DeviceIndex);
@@ -592,14 +594,14 @@ RETURN_AIOUSB_Validate_Device:
 AIORESULT AIOUSB_InitConfigBlock(ADConfigBlock *config, unsigned long DeviceIndex, AIOUSB_BOOL defaults)
 {
     assert(config);
-    if ( !config ) 
+    if ( !config )
         return -AIOUSB_ERROR_INVALID_PARAMETER;
     /*
      * mark as uninitialized unless this function succeeds
      */
     config->device = 0;
     config->size = 0;
-    
+
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
 
@@ -676,7 +678,7 @@ unsigned long AIOUSB_ADC_SetCalTable(
         return result;
     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS )
-        return result;    
+        return result;
 
     int bytesTransferred = 0;
 
@@ -686,11 +688,11 @@ unsigned long AIOUSB_ADC_SetCalTable(
      * of calibration data to "endpoint 2" and then send a control message
      * to load it into the SRAM
      */
-          
+
     int SRAM_BLOCK_WORDS = 1024;
     int sramAddress = 0;
     int wordsRemaining = CAL_TABLE_WORDS;
-          
+
     while(wordsRemaining > 0) {
         int num_to_write = (wordsRemaining < SRAM_BLOCK_WORDS) ? wordsRemaining : 1024 ;
         int libusbResult = usb->usb_bulk_transfer(usb,
@@ -707,13 +709,13 @@ unsigned long AIOUSB_ADC_SetCalTable(
             result = AIOUSB_ERROR_INVALID_DATA;
             break;
         } else {
-            bytesTransferred = usb->usb_control_transfer( usb, 
-                                                          0x40, 
-                                                          0xBB, 
-                                                          sramAddress, 
+            bytesTransferred = usb->usb_control_transfer( usb,
+                                                          0x40,
+                                                          0xBB,
+                                                          sramAddress,
                                                           0x400,
-                                                          NULL, 
-                                                          0, 
+                                                          NULL,
+                                                          0,
                                                           deviceDesc->commTimeout );
 
             if (bytesTransferred != 0) {
@@ -731,7 +733,7 @@ unsigned long AIOUSB_ADC_SetCalTable(
 
 
 
-/** 
+/**
  * @brief Performs a generic vendor USB write
  */
 unsigned long GenericVendorWrite(
@@ -750,7 +752,7 @@ unsigned long GenericVendorWrite(
 
     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( deviceIndex, &result );
     if ( result != AIOUSB_SUCCESS )
-        return result;    
+        return result;
 
     bytesTransferred = usb->usb_control_transfer(usb,
                                                  USB_WRITE_TO_DEVICE,
@@ -779,7 +781,7 @@ unsigned long GenericVendorRead(
                                 unsigned short Index,
                                 void *bufData,
                                 unsigned long *bytes_read
-                                ) 
+                                )
 {
     unsigned long result;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( deviceIndex, &result );
@@ -787,14 +789,14 @@ unsigned long GenericVendorRead(
         return result;
     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( deviceIndex, &result );
     if ( result != AIOUSB_SUCCESS )
-        return result;    
+        return result;
 
     result = AIOUSB_Validate(&deviceIndex);
     if (result != AIOUSB_SUCCESS)
         return result;
 
     unsigned timeout = deviceDesc->commTimeout;
-    
+
     int bytesTransferred = usb->usb_control_transfer(usb,
                                                      USB_READ_FROM_DEVICE,
                                                      Request,
@@ -826,7 +828,7 @@ Ushort_Array *new_ushortarray(size_t nelements )
     return tmp;
 }
 
- 
+
 #ifdef __cplusplus
 }
 #endif
@@ -845,14 +847,14 @@ using namespace AIOUSB;
 
 TEST(AIOUSB_Core,FakeInit ) {
 
-    AIOUSB_InitTest();    
+    AIOUSB_InitTest();
     EXPECT_EQ(AIOUSB_TRUE, AIOUSB_IsInit() );
 
 }
 
 TEST(AIOUSB_Core,MockObjects) {
     int numDevices = 0;
-    AIODeviceTableInit();    
+    AIODeviceTableInit();
     AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_AIO16_16A );
     EXPECT_EQ( numDevices, 1 );
     AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_DIO_32 );
@@ -863,15 +865,15 @@ TEST(AIOUSB_Core,MockObjects) {
 
 }
 
-int main( int argc , char *argv[] ) 
+int main( int argc , char *argv[] )
 {
     testing::InitGoogleTest(&argc, argv);
     testing::TestEventListeners & listeners = testing::UnitTest::GetInstance()->listeners();
 #ifdef GTEST_TAP_PRINT_TO_STDOUT
     delete listeners.Release(listeners.default_result_printer());
 #endif
-   
-    return RUN_ALL_TESTS();  
+
+    return RUN_ALL_TESTS();
 }
 
 
