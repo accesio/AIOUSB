@@ -264,6 +264,10 @@ SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="16
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0141", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8141", RUN+="/bin/chmod 0666 $tempnode"
 
+# USB-AIO16-16F
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="015f", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="815f", RUN+="/bin/chmod 0666 $tempnode"
+
 # USB-AIO12-16A
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0142", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8142", RUN+="/bin/chmod 0666 $tempnode"
