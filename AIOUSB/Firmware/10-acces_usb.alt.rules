@@ -251,9 +251,13 @@ SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", SYSFS{idVendor}=="1
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", SYSFS{idVendor}=="1605", SYSFS{idProduct}=="0141", RUN+="/sbin/fxload -t fx2 -D $ENV{DEVNAME} -I /usr/share/usb/USB-AIO16-16.hex"
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", SYSFS{idVendor}=="1605", SYSFS{idProduct}=="8141", RUN+="/bin/chmod 0666 $ENV{DEVNAME}"
 
-# USB-AIO16-16F
-SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", SYSFS{idVendor}=="1605", SYSFS{idProduct}=="015f", RUN+="/sbin/fxload -t fx2 -D $ENV{DEVNAME} -I /usr/share/usb/USB-AIO16-16.hex"
-SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", SYSFS{idVendor}=="1605", SYSFS{idProduct}=="815f", RUN+="/bin/chmod 0666 $ENV{DEVNAME}"
+# USB-AIO16-16E
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0141", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AIO16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8141", RUN+="/bin/chmod 0666 $tempnode"
+
+# USB-AI16-16F
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="005f", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="805f", RUN+="/bin/chmod 0666 $tempnode"
 
 # USB-AIO12-16A
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", SYSFS{idVendor}=="1605", SYSFS{idProduct}=="0142", RUN+="/sbin/fxload -t fx2 -D $ENV{DEVNAME} -I /usr/share/usb/USB-AIO16-16.hex"
