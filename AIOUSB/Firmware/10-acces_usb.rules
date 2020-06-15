@@ -452,13 +452,12 @@ SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="16
 # SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="c001", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DA128-ArevA.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
 
 # USB-DA12-8A
-SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="c002", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DA12-8A.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="c002", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DA12-8A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="4002", RUN+="/bin/chmod 0666 $tempnode"
 
 # USB-DA12-8E
-SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="c003", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DA12-8E.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
-
-# USB-IIRO4-COM (Xerox)
-# SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8031", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IIRO4-COM.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="c003", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DA12-8E.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="4003", RUN+="/bin/chmod 0666 $tempnode"
 
 # USB-AO-ARB1
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0068", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO-ARB1.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
