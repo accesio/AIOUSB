@@ -1246,8 +1246,8 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
     } else if (productID == PICO_DIO16RO8) {
         device->DIOBytes = 3;
     } else if (
-              (productID >= USB_AI16_16A && productID <= USB_AI12_16E) ||
-              (productID >= USB_AIO16_16A && productID <= USB_AIO12_16E)
+              (productID >= USB_AI16_16A && productID <= USB_AI16_16F) ||
+              (productID >= USB_AIO16_16A && productID <= USB_AIO16_16F)
               ) {
         device->DIOBytes = 2;
         device->Counters = 1;
