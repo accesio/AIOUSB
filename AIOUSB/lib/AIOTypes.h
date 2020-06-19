@@ -286,7 +286,6 @@ CREATE_ENUM_W_START(ProductIDS,0,
                      USB_DO24           = 0x803E,
                      PICO_DIO16RO8      = 0x8033,
                      USBP_II8IDO4A      = 0x8036,
-                     USB_AI16_16F	    = 0x805f,
                      USB_AI16_16A       = 0x8040,
                      USB_AI16_16E       = 0x8041,
                      USB_AI12_16A       = 0x8042,
@@ -317,6 +316,7 @@ CREATE_ENUM_W_START(ProductIDS,0,
                      USB_AI12_128A      = 0x805b,
                      USB_AI12_128       = 0x805c,
                      USB_AI12_128E      = 0x805d,
+                     USB_AI16_16F	    = 0x805f,
                      USB_AO_ARB1        = 0x8068,
                      USB_AO16_16A       = 0x8070,
                      USB_AO16_16        = 0x8071,
@@ -334,7 +334,6 @@ CREATE_ENUM_W_START(ProductIDS,0,
                      USB_AO12_8         = 0x807d,
                      USB_AO12_4A        = 0x807e,
                      USB_AO12_4         = 0x807f,
-                     USB_AIO16_16F      = 0x815f,
                      USB_AIO16_16A      = 0x8140,
                      USB_AIO16_16E      = 0x8141,
                      USB_AIO12_16A      = 0x8142,
@@ -364,8 +363,9 @@ CREATE_ENUM_W_START(ProductIDS,0,
                      USB_AIO16_128E     = 0x815a,
                      USB_AIO12_128A     = 0x815b,
                      USB_AIO12_128      = 0x815c,
-                     USB_AIO12_128E     = 0x815d
-                     );
+                     USB_AIO12_128E     = 0x815d,
+                     USB_AIO16_16F      = 0x815f
+                     ); // keep sorted by productID
 
 
 

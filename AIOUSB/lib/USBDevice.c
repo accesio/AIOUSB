@@ -191,9 +191,7 @@ AIORET_TYPE AddAllACCESUSBDevices( libusb_device ***deviceList , USBDevice **dev
             int libusbResult = libusb_get_device_descriptor(usb_device, &libusbDeviceDesc);
 
             if (libusbResult == LIBUSB_SUCCESS) {
-
-                if (libusbDeviceDesc.idVendor == ACCES_VENDOR_ID  &&
-                    VALID_ENUM(ProductIDS, libusbDeviceDesc.idProduct ) 
+                if (libusbDeviceDesc.idVendor == ACCES_VENDOR_ID  && VALID_ENUM(ProductIDS, libusbDeviceDesc.idProduct ) 
                     ) {
                     *size += 1;
                     *devs = (USBDevice*)realloc( *devs, (*size )*(sizeof(USBDevice)));
