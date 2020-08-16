@@ -22,7 +22,7 @@ typedef int64_t AIORET_TYPE;
 
 /* #include <pthread.h> */
 
-#include <mex.h>  
+#include <mex.h>
 
 
 
@@ -50,15 +50,15 @@ PUBLIC_EXTERN AIORET_TYPE DIOBufSetByteAtIndex( DIOBuf *buf, unsigned index, cha
 
 /* #include "AIOUSB_DIO.h" */
 
-PUBLIC_EXTERN AIORESULT DIO_ConfigureWithDIOBuf( unsigned long DeviceIndex, unsigned char bTristate, AIOChannelMask *mask, DIOBuf *buf ); 
-PUBLIC_EXTERN unsigned long DIO_Configure( unsigned long DeviceIndex, unsigned char bTristate, void *pOutMask, void *pData ); 
+PUBLIC_EXTERN AIORESULT DIO_ConfigureWithDIOBuf( unsigned long DeviceIndex, unsigned char bTristate, AIOChannelMask *mask, DIOBuf *buf );
+PUBLIC_EXTERN unsigned long DIO_Configure( unsigned long DeviceIndex, unsigned char bTristate, void *pOutMask, void *pData );
 
-PUBLIC_EXTERN unsigned long DIO_ConfigureEx( unsigned long DeviceIndex, void *pOutMask, void *pData, void *pTristateMask ); 
-PUBLIC_EXTERN unsigned long DIO_ConfigurationQuery( unsigned long DeviceIndex, void *pOutMask, void *pTristateMask ); 
-PUBLIC_EXTERN unsigned long DIO_WriteAll( unsigned long DeviceIndex, void *pData ); 
-PUBLIC_EXTERN unsigned long DIO_Write8( unsigned long DeviceIndex, unsigned long ByteIndex, unsigned char Data ); 
+PUBLIC_EXTERN unsigned long DIO_ConfigureEx( unsigned long DeviceIndex, void *pOutMask, void *pData, void *pTristateMask );
+PUBLIC_EXTERN unsigned long DIO_ConfigurationQuery( unsigned long DeviceIndex, void *pOutMask, void *pTristateMask );
+PUBLIC_EXTERN unsigned long DIO_WriteAll( unsigned long DeviceIndex, void *pData );
+PUBLIC_EXTERN unsigned long DIO_Write8( unsigned long DeviceIndex, unsigned long ByteIndex, unsigned char Data );
 
-PUBLIC_EXTERN unsigned long DIO_Write1( unsigned long DeviceIndex, unsigned long BitIndex, unsigned char bData ); 
+PUBLIC_EXTERN unsigned long DIO_Write1( unsigned long DeviceIndex, unsigned long BitIndex, unsigned char bData );
 
 
 PUBLIC_EXTERN AIORET_TYPE DIO_ReadAllToDIOBuf( unsigned long DeviceIndex, DIOBuf *buf );
@@ -68,12 +68,12 @@ PUBLIC_EXTERN AIORET_TYPE DIO_ReadIntoDIOBuf( unsigned long DeviceIndex, DIOBuf 
 PUBLIC_EXTERN AIORESULT DIO_ReadAll( unsigned long DeviceIndex, void *buf );
 
 
-PUBLIC_EXTERN unsigned long DIO_ReadAllToCharStr( unsigned long DeviceIndex, char *buf, unsigned size ); 
-PUBLIC_EXTERN unsigned long DIO_Read8( unsigned long DeviceIndex, unsigned long ByteIndex, unsigned char *pdat ); 
-PUBLIC_EXTERN unsigned long DIO_Read1( unsigned long DeviceIndex, unsigned long BitIndex, unsigned char *bit ); 
-PUBLIC_EXTERN unsigned long DIO_StreamOpen( unsigned long DeviceIndex, unsigned long bIsRead ); 
-PUBLIC_EXTERN unsigned long DIO_StreamClose( unsigned long DeviceIndex ); 
-PUBLIC_EXTERN unsigned long DIO_StreamSetClocks( unsigned long DeviceIndex, double *ReadClockHz, double *WriteClockHz ); 
+PUBLIC_EXTERN unsigned long DIO_ReadAllToCharStr( unsigned long DeviceIndex, char *buf, unsigned size );
+PUBLIC_EXTERN unsigned long DIO_Read8( unsigned long DeviceIndex, unsigned long ByteIndex, unsigned char *pdat );
+PUBLIC_EXTERN unsigned long DIO_Read1( unsigned long DeviceIndex, unsigned long BitIndex, unsigned char *bit );
+PUBLIC_EXTERN unsigned long DIO_StreamOpen( unsigned long DeviceIndex, unsigned long bIsRead );
+PUBLIC_EXTERN unsigned long DIO_StreamClose( unsigned long DeviceIndex );
+PUBLIC_EXTERN unsigned long DIO_StreamSetClocks( unsigned long DeviceIndex, double *ReadClockHz, double *WriteClockHz );
 PUBLIC_EXTERN unsigned long DIO_StreamFrame( unsigned long DeviceIndex, unsigned long FramePoints, unsigned short *pFrameData, unsigned long *BytesTransferred );
 
 /* #include "AIOUSB_Core.h" */
@@ -113,13 +113,13 @@ PUBLIC_EXTERN const char *AIOUSB_GetResultCodeAsString( unsigned long value ); /
 
 PUBLIC_EXTERN unsigned short AIOUSB_VoltsToCounts(unsigned long DeviceIndex, unsigned channel, double volts );
 
-PUBLIC_EXTERN unsigned long AIOUSB_ADC_LoadCalTable(unsigned long DeviceIndex, const char *fileName ); 
+PUBLIC_EXTERN unsigned long AIOUSB_ADC_LoadCalTable(unsigned long DeviceIndex, const char *fileName );
 
 PUBLIC_EXTERN unsigned long AIOUSB_ADC_SetCalTable(unsigned long DeviceIndex, const unsigned short calTable[] );
 
 PUBLIC_EXTERN unsigned long AIOUSB_ClearFIFO(unsigned long DeviceIndex, FIFO_Method Method );
- 
-PUBLIC_EXTERN long AIOUSB_GetStreamingBlockSize( unsigned long DeviceIndex ); 
+
+PUBLIC_EXTERN long AIOUSB_GetStreamingBlockSize( unsigned long DeviceIndex );
 
 
 
@@ -299,20 +299,20 @@ AIOContinuousBuf *NewAIOContinuousBufFromJSON( const char *json_string );
 /* #include "AIOUSB_CTR.h" */
 
 PUBLIC_EXTERN AIORET_TYPE CTR_CalculateCountersForClock( int hz , int *diva, int *divb );
-PUBLIC_EXTERN AIORET_TYPE CTR_8254Mode( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned long Mode ); 
-PUBLIC_EXTERN AIORET_TYPE CTR_8254Load( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned short LoadValue ); 
-PUBLIC_EXTERN AIORET_TYPE CTR_8254ModeLoad( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned long Mode, unsigned short LoadValue ); 
-PUBLIC_EXTERN AIORET_TYPE CTR_8254ReadModeLoad( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned long Mode, unsigned short LoadValue, unsigned short *pReadValue ); 
-PUBLIC_EXTERN AIORET_TYPE CTR_8254Read( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned short *pReadValue ); 
-PUBLIC_EXTERN AIORET_TYPE CTR_8254ReadAll( unsigned long DeviceIndex, unsigned short *pData ); 
-PUBLIC_EXTERN AIORET_TYPE CTR_8254ReadStatus( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned short *pReadValue, unsigned char *pStatus ); 
+PUBLIC_EXTERN AIORET_TYPE CTR_8254Mode( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned long Mode );
+PUBLIC_EXTERN AIORET_TYPE CTR_8254Load( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned short LoadValue );
+PUBLIC_EXTERN AIORET_TYPE CTR_8254ModeLoad( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned long Mode, unsigned short LoadValue );
+PUBLIC_EXTERN AIORET_TYPE CTR_8254ReadModeLoad( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned long Mode, unsigned short LoadValue, unsigned short *pReadValue );
+PUBLIC_EXTERN AIORET_TYPE CTR_8254Read( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned short *pReadValue );
+PUBLIC_EXTERN AIORET_TYPE CTR_8254ReadAll( unsigned long DeviceIndex, unsigned short *pData );
+PUBLIC_EXTERN AIORET_TYPE CTR_8254ReadStatus( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned short *pReadValue, unsigned char *pStatus );
 #ifndef SWIG
 
-PUBLIC_EXTERN AIORET_TYPE CTR_StartOutputFreq( unsigned long DeviceIndex, unsigned long BlockIndex, double *pHz ); 
+PUBLIC_EXTERN AIORET_TYPE CTR_StartOutputFreq( unsigned long DeviceIndex, unsigned long BlockIndex, double *pHz );
 #endif
 
-PUBLIC_EXTERN AIORET_TYPE CTR_8254SelectGate( unsigned long DeviceIndex, unsigned long GateIndex ); 
-PUBLIC_EXTERN AIORET_TYPE CTR_8254ReadLatched( unsigned long DeviceIndex, unsigned short *pData ); 
+PUBLIC_EXTERN AIORET_TYPE CTR_8254SelectGate( unsigned long DeviceIndex, unsigned long GateIndex );
+PUBLIC_EXTERN AIORET_TYPE CTR_8254ReadLatched( unsigned long DeviceIndex, unsigned short *pData );
 
 /* #include "ADCConfigBlock.h" */
 
@@ -534,7 +534,7 @@ PUBLIC_EXTERN AIODeviceInfo *NewAIODeviceInfo();
 PUBLIC_EXTERN void DeleteAIODeviceInfo( AIODeviceInfo *di );
 PUBLIC_EXTERN const char *AIODeviceInfoGetName( AIODeviceInfo *di );
 PUBLIC_EXTERN AIODeviceInfo *AIODeviceInfoGet( unsigned long DeviceIndex );
-PUBLIC_EXTERN AIORET_TYPE AIODeviceInfoGetCounters( AIODeviceInfo *di ); 
+PUBLIC_EXTERN AIORET_TYPE AIODeviceInfoGetCounters( AIODeviceInfo *di );
 PUBLIC_EXTERN AIORET_TYPE AIODeviceInfoGetDIOBytes( AIODeviceInfo *di );
 PUBLIC_EXTERN AIODeviceInfo *AIODeviceInfoGet( unsigned long DeviceIndex );
 
@@ -635,7 +635,7 @@ PUBLIC_EXTERN AIORET_TYPE ADC_GetScanV( unsigned long DeviceIndex, double *volta
 PUBLIC_EXTERN AIORESULT ADC_RangeAll( unsigned long DeviceIndex, unsigned char *pGainCodes, unsigned long bSingleEnded );
 PUBLIC_EXTERN AIORET_TYPE ADC_GetChannelV( unsigned long DeviceIndex, unsigned long ChannelIndex, double *singlevoltage );
 
-    
+
 PUBLIC_EXTERN AIORET_TYPE ADC_GetScan( unsigned long DeviceIndex, unsigned short *pBuf );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short counts[] );
 PUBLIC_EXTERN AIORESULT ADC_GetConfig( unsigned long DeviceIndex, unsigned char *pConfigBuf, unsigned long *ConfigBufSize );
@@ -657,7 +657,7 @@ PUBLIC_EXTERN AIORESULT ADC_BulkPoll( unsigned long DeviceIndex, unsigned long *
 PUBLIC_EXTERN AIORESULT ADC_InitFastITScanV( unsigned long DeviceIndex );
 PUBLIC_EXTERN AIORESULT ADC_CreateFastITConfig( unsigned long DeviceIndex, int size );
 PUBLIC_EXTERN AIORESULT ADC_ResetFastITScanV( unsigned long DeviceIndex );
-PUBLIC_EXTERN AIORESULT ADC_SetFastITScanVChannels( unsigned long DeviceIndex, unsigned long NewChannels); 
+PUBLIC_EXTERN AIORESULT ADC_SetFastITScanVChannels( unsigned long DeviceIndex, unsigned long NewChannels);
 PUBLIC_EXTERN AIORESULT ADC_GetFastITScanV( unsigned long DeviceIndex, double *pData);
 PUBLIC_EXTERN AIORESULT ADC_GetITScanV( unsigned long DeviceIndex, double *pBuf);
 
@@ -689,12 +689,12 @@ PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetTriggerMode( ADConfigBlock *config, unsigned
 PUBLIC_EXTERN unsigned AIOUSB_GetStartChannel( const ADConfigBlock *config );
 PUBLIC_EXTERN unsigned AIOUSB_GetEndChannel( const ADConfigBlock *config );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetScanRange( ADConfigBlock *config, unsigned startChannel, unsigned endChannel );
-PUBLIC_EXTERN unsigned long AIOUSB_SetStreamingBlockSize( unsigned long DeviceIndex, unsigned long BlockSize ); 
-PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_IsDiscardFirstSample( unsigned long DeviceIndex );    
+PUBLIC_EXTERN unsigned long AIOUSB_SetStreamingBlockSize( unsigned long DeviceIndex, unsigned long BlockSize );
+PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_IsDiscardFirstSample( unsigned long DeviceIndex );
 PUBLIC_EXTERN unsigned long AIOUSB_SetDiscardFirstSample(unsigned long DeviceIndex,AIOUSB_BOOL discard );
 
 PUBLIC_EXTERN AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex );
-PUBLIC_EXTERN unsigned long AIOUSB_ADC_InternalCal( unsigned long DeviceIndex, AIOUSB_BOOL autoCal, unsigned short returnCalTable[], const char *saveFileName ); 
+PUBLIC_EXTERN unsigned long AIOUSB_ADC_InternalCal( unsigned long DeviceIndex, AIOUSB_BOOL autoCal, unsigned short returnCalTable[], const char *saveFileName );
 PUBLIC_EXTERN unsigned char *ADC_GetADConfigBlock_Registers( ADConfigBlock *config );
 PUBLIC_EXTERN void AIOUSB_SetRegister( ADConfigBlock *cb, unsigned int Register, unsigned char value );
 PUBLIC_EXTERN unsigned char AIOUSB_GetRegister( ADConfigBlock *cb, unsigned int Register );
@@ -713,10 +713,11 @@ PUBLIC_EXTERN unsigned long DACOutputFrame(unsigned long DeviceIndex,unsigned lo
 PUBLIC_EXTERN unsigned long DACOutputFrameRaw(unsigned long DeviceIndex,unsigned long FramePoints,unsigned short *FrameData );
 PUBLIC_EXTERN unsigned long DACOutputStart(unsigned long DeviceIndex );
 PUBLIC_EXTERN unsigned long DACOutputSetInterlock(unsigned long DeviceIndex,unsigned long bInterlock );
-
+PUBLIC_EXTERN unsigned long CSA_DACOutputProcess(long DeviceIndex, double ClockHz, long Samples, short * sampleData );
+								)
 /* #include "AIOUSB_CustomEEPROM.h" */
 
-PUBLIC_EXTERN unsigned long CustomEEPROMWrite( unsigned long DeviceIndex, unsigned long StartAddress, unsigned long DataSize, void *Data ); 
+PUBLIC_EXTERN unsigned long CustomEEPROMWrite( unsigned long DeviceIndex, unsigned long StartAddress, unsigned long DataSize, void *Data );
 PUBLIC_EXTERN unsigned long CustomEEPROMRead( unsigned long DeviceIndex, unsigned long StartAddress, unsigned long *DataSize, void *Data );
 
 /* #include "AIOUSBDevice.h" */
@@ -802,7 +803,7 @@ PUBLIC_EXTERN int usb_request(USBDevice *dev_handle,
                         unsigned char *data, uint16_t wLength, unsigned int timeout);
 PUBLIC_EXTERN int usb_reset_device( USBDevice *usb );
 
- 
+
 PUBLIC_EXTERN libusb_device_handle *get_usb_device( USBDevice *dev );
 PUBLIC_EXTERN libusb_device_handle *USBDeviceGetUSBDeviceHandle( USBDevice *usb );
 

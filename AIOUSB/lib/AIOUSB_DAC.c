@@ -20,9 +20,9 @@ unsigned long DACDirect(unsigned long DeviceIndex,unsigned short Channel,unsigne
     AIORESULT result = AIOUSB_SUCCESS;
 
     DeviceDescriptor *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS ) 
+    if ( result != AIOUSB_SUCCESS )
         return result;
-    
+
 
     if (deviceDesc->ImmDACs == 0) {
         return AIOUSB_ERROR_NOT_SUPPORTED;
@@ -36,22 +36,22 @@ unsigned long DACDirect(unsigned long DeviceIndex,unsigned short Channel,unsigne
         return AIOUSB_ERROR_INVALID_PARAMETER;
     }
     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS ) 
+    if ( result != AIOUSB_SUCCESS )
         return result;
-    
-    
-    int bytesTransferred = usb->usb_control_transfer(usb, 
-                                                     USB_WRITE_TO_DEVICE, 
+
+
+    int bytesTransferred = usb->usb_control_transfer(usb,
+                                                     USB_WRITE_TO_DEVICE,
                                                      AUR_DAC_IMMEDIATE,
-                                                     Value, 
-                                                     Channel, 
-                                                     0, 
+                                                     Value,
+                                                     Channel,
+                                                     0,
                                                      0, /* wLength */
                                                      deviceDesc->commTimeout
                                                      );
     if (bytesTransferred != 0)
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-    
+
 
     return result;
 }
@@ -128,7 +128,7 @@ unsigned long DACDirect(unsigned long DeviceIndex,unsigned short Channel,unsigne
 unsigned long DACMultiDirect( unsigned long DeviceIndex,
                              unsigned short *pDACData,
                              unsigned long DACDataCount
-                             ) 
+                             )
 {
     AIO_ASSERT( pDACData );
     AIO_ASSERT( DACDataCount <= 10000  );
@@ -139,14 +139,14 @@ unsigned long DACMultiDirect( unsigned long DeviceIndex,
 
     AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED, deviceDesc->ImmDACs );
-    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_OPEN_FAILED, 
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_OPEN_FAILED,
                           !(
-                            ( deviceDesc->bDACDIOStream || deviceDesc->bDACSlowWaveStream || deviceDesc->bDACStream ) && 
+                            ( deviceDesc->bDACDIOStream || deviceDesc->bDACSlowWaveStream || deviceDesc->bDACStream ) &&
                             ( deviceDesc->bDACOpen || deviceDesc->bDACClosing )
                             )
                           );
 
-                          
+
     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
     AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
 
@@ -187,17 +187,17 @@ unsigned long DACMultiDirect( unsigned long DeviceIndex,
     }
 
     int bytesTransferred = usb->usb_control_transfer(usb,
-                                                     USB_WRITE_TO_DEVICE, 
+                                                     USB_WRITE_TO_DEVICE,
                                                      AUR_DAC_IMMEDIATE,
-                                                     0, 
-                                                     0, 
-                                                     configBuffer, 
-                                                     configBytes, 
+                                                     0,
+                                                     0,
+                                                     configBuffer,
+                                                     configBytes,
                                                      deviceDesc->commTimeout
                                                      );
     if (bytesTransferred != configBytes)
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-        
+
     free(configBuffer);
 
     return result;
@@ -210,7 +210,7 @@ unsigned long DACMultiDirect( unsigned long DeviceIndex,
  * @param RangeCode
  * @return
  */
-unsigned long DACSetBoardRange(unsigned long DeviceIndex,unsigned long RangeCode ) 
+unsigned long DACSetBoardRange(unsigned long DeviceIndex,unsigned long RangeCode )
 {
     if ( RangeCode < DAC_RANGE_0_5V || RangeCode > DAC_RANGE_10V )
         return AIOUSB_ERROR_INVALID_PARAMETER;
@@ -222,23 +222,23 @@ unsigned long DACSetBoardRange(unsigned long DeviceIndex,unsigned long RangeCode
     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS )
         return result;
-    
+
     if (deviceDesc->bDACBoardRange == AIOUSB_FALSE)
         return AIOUSB_ERROR_NOT_SUPPORTED;
 
-      
+
     int bytesTransferred = usb->usb_control_transfer(usb,
-                                                     USB_WRITE_TO_DEVICE, 
+                                                     USB_WRITE_TO_DEVICE,
                                                      AUR_DAC_RANGE,
-                                                     RangeCode, 
-                                                     0, 
-                                                     0, 
-                                                     0 /* wLength */, 
+                                                     RangeCode,
+                                                     0,
+                                                     0,
+                                                     0 /* wLength */,
                                                      deviceDesc->commTimeout
                                                      );
     if (bytesTransferred != 0)
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-        
+
     return result;
 }
 
@@ -270,7 +270,7 @@ unsigned long DACOutputCloseNoEnd( unsigned long DeviceIndex, unsigned long bWai
 unsigned long DACOutputSetCount(unsigned long DeviceIndex, unsigned long NewCount) {
   // TODO: this function is not yet implemented
     return AIOUSB_ERROR_NOT_SUPPORTED;
-} 
+}
 
 
 
@@ -314,7 +314,67 @@ unsigned long DACOutputSetInterlock(
                                     ) {
   // TODO: this function is not yet implemented
     return AIOUSB_ERROR_NOT_SUPPORTED;
-} 
+}
+
+
+/*----------------------------------------------------------------------------*/
+#define SamplesPerDACUploadBlock (31 * 512)
+unsigned long CSA_DACOutputProcess(
+								unsigned long DeviceIndex,
+								double ClockHz,
+								unsigned long Samples,
+								unsigned short * sampleData
+								) {
+
+  AIORESULT result = AIOUSB_SUCCESS;
+  AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+  if ( result != AIOUSB_SUCCESS )
+      return result;
+  USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
+  if ( result != AIOUSB_SUCCESS )
+      return result;
+
+  // stop ARB and reset read pointer
+  int bytesTransferred = usb->usb_control_transfer(usb, USB_WRITE_TO_DEVICE, AUR_DAC_CONTROL, 0x80, 0, 0, 0, deviceDesc->commTimeout);
+  if (bytesTransferred != 0)
+      return LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+
+	// write data pointer to zero
+	bytesTransferred = usb->usb_control_transfer(usb, USB_WRITE_TO_DEVICE, AUR_DAC_DATAPTR, 0, 0, 0, 0, deviceDesc->commTimeout);
+  if (bytesTransferred != 0)
+    return LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+
+	unsigned short CtrDivisor = 12000000.0 / ClockHz;
+	ClockHz = 12000000.0 / CtrDivisor;
+
+	// set ARB rate
+	bytesTransferred = usb->usb_control_transfer(usb, USB_WRITE_TO_DEVICE, AUR_DAC_DIVISOR, 0, CtrDivisor, 0, 0, deviceDesc->commTimeout);
+    if (bytesTransferred != 0)
+        return LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+
+  int L;
+  unsigned long status;
+  unsigned short * ptr = sampleData;
+  while (Samples > SamplesPerDACUploadBlock)
+  {
+	L = 0;
+	status = usb->usb_bulk_transfer(usb, 0x02, (unsigned char *)ptr, SamplesPerDACUploadBlock * 2, &L, 0);
+	if (0 != status) return LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+	ptr += SamplesPerDACUploadBlock;
+	Samples -= SamplesPerDACUploadBlock;
+	}
+	L = 0;
+	status = usb->usb_bulk_transfer(usb, 0x02, (unsigned char *)ptr, Samples * 2, &L, 0);
+	if (0 != status) return LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+
+	// start (just in the case where not enough data was sent that it auto-started; redundant starts are safe
+	bytesTransferred = usb->usb_control_transfer(usb, USB_WRITE_TO_DEVICE, AUR_DAC_CONTROL, 0x01, 0, 0, 0, deviceDesc->commTimeout);
+  if (bytesTransferred != 0)
+    return LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+
+  return AIOUSB_SUCCESS;
+}
+
 
 #ifdef __cplusplus
 }
