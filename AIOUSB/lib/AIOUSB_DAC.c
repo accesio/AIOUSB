@@ -23,6 +23,9 @@ unsigned long DACDirect(unsigned long DeviceIndex,unsigned short Channel,unsigne
     if ( result != AIOUSB_SUCCESS )
         return result;
 
+    result=AIOUSB_EnsureOpen(DeviceIndex);
+    if ( result != AIOUSB_SUCCESS )
+        return result;
 
     if (deviceDesc->ImmDACs == 0) {
         return AIOUSB_ERROR_NOT_SUPPORTED;
@@ -137,6 +140,10 @@ unsigned long DACMultiDirect( unsigned long DeviceIndex,
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
 
+    result=AIOUSB_EnsureOpen(DeviceIndex);
+    if ( result != AIOUSB_SUCCESS )
+        return result;
+
     AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED, deviceDesc->ImmDACs );
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_OPEN_FAILED,
@@ -220,6 +227,10 @@ unsigned long DACSetBoardRange(unsigned long DeviceIndex,unsigned long RangeCode
     if ( result != AIOUSB_SUCCESS )
         return result;
     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS )
+        return result;
+
+    result=AIOUSB_EnsureOpen(DeviceIndex);
     if ( result != AIOUSB_SUCCESS )
         return result;
 
@@ -333,6 +344,10 @@ unsigned long CSA_DACOutputProcess(
   USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
   if ( result != AIOUSB_SUCCESS )
       return result;
+
+  result=AIOUSB_EnsureOpen(DeviceIndex);
+    if ( result != AIOUSB_SUCCESS )
+        return result;
 
   // stop ARB and reset read pointer
   int bytesTransferred = usb->usb_control_transfer(usb, USB_WRITE_TO_DEVICE, AUR_DAC_CONTROL, 0x80, 0, 0, 0, deviceDesc->commTimeout);
