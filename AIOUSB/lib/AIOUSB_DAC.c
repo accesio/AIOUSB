@@ -370,6 +370,8 @@ unsigned long CSA_DACOutputProcess(
   int L;
   unsigned long status;
   unsigned short * ptr = sampleData;
+    unsigned long samplesWritten = 0;
+    int once = 0;
   while (Samples > SamplesPerDACUploadBlock)
   {
 	L = 0;
@@ -377,15 +379,19 @@ unsigned long CSA_DACOutputProcess(
 	if (0 != status) return LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
 	ptr += SamplesPerDACUploadBlock;
 	Samples -= SamplesPerDACUploadBlock;
-	}
-	L = 0;
-	status = usb->usb_bulk_transfer(usb, 0x02, (unsigned char *)ptr, Samples * 2, &L, 0);
-	if (0 != status) return LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-
+        samplesWritten += SamplesPerDACUploadBlock;
+        if ((samplesWritten > 65536) && (!once))
+        {
+            once = 1;
 	// start (just in the case where not enough data was sent that it auto-started; redundant starts are safe
 	bytesTransferred = usb->usb_control_transfer(usb, USB_WRITE_TO_DEVICE, AUR_DAC_CONTROL, 0x01, 0, 0, 0, deviceDesc->commTimeout);
   if (bytesTransferred != 0)
     return LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+        }
+    }
+    L = 0;
+    status = usb->usb_bulk_transfer(usb, 0x02, (unsigned char *)ptr, Samples * 2, &L, 0);
+    if (0 != status) return LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
 
   return AIOUSB_SUCCESS;
 }
