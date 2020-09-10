@@ -332,7 +332,7 @@ unsigned long DACOutputSetInterlock(
 #define SamplesPerDACUploadBlock (31 * 512)
 unsigned long CSA_DACOutputProcess(
 								unsigned long DeviceIndex,
-								double ClockHz,
+								double *ClockHz,
 								unsigned long Samples,
 								unsigned short * sampleData
 								) {
@@ -359,8 +359,8 @@ unsigned long CSA_DACOutputProcess(
   if (bytesTransferred != 0)
     return LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
 
-	unsigned short CtrDivisor = 12000000.0 / ClockHz;
-	ClockHz = 12000000.0 / CtrDivisor;
+	unsigned short CtrDivisor = 12000000.0 / *ClockHz;
+	*ClockHz = 12000000.0 / CtrDivisor;
 
 	// set ARB rate
 	bytesTransferred = usb->usb_control_transfer(usb, USB_WRITE_TO_DEVICE, AUR_DAC_DIVISOR, 0, CtrDivisor, 0, 0, deviceDesc->commTimeout);
