@@ -21,6 +21,7 @@ PUBLIC_EXTERN unsigned long DACOutputFrame(unsigned long DeviceIndex,unsigned lo
 PUBLIC_EXTERN unsigned long DACOutputFrameRaw(unsigned long DeviceIndex,unsigned long FramePoints,unsigned short *FrameData );
 PUBLIC_EXTERN unsigned long DACOutputStart(unsigned long DeviceIndex );
 PUBLIC_EXTERN unsigned long DACOutputSetInterlock(unsigned long DeviceIndex,unsigned long bInterlock );
+PUBLIC_EXTERN unsigned long CSA_DACOutputProcess( unsigned long DeviceIndex,double *ClockHz,	unsigned long Samples, unsigned short * sampleData );
 /* END AIOUSB_API */
 
 
