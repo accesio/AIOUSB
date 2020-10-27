@@ -107,7 +107,7 @@ seconds before attempting to make all ACCES USB devices on the system usable by 
 than root. This script must be run with root privileges.
 
 \code{.sh}
-fxload -t fx2 -D /dev/bus/usb/008/006 -I /usr/share/usb/USB-AI16-16.hex
+fxload -t fx2lp -D /dev/bus/usb/008/006 -I /usr/share/usb/USB-AI16-16.hex
 chmod 0666 /dev/bus/usb/008/007
 \endcode
 

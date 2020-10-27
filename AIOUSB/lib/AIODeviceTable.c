@@ -44,7 +44,6 @@ static ProductIDName productIDNameTable[] = {
     { USB_IIRO4_COM     , "USB-IIRO4-COM"  },
     { USB_DIO16RO8      , "USB-DIO16RO8"   },
     { PICO_DIO16RO8     , "PICO-DIO16RO8"  },
-    { USB_AI16_16F      , "USB-AI16-16F"   },
     { USB_AI16_16A      , "USB-AI16-16A"   },
     { USB_AI16_16E      , "USB-AI16-16E"   },
     { USB_AI12_16A      , "USB-AI12-16A"   },
@@ -75,6 +74,7 @@ static ProductIDName productIDNameTable[] = {
     { USB_AI12_128A     , "USB-AI12-128A"  },
     { USB_AI12_128      , "USB-AI12-128"   },
     { USB_AI12_128E     , "USB-AI12-128E"  },
+    { USB_AI16_16F      , "USB-AI16-16F"   },
     { USB_AO_ARB1       , "USB_AO_ARB1"    },
     { USB_AO16_16A      , "USB-AO16-16A"   },
     { USB_AO16_16       , "USB-AO16-16"    },
@@ -92,7 +92,6 @@ static ProductIDName productIDNameTable[] = {
     { USB_AO12_8        , "USB-AO12-8"     },
     { USB_AO12_4A       , "USB-AO12-4A"    },
     { USB_AO12_4        , "USB-AO12-4"     },
-    { USB_AIO16_16F     , "USB-AIO16-16F"  },
     { USB_AIO16_16A     , "USB-AIO16-16A"  },
     { USB_AIO16_16E     , "USB-AIO16-16E"  },
     { USB_AIO12_16A     , "USB-AIO12-16A"  },
@@ -122,8 +121,9 @@ static ProductIDName productIDNameTable[] = {
     { USB_AIO16_128E    , "USB-AIO16-128E" },
     { USB_AIO12_128A    , "USB-AIO12-128A" },
     { USB_AIO12_128     , "USB-AIO12-128"  },
-    { USB_AIO12_128E    , "USB-AIO12-128E" }
-};
+    { USB_AIO12_128E    , "USB-AIO12-128E" },
+    { USB_AIO16_16F     , "USB-AIO16-16F"  }
+};// keep sorted by productID
 #ifdef __cplusplus
 const int NUM_PROD_NAMES = sizeof(productIDNameTable) / sizeof(productIDNameTable[ 0 ]);
 #else
@@ -486,7 +486,6 @@ AIORET_TYPE GetDevices(void)
      * that have not been unplugged, which the user may be using,
      * _should_ still be valid
      */
-
     for(index = 0; index < MAX_USB_DEVICES; index++) {
         if ( deviceTable[index].usb_device != NULL && deviceTable[index].valid == AIOUSB_TRUE )
             deviceMask =  (deviceMask << 1) | 1;
@@ -1246,8 +1245,8 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
     } else if (productID == PICO_DIO16RO8) {
         device->DIOBytes = 3;
     } else if (
-              (productID >= USB_AI16_16A && productID <= USB_AI12_16E) ||
-              (productID >= USB_AIO16_16A && productID <= USB_AIO12_16E)
+              (productID >= USB_AI16_16A && productID <= USB_AI16_16F) ||
+              (productID >= USB_AIO16_16A && productID <= USB_AIO16_16F)
               ) {
         device->DIOBytes = 2;
         device->Counters = 1;
