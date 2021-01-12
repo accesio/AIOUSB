@@ -36,9 +36,9 @@ using namespace AIOUSB;
 
 int 
 main( int argc, char **argv ) {
-    printf( "USB-DA12-8A sample program version 1.111, 17 November 2014\n"
+    printf( "USB-DA12-8A/E sample program version 1.112, 12 January 2020\n"
             "  AIOUSB library version %s, %s\n"
-            "  This program demonstrates controlling a USB-AI16-16A device on\n"
+            "  This program demonstrates controlling a USB-DA12-8A/E device on\n"
             "  the USB bus. For simplicity, it uses the first such device found\n"
             "  on the bus.\n", AIOUSB_GetVersion(), AIOUSB_GetVersionDate()
             );
@@ -65,13 +65,13 @@ main( int argc, char **argv ) {
             bool deviceFound = false;
             while( deviceMask != 0 ) {
                 if( ( deviceMask & 1 ) != 0 ) {
-
                     nameSize = MAX_NAME_SIZE;
                     result = QueryDeviceInfo( deviceIndex, &productID, &nameSize, name, &numDIOBytes, &numCounters );
                     if( result == AIOUSB_SUCCESS ) {
+
                         if(
-                           productID >= USB_DA12_8A_REV_A
-                           && productID <= USB_DA12_8E
+                           productID >= 0x4002
+                           && productID <= 0x4003
                            ) {
                             // found a USB-DA12-8A/E family device
                             deviceFound = true;
@@ -85,6 +85,7 @@ main( int argc, char **argv ) {
                 deviceMask >>= 1;
             }
             if( deviceFound ) {
+                printf("Using Device Index %d\n", deviceIndex);
                 AIOUSB_SetCommTimeout( deviceIndex, 500 );
 
                 uint64_t serialNumber;
