@@ -1,5 +1,5 @@
 #
-# Build samples for USB-AO16-16
+# Build samples for USB-DA12-8A/USB-DA12-8E
 #
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
