@@ -638,7 +638,7 @@ unsigned long AIOUSB_ADC_LoadCalTable(
     if(calTable != 0) {
           struct stat fileInfo;
           if(stat(fileName, &fileInfo) == 0) {
-                if(fileInfo.st_size == CAL_TABLE_WORDS * sizeof(unsigned short) * 2) {
+                if(fileInfo.st_size == CAL_TABLE_WORDS * sizeof(unsigned short)) {
                       FILE *const calFile = fopen(fileName, "r");
                       if(calFile != NULL) {
                             const size_t wordsRead = fread(calTable, sizeof(unsigned short), CAL_TABLE_WORDS, calFile);

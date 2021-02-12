@@ -70,6 +70,10 @@ int main(int argc, char **argv)
     }
 
     /* AIOUSB_Reset( deviceIndex ); */
+
+    result = ADC_SetCal(deviceIndex, "/home/jhentges/Desktop/Multibeamcorp/M.9994 B-.0522.bin");
+    printf("ADC_SetCal() returned %ld\n", result);
+
     double Hz = 1e6;
     int seconds = 2;
     int samples = seconds * Hz;
