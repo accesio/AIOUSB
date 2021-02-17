@@ -2491,6 +2491,7 @@ unsigned long AIOUSB_SetDiscardFirstSample(
 
     return result;
 }
+
 /*----------------------------------------------------------------------------*/
 void AIOUSB_Copy_Config_Block(ADConfigBlock *to, ADConfigBlock *from)
 {
@@ -2498,6 +2499,7 @@ void AIOUSB_Copy_Config_Block(ADConfigBlock *to, ADConfigBlock *from)
     to->size = from->size;
     memcpy(&to->registers[0], &from->registers[0], to->size);
 }
+
 /*----------------------------------------------------------------------------*/
 unsigned long AIOUSB_Validate_ADC_Device(unsigned long DeviceIndex)
 {
@@ -2512,24 +2514,24 @@ RETURN_AIOUSB_Validate_ADC_Device:
 
     return result;
 }
+
 /**
  * @param deviceIndex
- * @return
+ * @return the factory-stored RefV calibration value, if present
  */
 /*----------------------------------------------------------------------------*/
 double GetHiRef(unsigned long deviceIndex)
 {
-    const double HiRefRef = 65130.249;          // == 9.938239V on 0-10V range (9.938239V / 10.0V * 65535 = 65130.249)
     unsigned short RefData = 0xFFFF;
     unsigned long DataSize = sizeof(RefData);
     unsigned long Status = GenericVendorRead(deviceIndex, 0xA2, 0x1DF2, 0, &RefData, &DataSize );
 
     if (Status != AIOUSB_SUCCESS)
-        return HiRefRef;
+        RefData = 0;
     if (DataSize != sizeof(RefData))
-        return HiRefRef;
+        RefData = 0;
     if ((RefData == 0xFFFF) || (RefData == 0x0000))
-        return HiRefRef;
+        RefData =  0;
     return RefData;
 }
 /*----------------------------------------------------------------------------*/
@@ -2598,33 +2600,79 @@ AIORESULT AIOUSB_SetRangeSingle(ADConfigBlock *config, unsigned long channel, un
 }
 
 int dRef = 3;
+// code as original designed
+// AIORET_TYPE ConfigureAndBulkAcquire1( unsigned long DeviceIndex, ADConfigBlock *config )
+// {
+//     unsigned short *ADData;
+//     int addata_num_bytes,  total = 0;
+//     uint16_t bytesTransferred;
+//     int numBytes = 256;
+//     unsigned char bcdata[] = {0x05,0x00,0x00,0x00};
+//     int libusbresult;
+//     AIORESULT result;
 
-AIORET_TYPE ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *config )
+//     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
+//     if ( result != AIOUSB_SUCCESS )
+//         return (AIORET_TYPE)result;
+
+//     /* Set Config */
+//     ADC_SetConfig( DeviceIndex, config->registers, &config->size );
+
+//     ADData = (unsigned short *)malloc(sizeof(unsigned short)*numBytes );
+//     if (!ADData ) {
+//         return -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+//     }
+//     addata_num_bytes = numBytes * sizeof(unsigned short);
+
+//     /* Write BC data */
+//     libusbresult = usb->usb_control_transfer( usb, USB_WRITE_TO_DEVICE, 0xBC, 0, numBytes, bcdata, sizeof(bcdata), 1000 );
+
+//     /* Get Immediate */
+//     libusbresult = usb->usb_control_transfer( usb, USB_WRITE_TO_DEVICE, 0xBF, 0, 0, bcdata, 0, 1000 );
+
+//     /* Bulk read */
+//     libusbresult = usb->usb_bulk_transfer( usb,
+//                                            LIBUSB_ENDPOINT_IN | USB_BULK_READ_ENDPOINT,
+//                                            (unsigned char *)ADData,
+//                                            addata_num_bytes,
+//                                            (int *)&bytesTransferred,
+//                                            1000 );
+
+//     if (libusbresult != LIBUSB_SUCCESS) {
+//         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbresult);
+//     } else if (bytesTransferred != addata_num_bytes ) {
+//         result = AIOUSB_ERROR_INVALID_DATA;
+//     } else {
+//         for ( int i = 0; i < numBytes; i ++ )
+//             total += ADData[i];
+//         result = total / numBytes;
+//     }
+
+//     return (AIORET_TYPE)result;
+// }
+
+double ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *config )
 {
-    unsigned short *ADData;
+    unsigned short ADData[256]; // TODO: adjust for low-speed USB packet size support (64 bytes)
     int addata_num_bytes,  total = 0;
     uint16_t bytesTransferred;
-    int numBytes = 256;
+    int numSamples = 256;
     unsigned char bcdata[] = {0x05,0x00,0x00,0x00};
     int libusbresult;
-    AIORESULT result;
+    double result;
+    AIORESULT code;
 
-    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS )
-        return (AIORET_TYPE)result;
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &code );
+    if ( code != AIOUSB_SUCCESS )
+        return (double)code;
 
     /* Set Config */
     ADC_SetConfig( DeviceIndex, config->registers, &config->size );
 
-    ADData = (unsigned short *)malloc(sizeof(unsigned short)*numBytes );
-    if (!ADData ) {
-        result = -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
-        goto out_ConfigureAndBulkAcquire;
-    }
-    addata_num_bytes = numBytes * sizeof(unsigned short);
+    addata_num_bytes = numSamples * sizeof(unsigned short);
 
     /* Write BC data */
-    libusbresult = usb->usb_control_transfer( usb, USB_WRITE_TO_DEVICE, 0xBC, 0, numBytes, bcdata, sizeof(bcdata), 1000 );
+    libusbresult = usb->usb_control_transfer( usb, USB_WRITE_TO_DEVICE, 0xBC, 0, numSamples, bcdata, sizeof(bcdata), 1000 );
 
     /* Get Immediate */
     libusbresult = usb->usb_control_transfer( usb, USB_WRITE_TO_DEVICE, 0xBF, 0, 0, bcdata, 0, 1000 );
@@ -2642,15 +2690,13 @@ AIORET_TYPE ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *c
     } else if (bytesTransferred != addata_num_bytes ) {
         result = AIOUSB_ERROR_INVALID_DATA;
     } else {
-        for ( int i = 0; i < numBytes; i ++ )
+        for ( int i = 0; i < numSamples; i ++ )
             total += ADData[i];
-        result = total / numBytes;
+        result = total / (double)numSamples;
     }
- out_ConfigureAndBulkAcquire:
-    return (AIORET_TYPE)result;
+
+    return result;
 }
-
-
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -2668,10 +2714,8 @@ unsigned long AIOUSB_ADC_InternalCal(
                                      const char *saveFileName
                                      )
 {
-    int tmpval, lowRead, hiRead, dRead, dRef;
-    int lowRefRef = 0, hiRefRef = 9.9339 * 6553.6;
-    double fval;
-    ADConfigBlock oConfig,nConfig;
+    ADConfigBlock oConfig, nConfig;
+
     AIORET_TYPE retval = AIOUSB_SUCCESS;
 
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, (AIORESULT*)&retval );
@@ -2693,66 +2737,83 @@ unsigned long AIOUSB_ADC_InternalCal(
         goto out_AIOUSB_ADC_InternalCal;
     }
 
-
     retval = ADC_GetConfig( DeviceIndex, oConfig.registers, &oConfig.size );
 
     if ( autoCal ) {
-
-        dRef = hiRefRef - lowRefRef;
+  
+        double lowRefRef = 0.0 * 6553.6;
+        double hiRefRef = 9.9339 * 6553.6;
+        double LoRef, HiRef, dRef, ThisRef, LoRead, HiRead, dRead;
+        double F;
         /*
          * create calibrated calibration table
          */
 
-        nConfig = deviceDesc->cachedConfigBlock;
-        memset(nConfig.registers,0,nConfig.size );
+        LoRef = lowRefRef;
+        HiRef = GetHiRef(DeviceIndex);
+        if (HiRef == 0) {
+            HiRef = hiRefRef;
+            // printf("  -- ERROR: HiRef returned zero\n");
+            }
+        dRef = HiRef - LoRef;
+
+        memset(nConfig.registers, 0, 21 );
         nConfig.registers[AD_REGISTER_CAL_MODE] = 0x07;
-        nConfig.registers[0x00] = AD_GAIN_CODE_10V;
+        nConfig.registers[0x00] = AD_GAIN_CODE_10V; // this is bipolar
+        nConfig.registers[AD_REGISTER_TRIG_COUNT] = 0x04;   // software start scan mode
+        nConfig.registers[AD_REGISTER_START_END] = 0x00;    // just channel "0" (all channels will reprort selected calibration input)
+        nConfig.registers[AD_REGISTER_OVERSAMPLE] = 0xff; // TODO: add handling for low-speed (64-byte) packet sizes
 
         for ( int k = 0;  k <= 1 ; k ++ ) {
             ADC_SetConfig( DeviceIndex, nConfig.registers, &deviceDesc->cachedConfigBlock.size );
 
             /* Setup 1-to-1 caltable */
-            for(int index = 0; index < CAL_TABLE_WORDS; index++)
+            for(int index = 0; index < 65536; index++) // TODO: CAL_TABLE_WORDS used in two ways, fix
                 calTable[ index ] = index;
             AIOUSB_ADC_SetCalTable(DeviceIndex, calTable);
 
-            nConfig.registers[AD_REGISTER_TRIG_COUNT] = 0x04;
-            nConfig.registers[AD_REGISTER_START_END] = 0x00;
-            nConfig.registers[AD_REGISTER_OVERSAMPLE] = 0xff;
-            nConfig.registers[AD_REGISTER_CAL_MODE] |= 0x02;
+            ThisRef = HiRef;
+            if (k==0) 
+                ThisRef = 0.5 * (ThisRef + 0x10000);
+            nConfig.registers[AD_REGISTER_CAL_MODE] |= 2; // cal high reference
 
-            tmpval = ConfigureAndBulkAcquire( DeviceIndex, &nConfig );
-            if ( tmpval < 0xf000 ) {
-                retval = AIOUSB_ERROR_INVALID_DATA;
+            HiRead = ConfigureAndBulkAcquire( DeviceIndex, &nConfig );
+            // printf("AIOUSB - HiRef: %X, HiRead: %X, ThisRef: %X, HiRead-ThisRef: %X\n", (int)HiRef, (int)HiRead, (int)ThisRef, (int)(HiRead-ThisRef));
+            if (abs(HiRead-ThisRef) > 0x1000)
+            {
+                retval = AIOUSB_ERROR_INVALID_DATA; 
+
+
                 goto free_AIOUSB_ADC_InternalCal;
             }
-            hiRead = tmpval;
+            usleep(10000); // cargo cult copy-pasted from Windows DLL source
 
-            nConfig.registers[0x10] = nConfig.registers[0x10] & (~0x02);
+            ThisRef = LoRef;
+            if (k==0)
+                ThisRef = 0.5 * (ThisRef + 0x10000);
+            nConfig.registers[AD_REGISTER_CAL_MODE] = nConfig.registers[AD_REGISTER_CAL_MODE] & (~0x02); // cal low reference
+            LoRead = ConfigureAndBulkAcquire( DeviceIndex, &nConfig );
 
-            tmpval = ConfigureAndBulkAcquire( DeviceIndex, &nConfig );
+            // printf("AIOUSB - LoRef: %X, LoRead: %X, ThisRef: %X, LoRead-ThisRef: %X\n",  (int)LoRef, (int)LoRead, (int)ThisRef, (int)(LoRead-ThisRef));
 
-            if ( k ==0 ) {
-                if ( tmpval < 0x7e00 || tmpval > 0x80ff ) {
-                    retval = AIOUSB_ERROR_INVALID_DATA;
-                    goto free_AIOUSB_ADC_InternalCal;
-                }
-            } else {
-                if ( tmpval > 0x00ff ) {
-                    retval = AIOUSB_ERROR_INVALID_DATA;
-                    goto free_AIOUSB_ADC_InternalCal;
-                }
+            if (abs(LoRead - ThisRef) > 0x100)
+            {
+                retval = AIOUSB_ERROR_INVALID_DATA;
+
+
+                goto free_AIOUSB_ADC_InternalCal;
             }
-            lowRead = tmpval;
-            /* helper_average( DeviceIndex, calTable , CAL_TABLE_WORDS , lowRead, hiRead ); */
-            dRead = hiRead - lowRead;
-            for( int i = 0, j  = 0; i < CAL_TABLE_WORDS; i++) {
-                fval = (double)( i - lowRead ) / dRead;
-                fval = (double)(lowRefRef + fval * dRef);
+            usleep(10000);
+
+            dRead = HiRead - LoRead;
+
+            for( int i = 0, j  = 0; i < 65536; i++) { // TODO: CAL_TABLE_WORDS used in two ways, fix
+                F = (double)( i - LoRead ) / dRead;
+                F = (double)(lowRefRef + F * dRef);
                 if ( k == 0 ) {
-                    fval = 0.5 * (fval + 0x10000 );
+                    F = 0.5 * (F + 0x10000 );
                 }
-                j = round(fval);
+                j = round(F);
                 if ( j <= 0 )
                     j = 0;
                 else if ( j >= 0xffff )
@@ -2822,7 +2883,7 @@ unsigned long AIOUSB_ADC_InternalCal(
     free(calTable);
 
     deviceDesc->cachedConfigBlock = oConfig;
-    retval = ADC_SetConfig( DeviceIndex, oConfig.registers, &oConfig.size );
+    ADC_SetConfig( DeviceIndex, oConfig.registers, &oConfig.size );
 
 out_AIOUSB_ADC_InternalCal:
 

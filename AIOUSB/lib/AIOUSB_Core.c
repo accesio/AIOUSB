@@ -691,7 +691,7 @@ unsigned long AIOUSB_ADC_SetCalTable(
 
     int SRAM_BLOCK_WORDS = 1024;
     int sramAddress = 0;
-    int wordsRemaining = CAL_TABLE_WORDS;
+    int wordsRemaining = 65536;
 
     while(wordsRemaining > 0) {
         int num_to_write = (wordsRemaining < SRAM_BLOCK_WORDS) ? wordsRemaining : 1024 ;

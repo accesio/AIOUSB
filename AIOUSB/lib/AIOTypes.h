@@ -686,7 +686,7 @@ enum {
     BITS_PER_BYTE                 = 8,
     AI_16_MAX_COUNTS              = 65535,
     MAX_IMM_ADCS                  = 2, /*< maximum number of "immediate" A/Ds in any device */
-    CAL_TABLE_WORDS               = ( 64 * 1024 *2), /*< 64K 2-byte words, twice: unipolar then bipolar */
+    CAL_TABLE_WORDS               = ( 64 * 1024 *2), /* 64K 2-byte words, twice: unipolar then bipolar */
     COUNTERS_PER_BLOCK            = 3,
     COUNTER_NUM_MODES             = 6,
     DAC_RESET                     = 0x80,

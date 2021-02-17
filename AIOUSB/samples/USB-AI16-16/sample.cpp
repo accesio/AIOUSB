@@ -11,7 +11,6 @@ int main( int argc, char **argv ) {
     unsigned short counts[ MAX_CHANNELS ];
     double volts[ MAX_CHANNELS ];
     unsigned char gainCodes[ NUM_CHANNELS ];
-    uint64_t serialNumber;
     unsigned long result;
     unsigned long deviceMask;
     int MAX_NAME_SIZE = 20;
@@ -77,14 +76,6 @@ int main( int argc, char **argv ) {
     }
 
     AIOUSB_Reset( deviceIndex );
-    result = GetDeviceSerialNumber( deviceIndex, &serialNumber );
-
-    if( result == AIOUSB_SUCCESS )
-        printf( "Serial number of device at index %llx\n", (long long)serialNumber  );
-    else
-        printf( "Error '%s' getting serial number of device at index %lu\n",
-                AIOUSB_GetResultCodeAsString( result ),
-                deviceIndex );
 
     /*
      * demonstrate A/D configuration; there are two ways to configure the A/D;
@@ -117,17 +108,17 @@ int main( int argc, char **argv ) {
     }
     printf( "A/D settings successfully configured\n" );
 
-    // calibration_type = strdup(":1TO1:");
-    calibration_type = strdup(":AUTO:");
+    calibration_type = strdup(":1TO1:");
+    //calibration_type = strdup(":AUTO:");
 
     result = ADC_SetCal( deviceIndex, calibration_type ); /**demonstrate automatic A/D calibration */
 
     if( result == AIOUSB_SUCCESS ) {
-        printf( "Automatic calibration completed successfully\n" );
+        printf( "Calibration completed successfully\n" );
     } else if (result == AIOUSB_ERROR_NOT_SUPPORTED) {
-        printf ("Automatic calibration not supported on this device\n");
+        printf ("Calibration not supported on this device\n");
     } else {
-        printf( "Error '%s' performing automatic A/D calibration\n", AIOUSB_GetResultCodeAsString( result ) );
+        printf( "Error '%s' performing A/D calibration (code %lx)\n", AIOUSB_GetResultCodeAsString( result ), result );
         goto out_after_init;
     }
 
@@ -141,13 +132,10 @@ int main( int argc, char **argv ) {
     result = ADC_GetScan( deviceIndex, counts );
 
     if( result == AIOUSB_SUCCESS )
-        printf( "Ground counts = %u (should be approx. 0)\n", counts[ CAL_CHANNEL ] );
+        printf( "Ground counts = %x (should be near 0)\n", counts[ CAL_CHANNEL ] );
     else
         printf( "Error '%s' attempting to read ground counts\n", 
                 AIOUSB_GetResultCodeAsString( result ) );
-
-
-
 
     /*
      * verify that A/D reference calibration is correct
@@ -155,10 +143,11 @@ int main( int argc, char **argv ) {
     ADC_ADMode( deviceIndex, 0 , AD_CAL_MODE_REFERENCE );
     result = ADC_GetScan( deviceIndex, counts );
     if( result == AIOUSB_SUCCESS )
-        printf( "Reference counts = %u (should be approx. 65130)\n", counts[ CAL_CHANNEL ] );
+        printf( "Reference counts = 0x%x (should be near 0x1750)\n", counts[ CAL_CHANNEL ] );
     else
         printf( "Error '%s' attempting to read reference counts\n", 
                 AIOUSB_GetResultCodeAsString( result ) );
+
     /*
      * demonstrate scanning channels and measuring voltages
      */
@@ -172,11 +161,32 @@ int main( int argc, char **argv ) {
 
     result = ADC_GetScanV( deviceIndex, volts );
     if( result == AIOUSB_SUCCESS ) {
-        printf( "Volts read:\n" );
+        printf( "Volts read (uncalibrated):\n" );
         for( int channel = 0; channel < NUM_CHANNELS; channel++ )
             printf( "  Channel %2d = %f\n", channel, volts[ channel ] );
     } else
         printf( "Error '%s' performing A/D channel scan\n", AIOUSB_GetResultCodeAsString( result ) );
+
+
+
+    result = ADC_SetCal(deviceIndex, ":AUTO:");
+    if( result == AIOUSB_SUCCESS ) {
+        printf( "Automatic calibration completed successfully\n" );
+    } else if (result == AIOUSB_ERROR_NOT_SUPPORTED) {
+        printf ("Automatic calibration not supported on this device\n");
+    } else {
+        printf( "Error '%s' performing automatic A/D calibration (code %lx)\n", AIOUSB_GetResultCodeAsString( result ), result );
+        goto out_after_init;
+    }
+
+    result = ADC_GetScanV( deviceIndex, volts );
+    if( result == AIOUSB_SUCCESS ) {
+        printf( "Volts read (calibrated):\n" );
+        for( int channel = 0; channel < NUM_CHANNELS; channel++ )
+            printf( "  Channel %2d = %f\n", channel, volts[ channel ] );
+    } else
+        printf( "Error '%s' performing A/D channel scan\n", AIOUSB_GetResultCodeAsString( result ) );
+
 
     /*
      * demonstrate reading a single channel in volts
