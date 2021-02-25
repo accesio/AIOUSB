@@ -6,6 +6,7 @@
  * @brief  Configuration functions for ADC elements
  *
  */
+#define DEBUG 1
 
 #include "AIOUSB_ADC.h"
 #include "AIOUSB_CTR.h"
@@ -2525,7 +2526,9 @@ double GetHiRef(unsigned long deviceIndex)
     unsigned short RefData = 0xFFFF;
     unsigned long DataSize = sizeof(RefData);
     unsigned long Status = GenericVendorRead(deviceIndex, 0xA2, 0x1DF2, 0, &RefData, &DataSize );
-
+#ifdef DEBUG      
+    printf("AIOUSB - EEPROM Factory Cal read %04x (status==%d)\n", RefData, Status);
+#endif
     if (Status != AIOUSB_SUCCESS)
         RefData = 0;
     if (DataSize != sizeof(RefData))
@@ -2753,7 +2756,9 @@ unsigned long AIOUSB_ADC_InternalCal(
         HiRef = GetHiRef(DeviceIndex);
         if (HiRef == 0) {
             HiRef = hiRefRef;
-            // printf("  -- ERROR: HiRef returned zero\n");
+#ifdef DEBUG            
+            printf("AIOUSB -   -- ERROR: EEPROM HiRef returned zero\n");
+#endif            
             }
         dRef = HiRef - LoRef;
 
@@ -2778,7 +2783,9 @@ unsigned long AIOUSB_ADC_InternalCal(
             nConfig.registers[AD_REGISTER_CAL_MODE] |= 2; // cal high reference
 
             HiRead = ConfigureAndBulkAcquire( DeviceIndex, &nConfig );
-            // printf("AIOUSB - HiRef: %X, HiRead: %X, ThisRef: %X, HiRead-ThisRef: %X\n", (int)HiRef, (int)HiRead, (int)ThisRef, (int)(HiRead-ThisRef));
+#ifdef DEBUG              
+            printf("AIOUSB - HiRef: %X, HiRead: %X, ThisRef: %X, HiRead-ThisRef: %d\n", (int)HiRef, (int)HiRead, (int)ThisRef, (int)(HiRead-ThisRef));
+#endif            
             if (abs(HiRead-ThisRef) > 0x1000)
             {
                 retval = AIOUSB_ERROR_INVALID_DATA; 
@@ -2793,9 +2800,9 @@ unsigned long AIOUSB_ADC_InternalCal(
                 ThisRef = 0.5 * (ThisRef + 0x10000);
             nConfig.registers[AD_REGISTER_CAL_MODE] = nConfig.registers[AD_REGISTER_CAL_MODE] & (~0x02); // cal low reference
             LoRead = ConfigureAndBulkAcquire( DeviceIndex, &nConfig );
-
-            // printf("AIOUSB - LoRef: %X, LoRead: %X, ThisRef: %X, LoRead-ThisRef: %X\n",  (int)LoRef, (int)LoRead, (int)ThisRef, (int)(LoRead-ThisRef));
-
+#ifdef DEBUG  
+            printf("AIOUSB - LoRef: %X, LoRead: %X, ThisRef: %X, LoRead-ThisRef: %d\n",  (int)LoRef, (int)LoRead, (int)ThisRef, (int)(LoRead-ThisRef));
+#endif
             if (abs(LoRead - ThisRef) > 0x100)
             {
                 retval = AIOUSB_ERROR_INVALID_DATA;
