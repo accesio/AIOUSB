@@ -2468,7 +2468,7 @@ AIOUSB_BOOL AIOUSB_IsDiscardFirstSample(
     if ( result != AIOUSB_SUCCESS )
         return result;
 
-        discard = deviceDesc->discardFirstSample;
+    discard = deviceDesc->discardFirstSample;
 
     return discard;
 }
@@ -2669,11 +2669,17 @@ double ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *config
     if ( code != AIOUSB_SUCCESS )
         return (double)code;
 
+#ifdef DEBUG
+    printf(" -- config->size:%ld, config->registers[0x10]:%02x\n", config->size, config->registers[0x10]);
+#endif
+
     /* Set Config */
     ADC_SetConfig( DeviceIndex, config->registers, &config->size );
 
     addata_num_bytes = numSamples * sizeof(unsigned short);
-
+#ifdef DEBUG
+    printf(" -- numSamples:%d, num_bytes:%d\n", numSamples, addata_num_bytes);
+#endif
     /* Write BC data */
     libusbresult = usb->usb_control_transfer( usb, USB_WRITE_TO_DEVICE, 0xBC, 0, numSamples, bcdata, sizeof(bcdata), 1000 );
 
@@ -2697,6 +2703,10 @@ double ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *config
             total += ADData[i];
         result = total / (double)numSamples;
     }
+
+#ifdef DEBUG
+    printf(" -- result:%f, total:%d, numSamples:%d\n", result, total, numSamples);
+#endif
 
     return result;
 }
