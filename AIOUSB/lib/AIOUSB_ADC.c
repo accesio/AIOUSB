@@ -2527,7 +2527,7 @@ double GetHiRef(unsigned long deviceIndex)
     unsigned long DataSize = sizeof(RefData);
     unsigned long Status = GenericVendorRead(deviceIndex, 0xA2, 0x1DF2, 0, &RefData, &DataSize );
 #ifdef DEBUG      
-    printf("AIOUSB - EEPROM Factory Cal read %04x (status==%d)\n", RefData, Status);
+    printf("AIOUSB - EEPROM Factory Cal read %04x (status==%ld)\n", RefData, Status);
 #endif
     if (Status != AIOUSB_SUCCESS)
         RefData = 0;
@@ -2763,6 +2763,7 @@ unsigned long AIOUSB_ADC_InternalCal(
         dRef = HiRef - LoRef;
 
         memset(nConfig.registers, 0, 21 );
+        nConfig.size = 21;
         nConfig.registers[AD_REGISTER_CAL_MODE] = 0x07;
         nConfig.registers[0x00] = AD_GAIN_CODE_10V; // this is bipolar
         nConfig.registers[AD_REGISTER_TRIG_COUNT] = 0x04;   // software start scan mode
@@ -2801,7 +2802,7 @@ unsigned long AIOUSB_ADC_InternalCal(
 #ifdef DEBUG  
             printf("AIOUSB - LoRef: %X, LoRead: %X, ThisRef: %X, LoRead-ThisRef: %d\n",  (int)LoRef, (int)LoRead, (int)ThisRef, (int)(LoRead-ThisRef));
 #endif
-            if (abs(LoRead - ThisRef) > 0x100)
+            if (abs(LoRead - ThisRef) > 0x150)
             {
                 retval = AIOUSB_ERROR_INVALID_DATA;
                 goto free_AIOUSB_ADC_InternalCal;
