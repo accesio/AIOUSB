@@ -2789,11 +2789,9 @@ unsigned long AIOUSB_ADC_InternalCal(
             if (abs(HiRead-ThisRef) > 0x1000)
             {
                 retval = AIOUSB_ERROR_INVALID_DATA; 
-
-
                 goto free_AIOUSB_ADC_InternalCal;
             }
-            usleep(10000); // cargo cult copy-pasted from Windows DLL source
+            usleep(10000); 
 
             ThisRef = LoRef;
             if (k==0)
@@ -2806,15 +2804,13 @@ unsigned long AIOUSB_ADC_InternalCal(
             if (abs(LoRead - ThisRef) > 0x100)
             {
                 retval = AIOUSB_ERROR_INVALID_DATA;
-
-
                 goto free_AIOUSB_ADC_InternalCal;
             }
             usleep(10000);
 
             dRead = HiRead - LoRead;
 
-            for( int i = 0, j  = 0; i < 65536; i++) { // TODO: CAL_TABLE_WORDS used in two ways, fix
+            for( int i = 0, j  = 0; i < 65536; i++) {
                 F = (double)( i - LoRead ) / dRead;
                 F = (double)(lowRefRef + F * dRef);
                 if ( k == 0 ) {

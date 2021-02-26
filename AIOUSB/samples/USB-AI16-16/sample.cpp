@@ -9,7 +9,7 @@ int main( int argc, char **argv ) {
     int MAX_CHANNELS = 128;
     int NUM_CHANNELS = 16;
     unsigned short counts[ MAX_CHANNELS ];
-    double volts[ MAX_CHANNELS ];
+    double volts;
     unsigned char gainCodes[ NUM_CHANNELS ];
     unsigned long result;
     unsigned long deviceMask;
@@ -108,49 +108,40 @@ int main( int argc, char **argv ) {
     printf( "A/D settings successfully configured\n" );
 
 
-    for(int calLoops=0;calLoops<10;++calLoops)
+
+    for(int calLoops=0;calLoops<1;++calLoops)
     {
         result = ADC_SetCal( deviceIndex, ":1TO1:" ); /**demonstrate automatic A/D calibration */
-
-        if( result == AIOUSB_SUCCESS ) {
-        ;
-        } else if (result == AIOUSB_ERROR_NOT_SUPPORTED) {
-            printf ("Calibration not supported on this device\n");
-        } else {
-            printf( "Error '%s' performing A/D calibration (code %lx)\n", AIOUSB_GetResultCodeAsString( result ), result );
-            goto out_after_init;
-        }
-
-
-        result = ADC_GetChannelV( deviceIndex, 0, &volts[ 0 ] );
-        if( result == AIOUSB_SUCCESS )
-            printf( "Volts read from A/D channel %d = %f (uncalibrated)\n", 0, volts[ 0 ] );
-        else
-            printf( "Error '%s' reading A/D channel %d\n", 
-                    AIOUSB_GetResultCodeAsString( result ), 
-                    0 );
+        result = ADC_GetChannelV( deviceIndex, 0, &volts );
+        printf( "Volts read from A/D channel %d = %f (uncalibrated)\n", 0, volts );       
     }
-    for(int calLoops=0;calLoops<10;++calLoops)
+    for(int calLoops=0;calLoops<1;++calLoops)
     {
         result = ADC_SetCal(deviceIndex, ":AUTO:");
-        if( result == AIOUSB_SUCCESS ) {
-            ;
-        } else if (result == AIOUSB_ERROR_NOT_SUPPORTED) {
-            printf ("Automatic calibration not supported on this device\n");
-        } else {
-            printf( "Error '%s' performing automatic A/D calibration (code %lx)\n", AIOUSB_GetResultCodeAsString( result ), result );
-            goto out_after_init;
-        }
-
-        result = ADC_GetChannelV( deviceIndex, 0, &volts[ 0 ] );
-        if( result == AIOUSB_SUCCESS )
-            printf( "Volts read from A/D channel %d = %f (calibrated)\n", 0, volts[ 0 ] );
-        else
-            printf( "Error '%s' reading A/D channel %d\n", 
-                    AIOUSB_GetResultCodeAsString( result ), 
-                    0 );
+        result = ADC_GetChannelV( deviceIndex, 0, &volts );
+        printf( "Volts read from A/D channel %d = %f (calibrated)\n", 0, volts );
     }    
 
+    configBlock.registers[0x10] = 1;
+    result = ADC_SetConfig( deviceIndex, configBlock.registers, &configBlock.size );
+    printf("Measure: Unipolar GND");
+    getchar();
+
+    configBlock.registers[0x10] = 3;
+    result = ADC_SetConfig( deviceIndex, configBlock.registers, &configBlock.size );
+    printf("Measure: Unipolar REF");
+    getchar();
+
+    configBlock.registers[0x10] = 5;
+    result = ADC_SetConfig( deviceIndex, configBlock.registers, &configBlock.size );
+    printf("Measure: Bipolar GND");
+    getchar();
+
+    configBlock.registers[0x10] = 7;
+    result = ADC_SetConfig( deviceIndex, configBlock.registers, &configBlock.size );
+    printf("Measure: Bipolar REF");
+    getchar();
+       
        
 
 
