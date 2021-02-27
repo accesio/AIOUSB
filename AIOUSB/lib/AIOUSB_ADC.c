@@ -2670,9 +2670,6 @@ double ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *config
         return (double)code;
 
     /* Set Config */
-#ifdef DEBUG
-    config->registers[0x13] = 0;
-#endif    
     ADC_SetConfig( DeviceIndex, config->registers, &config->size );
 
     addata_num_bytes = numSamples * sizeof(unsigned short);
@@ -2680,17 +2677,9 @@ double ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *config
     /* Write BC data */
     libusbresult = usb->usb_control_transfer( usb, USB_WRITE_TO_DEVICE, 0xBC, 0, numSamples, bcdata, sizeof(bcdata), 1000 );
 
-#ifdef DEBUG
-    for (int manualStarts=0; manualStarts<256; ++manualStarts)
-    {
-#endif 
-
     /* Get Immediate (start ADC for 1+Oversamples conversions */
     libusbresult = usb->usb_control_transfer( usb, USB_WRITE_TO_DEVICE, 0xBF, 0, 0, bcdata, 0, 1000 );
 
-#ifdef DEBUG
-    }
-#endif 
     /* Bulk read */
     libusbresult = usb->usb_bulk_transfer( usb,
                                            LIBUSB_ENDPOINT_IN | USB_BULK_READ_ENDPOINT,
