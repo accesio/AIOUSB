@@ -2681,7 +2681,7 @@ double ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *config
     libusbresult = usb->usb_control_transfer( usb, USB_WRITE_TO_DEVICE, 0xBC, 0, numSamples, bcdata, sizeof(bcdata), 1000 );
 
 #ifdef DEBUG
-    for (int manualStarts=0;manualStarts<256;++manualStarts)
+    for (int manualStarts=0; manualStarts<256; ++manualStarts)
     {
 #endif 
 
@@ -2710,6 +2710,8 @@ double ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *config
     }
 
 #ifdef DEBUG
+    for (int samp=0; samp<256; ++samp)
+        printf( "%04x,\n", ADData[samp] );
     printf(" -- result:%f = total:%d / numSamples:%d\n", result, total, numSamples);
 #endif
 
