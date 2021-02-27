@@ -6,7 +6,7 @@
  * @brief  Configuration functions for ADC elements
  *
  */
-#define DEBUG 1
+//#define DEBUG 1
 
 #include "AIOUSB_ADC.h"
 #include "AIOUSB_CTR.h"
