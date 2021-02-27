@@ -2711,7 +2711,7 @@ double ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *config
 
 #ifdef DEBUG
     for (int samp=0; samp<256; ++samp)
-        printf( "%04x,\n", ADData[samp] );
+        printf( "%04x,", ADData[samp] );
     printf(" -- result:%f = total:%d / numSamples:%d\n", result, total, numSamples);
 #endif
 
