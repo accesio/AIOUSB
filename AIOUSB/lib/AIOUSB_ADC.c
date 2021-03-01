@@ -6,7 +6,7 @@
  * @brief  Configuration functions for ADC elements
  *
  */
-#define DEBUG 1
+//#define DEBUG 1
 
 #include "AIOUSB_ADC.h"
 #include "AIOUSB_CTR.h"
@@ -2684,7 +2684,6 @@ double ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *config
     for (int samp=0; samp<256; ++samp)
     {
 #endif
-
     /* Get Immediate (start ADC for 1+Oversamples conversions */
     libusbresult = usb->usb_control_transfer( usb, USB_WRITE_TO_DEVICE, 0xBF, 0, 0, bcdata, 0, 1000 );
 #ifdef DEBUG
