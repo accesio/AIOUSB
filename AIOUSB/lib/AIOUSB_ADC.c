@@ -2670,6 +2670,9 @@ double ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *config
         return (double)code;
 
     /* Set Config */
+#ifdef DEBUG
+    config->registers[0x13] = 0;
+#endif    
     ADC_SetConfig( DeviceIndex, config->registers, &config->size );
 
     addata_num_bytes = numSamples * sizeof(unsigned short);
@@ -2701,7 +2704,7 @@ double ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *config
     } else if (bytesTransferred != addata_num_bytes ) {
         result = AIOUSB_ERROR_INVALID_DATA;
     } else {
-        for ( int i = 1; i < numSamples; i ++ )
+        for ( int i = 1; i < numSamples; i ++ ) // average all but the first reading
             total += ADData[i];
         result = total / (double)(numSamples-1);
     }
