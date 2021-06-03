@@ -167,7 +167,7 @@ The table below summarizes the files and utilities required for automatic and ma
 		<td colspan="3">
 			<p>1. In order to upload firmware to USB devices you must have the <span class="filename">fxload</span> package
 			installed on your system. To check if you have <span class="filename">fxload</span> installed on your system simply
-			type <span class="computer bold italic">fxload -V</span> or <span class="computer bold italic">/sbin/fxload -V</span>
+			type <span class="computer bold italic">fxload -V</span> or <span class="computer bold italic">/etc/bin/fxload -V</span>
 			on the command line. If <span class="filename">fxload</span> is installed on your system you will see version
 			information displayed on your screen. If <span class="filename">fxload</span> is not installed on your system you
 			can find more information at
