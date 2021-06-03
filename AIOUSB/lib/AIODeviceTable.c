@@ -1552,6 +1552,8 @@ AIORET_TYPE AIODeviceTablePopulateTable(void)
         CheckPNPData( i );
 
     }
+    if (usbdevices)
+        free(usbdevices);
     libusb_free_device_list(deviceList, AIOUSB_TRUE);
 
     return AIOUSB_SUCCESS;

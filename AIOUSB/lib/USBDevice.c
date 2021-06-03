@@ -65,6 +65,7 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
         }
     }
 
+    current = 0;
     if (libusb_control_transfer(usb->deviceHandle,
                                 LIBUSB_REQUEST_TYPE_STANDARD | LIBUSB_ENDPOINT_IN |
                                 LIBUSB_RECIPIENT_DEVICE,
@@ -194,7 +195,10 @@ AIORET_TYPE AddAllACCESUSBDevices( libusb_device ***deviceList , USBDevice **dev
                 if (libusbDeviceDesc.idVendor == ACCES_VENDOR_ID  && VALID_ENUM(ProductIDS, libusbDeviceDesc.idProduct ) 
                     ) {
                     *size += 1;
-                    *devs = (USBDevice*)realloc( *devs, (*size )*(sizeof(USBDevice)));
+                    if (*devs)
+                        *devs = (USBDevice*)realloc( *devs, (*size )*(sizeof(USBDevice)));
+                    else
+                        *devs = (USBDevice*)malloc((*size )*(sizeof(USBDevice)));
                     memset(&(*devs)[*size-1],0,sizeof(USBDevice));
                     LIBUSBArgs args = { libusb_ref_device(usb_device), NULL, &libusbDeviceDesc };
                     AIOEither usbretval = InitializeUSBDevice( &( *devs)[*size-1] , &args );
