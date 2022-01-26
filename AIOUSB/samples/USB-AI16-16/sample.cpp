@@ -24,8 +24,8 @@ int main( int argc, char **argv ) {
     printf("USB-AI16-16A sample program version %s, %s\n"
            "  This program demonstrates controlling a USB-AI16-16A device on\n"
            "  the USB bus. For simplicity, it uses the first such device found\n"
-           "  on the bus.\n", 
-           AIOUSB_GetVersion(), 
+           "  on the bus.\n",
+           AIOUSB_GetVersion(),
            AIOUSB_GetVersionDate()
            );
 
@@ -61,9 +61,9 @@ int main( int argc, char **argv ) {
                     break;
                 }
             } else
-                printf( "Error '%s' querying device at index %lu\n", 
-                        AIOUSB_GetResultCodeAsString( result ), 
-                        deviceIndex 
+                printf( "Error '%s' querying device at index %lu\n",
+                        AIOUSB_GetResultCodeAsString( result ),
+                        deviceIndex
                         );
         }
         deviceIndex++;
@@ -74,6 +74,8 @@ int main( int argc, char **argv ) {
         printf( "Failed to find USB-AI16-16A device\n" );
         goto out_after_init;
     }
+
+    printf("About to call reset: deviceIndex = %lu\n", deviceIndex);
 
     AIOUSB_Reset( deviceIndex );
 
@@ -101,8 +103,8 @@ int main( int argc, char **argv ) {
     result = ADC_SetConfig( deviceIndex, configBlock.registers, &configBlock.size );
 
     if ( result != AIOUSB_SUCCESS ) {
-        printf( "Error '%s' setting A/D configuration\n", 
-                AIOUSB_GetResultCodeAsString( result ) 
+        printf( "Error '%s' setting A/D configuration\n",
+                AIOUSB_GetResultCodeAsString( result )
                 );
         goto out_after_init;
     }
@@ -134,7 +136,7 @@ int main( int argc, char **argv ) {
     if( result == AIOUSB_SUCCESS )
         printf( "Ground counts = %x (should be near 0)\n", counts[ CAL_CHANNEL ] );
     else
-        printf( "Error '%s' attempting to read ground counts\n", 
+        printf( "Error '%s' attempting to read ground counts\n",
                 AIOUSB_GetResultCodeAsString( result ) );
 
     /*
@@ -145,7 +147,7 @@ int main( int argc, char **argv ) {
     if( result == AIOUSB_SUCCESS )
         printf( "Reference counts = 0x%x (should be near 0x1750)\n", counts[ CAL_CHANNEL ] );
     else
-        printf( "Error '%s' attempting to read reference counts\n", 
+        printf( "Error '%s' attempting to read reference counts\n",
                 AIOUSB_GetResultCodeAsString( result ) );
 
     /*
@@ -195,8 +197,8 @@ int main( int argc, char **argv ) {
     if( result == AIOUSB_SUCCESS )
         printf( "Volts read from A/D channel %d = %f\n", CAL_CHANNEL, volts[ CAL_CHANNEL ] );
     else
-        printf( "Error '%s' reading A/D channel %d\n", 
-                AIOUSB_GetResultCodeAsString( result ), 
+        printf( "Error '%s' reading A/D channel %d\n",
+                AIOUSB_GetResultCodeAsString( result ),
                 CAL_CHANNEL );
 
 
@@ -208,6 +210,6 @@ int main( int argc, char **argv ) {
     AIOUSB_Exit();
 
  out_main:
-    
+
     return ( int ) result;
 }

@@ -425,6 +425,7 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
     sampleBuffer = ( unsigned short* )malloc( numSamples * sizeof(unsigned short) );
     if (!sampleBuffer ) {
         result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+        printf("%s:%d Returning AIOUSB_ERROR_NOT_ENOUGH_MEMORY\n", __FUNCTION__,__LINE__);
         goto out_AIOUSB_GetScan;
     }
 
@@ -439,6 +440,7 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
                                                  deviceDesc->commTimeout
                                                  );
     if ( bytesTransferred != (int)sizeof(bcdata) ) {
+        printf("%s:%d Translating libusb return: %d\n", __FUNCTION__, __LINE__, bytesTransferred);
         result = -LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
         goto out_freebuf_AIOUSB_GetScan;
     }
@@ -464,8 +466,10 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
                                           );
 
         if (libusbresult != LIBUSB_SUCCESS) {
+            printf("%s:%d Translating libusb return: %d\n", __FUNCTION__, __LINE__, libusbresult);
             result = -LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbresult);
         } else if (bytesTransferred != (int)(numSamples * sizeof(unsigned short)) ) {
+            printf("%s:%d Returning AIOUSB_ERROR_NOT_ENOUGH_MEMORY\n", __FUNCTION__,__LINE__);
             result = -AIOUSB_ERROR_INVALID_DATA;
         } else {
             /**
@@ -480,6 +484,7 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
              * startChannel in counts[0], and the reading for endChannel in counts[numChannels-1]
              */
             result = AIOUSB_SUCCESS;
+            printf("%s:%d Returning AIOUSB_SUCCESS\n", __FUNCTION__,__LINE__);
             samplesToAverage = discardFirstSample ? samplesPerChannel - 1 : samplesPerChannel;
             sampleIndex = 0;
 
@@ -505,8 +510,8 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
     }
 
  out_AIOUSB_GetScan:
-
-    return result;
+        printf("%s:%d Returning %d\n", __FUNCTION__,__LINE__, result);
+        return result;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2682,7 +2687,7 @@ double ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *config
                                            (unsigned char *)ADData,
                                            addata_num_bytes,
                                            (int *)&bytesTransferred,
-                                           1000 ); 
+                                           1000 );
 
     if (libusbresult != LIBUSB_SUCCESS) {
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbresult);
@@ -2772,7 +2777,7 @@ unsigned long AIOUSB_ADC_InternalCal(
             AIOUSB_ADC_SetCalTable(DeviceIndex, calTable);
 
             ThisRef = HiRef;
-            if (k==0) 
+            if (k==0)
                 ThisRef = 0.5 * (ThisRef + 0x10000);
             nConfig.registers[AD_REGISTER_CAL_MODE] |= 2; // cal high reference
 
@@ -2780,7 +2785,7 @@ unsigned long AIOUSB_ADC_InternalCal(
             //printf("AIOUSB - HiRef: %X, HiRead: %X, ThisRef: %X, HiRead-ThisRef: %X\n", (int)HiRef, (int)HiRead, (int)ThisRef, (int)(HiRead-ThisRef));
             if (abs(HiRead-ThisRef) > 0x1000)
             {
-                retval = AIOUSB_ERROR_INVALID_DATA; 
+                retval = AIOUSB_ERROR_INVALID_DATA;
 
 
                 goto free_AIOUSB_ADC_InternalCal;
