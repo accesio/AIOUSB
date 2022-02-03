@@ -29,6 +29,8 @@ int main( int argc, char **argv ) {
            AIOUSB_GetVersionDate()
            );
 
+    printf("And now I want you to pick a card\n");
+
     /*
      * MUST call AIOUSB_Init() before any meaningful AIOUSB functions;
      * AIOUSB_GetVersion() above is an exception

@@ -349,7 +349,10 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
     AIORET_TYPE result = AIOUSB_SUCCESS;
     unsigned char bcdata[] = {0x05,0x00,0x00,0x00 };
 
+    printf("%s:%d Enter\n", __FUNCTION__,__LINE__);
+
     AIO_ASSERT( counts );
+
 
     AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , (AIORESULT*)&result );
     AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
@@ -361,8 +364,10 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
 
     origConfigBlock     = deviceDesc->cachedConfigBlock;
 
+    printf("%s:%d Fetching config block\n", __FUNCTION__,__LINE__);
     result = USBDeviceFetchADCConfigBlock( usb, &origConfigBlock );
     AIO_ASSERT_RET( result, result >= AIOUSB_SUCCESS );
+    printf("%s:%d Fetched config block\n", __FUNCTION__,__LINE__);
 
     configChanged       = AIOUSB_FALSE;
     discardFirstSample  = deviceDesc->discardFirstSample;
@@ -510,7 +515,7 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
     }
 
  out_AIOUSB_GetScan:
-        printf("%s:%d Returning %d\n", __FUNCTION__,__LINE__, result);
+        printf("%s:%d Returning %ld\n", __FUNCTION__,__LINE__, result);
         return result;
 }
 
